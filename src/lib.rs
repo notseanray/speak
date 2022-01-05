@@ -1,4 +1,4 @@
-pub mod Data {
+pub mod data {
     pub struct Data {
         pub keys: Vec<String>,
         pub values: Vec<String>
@@ -59,6 +59,6 @@ pub mod Data {
     }
 }
 
-pub fn run (rawinput: &str, rawdata: Data::Data, no_similarity_found: impl Fn()){
+pub fn run(rawinput: &str, rawdata: data::Data, no_similarity_found: impl Fn()){
 
 }
