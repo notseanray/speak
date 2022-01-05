@@ -39,3 +39,4 @@ fn no_similarities_found() {
 ```
 
 Is not necessary to use the function `std::process::exit(0)` in this function, <b>Speak will do it for you.</b>
+
