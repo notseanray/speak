@@ -1,64 +1,58 @@
-pub mod data {
-    pub struct Data {
-        pub keys: Vec<String>,
-        pub values: Vec<String>
-    }
+pub struct Data {
+    pub keys: Vec<String>,
+    pub values: Vec<String>
+}
 
-    impl Data {
-        pub fn from(keys: Vec<String>, values: Vec<String>) -> Data {
-            Data {
-                keys: keys,
-                values: values
-            }
-        }
-
-        pub fn from_hashmap(map: std::collections::HashMap<String, String>) -> Data {
-            let mut keys = Vec::new();
-            let mut values = Vec::new();
-
-            for (key, value) in map {
-                keys.push(key);
-                values.push(value);
-            }
-
-            Data {
-                keys: keys,
-                values: values
-            }
-        }
-
-        fn keys(&self) -> Vec<String> {
-            return self.keys.clone();
-        }
-
-        pub fn values(&self) -> Vec<String> {
-            return self.values.clone();
-        }
-
-        fn translate(&mut self) -> Vec<f32> {
-            let mut sum: f32 = 0.0;
-            let mut vec: Vec<f32> = Vec::new();
-            for phrase in &self.keys() {
-                for word in phrase.split_whitespace() {
-                    for character in word.chars() {
+macro_rules! translate {
+    ($var: expr, $vec: expr) => {
+        let mut sum: f32 = 0.0;
+        for phrase in $var.iter() {
+            for word in phrase.split_whitespace() {
+                for character in word.chars() {
                     sum += (3 * (character as u32)) as f32;
-                    }
                 }
+                $vec.push(sum);
                 sum = 0.0;
             }
-            return vec;
         }
+    };
+}
 
-        fn enumerate(&self) -> Vec<(usize, String)> {
-            let mut vec: Vec<(usize, String)> = Vec::new();
-            for (index, value) in self.values().iter().enumerate() {
-                vec.push((index, value.clone()));
-            }
-            return vec;
-        }
+impl Data {
+    pub fn from(keys: Vec<String>, values: Vec<String>) -> Data {
+        Data {keys, values}
+    }
+
+    fn keys(&self) -> Vec<String> {
+        return self.keys.clone();
+    }
+
+    pub fn values(&self) -> Vec<String> {
+        return self.values.clone();
+    }
+
+    fn translate(self: Data) -> TranslatedData {
+        let mut vtkey: Vec<f32> = Vec::new();
+        let mut vtval: Vec<f32> = Vec::new();
+
+        translate!(self.keys(), vtkey);
+        translate!(self.values(), vtval);
+
+        return TranslatedData {
+            keys: vtkey,
+            values: vtval
+        };
     }
 }
 
-pub fn run(rawinput: &str, rawdata: data::Data, no_similarity_found: impl Fn()){
+struct TranslatedData {
+    keys: Vec<f32>,
+    values: Vec<f32>
+}
 
+#[allow(unused_variables)]
+pub fn run(rawinput: &str, rawdata: Data, no_similarity_found: impl Fn()){
+    let data: TranslatedData = rawdata.translate();
+    println!("{:?}", data.keys);
+    println!("{:?}", data.values);
 }
