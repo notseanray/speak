@@ -8,21 +8,38 @@ struct TranslatedData {
     values: Vec<Vec<f32>>
 }
 
+#[allow(unused_macros)]
 macro_rules! translate {
-    ($var: expr, $vec: expr) => {
+
+    // ↓ For the whole rawdata
+
+    ($var: expr, $vec: expr) => { // var: Vec<String> vec: Vec<(Vec<)f32(>) (*) if mode == 1> set mode to 1 if you're dealing with the input
         let mut sum: f32 = 0.0;
         let mut ram: Vec<f32> = Vec::new();
         for phrase in $var.iter() {
             for word in phrase.split_whitespace() {
                 for character in word.chars() {
                     sum += (7 * (character as u32)) as f32;
-                }
+                };
                 ram.push(sum);
                 sum = 0.0;
-            }
+            };
             $vec.push(ram.clone());
             ram.clear();
-        }
+        };
+    };
+
+    // For the input
+
+    ($var: expr) => {
+        let mut sum: f32 = 0.0;
+        let mut ram: Vec<f32> = Vec::new();
+        for word in $var.split_whitespace() {
+            for character in word.chars() {
+                sum += (7 * (character as u32)) as f32;
+            };
+            ram.push(sum);
+        };
     };
 }
 
@@ -61,14 +78,12 @@ pub fn run(rawinput: &str, rawdata: Data, no_similarity_found: impl Fn()){
         for (j, word) in phrase.iter().enumerate() { // each number
             for bphrase in data.values.iter() {
                 for (z, bword) in bphrase.iter().enumerate() {
-                temp.push(((*word / *bword) * (j + z) as f32, i))
+                temp.push(((*word / *bword) * ((1 + j + z) as f32), i))
                 }
-            }
-        }
-    }
-    // Usually we would sort the temp vector here, but we're going to use the position of the elements in the vector to calculate the origin. 
+            };
+        };
+    };
+    // Usually we would sort the temp vector here, but we're going to use the position of the elements in the vector to calc ulate the origin. 
 
-    for number in temp.iter() {
-        // WORKING ON HERE RIGHT NOW
-    }
+    //WORKING ON THIS RIGHT NOW
 }
