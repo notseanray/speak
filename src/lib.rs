@@ -3,7 +3,11 @@ pub struct Data {
     pub values: Vec<String>
 }
 
-#[allow(non_snake_case)]
+struct TranslatedData {
+    keys: Vec<Vec<f32>>,
+    values: Vec<Vec<f32>>
+}
+
 macro_rules! translate {
     ($var: expr, $vec: expr) => {
         let mut sum: f32 = 0.0;
@@ -36,27 +40,35 @@ impl Data {
     }
 
     fn translate(self: Data) -> TranslatedData {
-        let mut vtkey: Vec<Vec<f32>> = Vec::new();
-        let mut vtval: Vec<Vec<f32>> = Vec::new();
+        let mut keys: Vec<Vec<f32>> = Vec::new();
+        let mut values: Vec<Vec<f32>> = Vec::new();
 
-        translate!(self.keys(), vtkey);
-        translate!(self.values(), vtval);
+        translate!(self.keys(), keys);
+        translate!(self.values(), values);
 
         return TranslatedData {
-            keys: vtkey,
-            values: vtval
+            keys,
+            values
         };
     }
-}
-
-struct TranslatedData {
-    keys: Vec<Vec<f32>>,
-    values: Vec<Vec<f32>>
 }
 
 #[allow(unused_variables)]
 pub fn run(rawinput: &str, rawdata: Data, no_similarity_found: impl Fn()){
     let data: TranslatedData = rawdata.translate();
-    println!("{:?}", data.keys);
-    println!("{:?}", data.values);
+    let mut temp: Vec<(f32, usize)> = Vec::new();
+    for (i, phrase) in data.keys.iter().enumerate() { // A phrase is each list of numbers
+        for (j, word) in phrase.iter().enumerate() { // each number
+            for bphrase in data.values.iter() {
+                for (z, bword) in bphrase.iter().enumerate() {
+                temp.push(((*word / *bword) * (j + z) as f32, i))
+                }
+            }
+        }
+    }
+    // Usually we would sort the temp vector here, but we're going to use the position of the elements in the vector to calculate the origin. 
+
+    for number in temp.iter() {
+        // WORKING ON HERE RIGHT NOW
+    }
 }
