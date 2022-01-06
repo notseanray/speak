@@ -3,17 +3,21 @@ pub struct Data {
     pub values: Vec<String>
 }
 
+#[allow(non_snake_case)]
 macro_rules! translate {
     ($var: expr, $vec: expr) => {
         let mut sum: f32 = 0.0;
+        let mut ram: Vec<f32> = Vec::new();
         for phrase in $var.iter() {
             for word in phrase.split_whitespace() {
                 for character in word.chars() {
-                    sum += (3 * (character as u32)) as f32;
+                    sum += (7 * (character as u32)) as f32;
                 }
-                $vec.push(sum);
+                ram.push(sum);
                 sum = 0.0;
             }
+            $vec.push(ram.clone());
+            ram.clear();
         }
     };
 }
@@ -32,8 +36,8 @@ impl Data {
     }
 
     fn translate(self: Data) -> TranslatedData {
-        let mut vtkey: Vec<f32> = Vec::new();
-        let mut vtval: Vec<f32> = Vec::new();
+        let mut vtkey: Vec<Vec<f32>> = Vec::new();
+        let mut vtval: Vec<Vec<f32>> = Vec::new();
 
         translate!(self.keys(), vtkey);
         translate!(self.values(), vtval);
@@ -46,8 +50,8 @@ impl Data {
 }
 
 struct TranslatedData {
-    keys: Vec<f32>,
-    values: Vec<f32>
+    keys: Vec<Vec<f32>>,
+    values: Vec<Vec<f32>>
 }
 
 #[allow(unused_variables)]
