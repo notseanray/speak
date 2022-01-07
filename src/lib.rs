@@ -6,34 +6,25 @@ pub mod data {
 
     macro_rules! translate {
         // ↓ For the whole rawdata
-        ($var: expr, $vec: expr) => { // var: Vec<String> vec: Vec<Vec<f32>>           
-            let mut sum: f32 = 0.0;
+        ($var: expr, $vec: expr) => { // var: Vec<String> vec: Vec<Vec<f32>> vec is "just for storage"  
             let mut ram: Vec<f32> = Vec::new();
-            for phrase in $var.iter() {
-                for word in phrase.split_whitespace() {
-                    for character in word.chars() {
-                        sum += (7 * character as u32) as f32;
+            let mut sum: f32 = 0.0;
+                for phrase in $var.iter() {
+                    for word in phrase.split_whitespace() {
+                        for character in word.chars() {
+                            sum += (7 * character as u32) as f32;
+                        };
+    
+                        ram.push(sum);
+                        sum = 0.0;
                     };
-                    ram.push(sum);
-                    sum = 0.0;
+                    $vec.push(ram.clone());
+                    ram.clear();
                 };
-                $vec.push(ram.clone());
-                ram.clear();
-            };
-        };
-
-        ($var: expr) => {
-            let mut sum: f32 = 0.0;
-            let mut ram: Vec<f32> = Vec::new();
-            for word in $var.iter() {
-                for character in word.chars() {
-                    sum += (7 * character as u32) as f32;
-                };
-                ram.push(sum);
-                sum = 0.0;
             };
         }
-    }
+
+    pub(super) use translate;
 
     impl Data {
         pub fn from(keys: Vec<String>, values: Vec<String>) -> Data {
@@ -79,8 +70,8 @@ pub mod data {
 }
 
 use data::*;
-pub fn run(input: &str, rawdata: Data, no_similarity_found: impl Fn()){
-    let data: data::TranslatedData = rawdata.translate();
+pub fn run(rawinput: &str, rawdata: Data, no_similarity_found: impl Fn()){
+    let data: TranslatedData = rawdata.translate();
     let mut temp: Vec<(f32, usize)> = Vec::new();
     for (i, phrase) in data.keys.iter().enumerate() { // A phrase is each list of numbers
         for (j, word) in phrase.iter().enumerate() { // each number
@@ -94,9 +85,22 @@ pub fn run(input: &str, rawdata: Data, no_similarity_found: impl Fn()){
         };
     };
     // Usually we would sort the temp vector here, but we're going to use the position of the elements in the vector to calc ulate the origin. 
+
     
-    translate!(input);
-    for number in input {
+
+    // Translate Input to numbers
+    let mut sum: f32 = 0.0;
+    let mut input: Vec<f32> = Vec::new();
+
+    for word in rawinput.split_whitespace() {
+        for character in word.chars() {
+            sum += (7 * character as u32) as f32;
+        };
+        input.push(sum);
+        sum = 0.0;
+    }
+
+    for number in input.iter() {
         for each in temp.iter() {
            // CURRENTLY WORKING HERE 
         }
