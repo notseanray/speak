@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub mod data {
     pub struct Data {
         pub keys: Vec<String>,
@@ -14,7 +15,7 @@ pub mod data {
                         for character in word.chars() {
                             sum += (7 * character as u32) as f32;
                         };
-    
+
                         ram.push(sum);
                         sum = 0.0;
                     };
@@ -23,8 +24,6 @@ pub mod data {
                 };
             };
         }
-
-    pub(super) use translate;
 
     impl Data {
         pub fn from(keys: Vec<String>, values: Vec<String>) -> Data {
@@ -69,26 +68,28 @@ pub mod data {
     }
 }
 
-use data::*;
-pub fn run(rawinput: &str, rawdata: Data, no_similarity_found: impl Fn()){
-    let data: TranslatedData = rawdata.translate();
+
+#[allow(unused_variables)]
+pub fn run(rawinput: &str, rawdata: data::Data, no_similarity_found: impl Fn()){
+    let data: data::TranslatedData = rawdata.translate();
     let mut temp: Vec<(f32, usize)> = Vec::new();
     for (i, phrase) in data.keys.iter().enumerate() { // A phrase is each list of numbers
         for (j, word) in phrase.iter().enumerate() { // each number
             for bphrase in data.values.iter() {
                 for (z, bword) in bphrase.iter().enumerate() {
-                let tmp = (*word / *bword - 1.0).abs();
-                if tmp < 0.2 {
-                temp.push((tmp * ((1 + j + z) as f32), i));
-                }}
+                    let tmp = (*word / *bword - 1.0).abs();
+                    if tmp < 0.2 {
+                        temp.push((tmp * ((2 + j + z) as f32), i));
+                    };
+                };
             };
         };
     };
     // Usually we would sort the temp vector here, but we're going to use the position of the elements in the vector to calc ulate the origin. 
 
-    
 
-    // Translate Input to numbers
+
+    // Translate Input to numbers (92 - 101)
     let mut sum: f32 = 0.0;
     let mut input: Vec<f32> = Vec::new();
 
@@ -98,11 +99,6 @@ pub fn run(rawinput: &str, rawdata: Data, no_similarity_found: impl Fn()){
         };
         input.push(sum);
         sum = 0.0;
-    }
-
-    for number in input.iter() {
-        for each in temp.iter() {
-           // CURRENTLY WORKING HERE 
-        }
-    }
+    };
+    // WORKING ON HERE
 }
