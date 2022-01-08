@@ -68,6 +68,10 @@ pub mod data {
     }
 }
 
+fn difference(a: f32, other: f32) -> f32 {
+    return (a / other - 1.0).abs();
+}
+
 #[allow(unused_macros)]
 macro_rules! train {
     (rawdata: data::Data, while_not: ident) => {
@@ -108,7 +112,6 @@ macro_rules! run {
         };
 
         // The remaining run! macro goes here (Under development)
-
         if input.len() == 0 {
             $not_found();
         }

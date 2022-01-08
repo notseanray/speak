@@ -3,3 +3,5 @@ Cargo.lock
 main*
 .exe
 .pdb
+.vscode
+.markdownlint.json
