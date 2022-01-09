@@ -96,24 +96,19 @@ macro_rules! train {
     };
 }
 
-#[allow(unused_macros)]
-#[macro_export]
-macro_rules! run {
-    (rawinput: expr, not_found: ident) => {
-        let mut sum: f32 = 0.0;
-        let mut input: Vec<f32> = Vec::new();
+pub fn run(rawinput: String, not_found: impl Fn()) {
+    let mut sum: f32 = 0.0;
+    let mut input: Vec<f32> = Vec::new();
 
-        for word in $rawinput.split_whitespace() {
-            for character in word.chars() {
-                sum += (7 * character as u32) as f32;
-            };
-            input.push(sum);
-            sum = 0.0;
+    for word in rawinput.split_whitespace() {
+        for character in word.chars() {
+            sum += (7 * character as u32) as f32;
         };
+        input.push(sum);
+        sum = 0.0;
+    };
 
-        // The remaining run! macro goes here (Under development)
-        if input.len() == 0 {
-            $not_found();
-        }
-    }
+    if input.len() == 0 {
+        not_found();
+    };
 }
