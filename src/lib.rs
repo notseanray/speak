@@ -71,7 +71,6 @@ pub mod data {
     }
 }
 
-#[allow(dead_code)]
 fn difference(a: f32, other: f32) -> f32 {
     return (a / other - 1.0).abs();
 }
