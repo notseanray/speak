@@ -1,3 +1,6 @@
+// THIS FILE IS OBSOLETE!! THIS FILE IS JUST FOR ARCHIVING THE OLD ENGINE. BUT THIS ENGINE ISN'T EVEN COMPLETE! IT IS MID DEBUGGING!
+
+#![allow(unused_variables)]
 pub mod data {
     pub struct Data {
         pub keys: Vec<String>,
@@ -12,7 +15,7 @@ pub mod data {
             let mut sum: f32 = 0.0;
             for phrase in $var.iter() {
                 for word in phrase.split_whitespace() {
-                    for character in word.chars() {
+                    for character in word.to_lowercase().chars() {
                         sum += (7 * character as u32) as f32;
                     }
 
@@ -78,16 +81,19 @@ fn difference(a: f32, other: f32) -> f32 {
 pub fn train(rawdata: data::Data) -> (Vec<Vec<f32>>, Vec<f32>) {
     let data: data::TranslatedData = rawdata.translate();
     let mut trained: Vec<f32> = Vec::new();
-    for phrase in data.keys.iter() {
+    for (i, phrase) in data.keys.iter().enumerate() {
         // A phrase is each list of numbers
         for (j, word) in phrase.iter().enumerate() {
             // each number
-            for bphrase in data.values.iter() {
+            for (y, bphrase) in data.values.iter().enumerate() {
                 for (z, bword) in bphrase.iter().enumerate() {
-                    let tmp = (*word / *bword - 1.0).abs();
-                    if tmp < 0.2 {
-                        trained.push(tmp * ((2 + j + z) as f32));
-                    };
+                    if i != y {
+                        let tmp = *word / *bword;
+                        println!("{}: {} / {} ({} :: {})", bword,word, bword, tmp, tmp * ((2 + j + z) as f32));
+                        if tmp < 0.5 {
+                            trained.push(tmp * ((2 + j + z) as f32));
+                        };
+                    }
                 };
             };
         };
@@ -114,9 +120,9 @@ pub fn run(rawinput: String, trained: Vec<f32>, keys: Vec<Vec<f32>>, values: Vec
             for (j, bnumber) in trained.iter().enumerate() {
                 for list in keys.iter().enumerate() {
                     for (z, ext) in list.1.iter().enumerate() {
-                        if difference((number / ext) * (2 + i + z) as f32, *bnumber) < 0.1 {
-                            returnal.push(values[j].split(' ').map(str::to_string).nth(z));
-                        };
+                        //if difference((number / ext) * (2 + i + z) as f32, *bnumber) < 0.2 {
+                        //    returnal.push(Some(values[j].clone()));
+                        //};
                     }
                 }
             }
