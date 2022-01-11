@@ -1,8 +1,3 @@
-<h1> WARNING
-THIS IS THE OLD ENGINE, THIS BRANCH IS JUST FOR ARCHIVING THE OLD ENGINE, IT IS OBSOLETE!!
-
-</h1>
-
 <h1 align=center>Speak</h1>
 
 **Speak** is a simple, easy to use Natural Language Processor (NLP) written in Rust.
