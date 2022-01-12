@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(unused_variables)]
+#![allow(unused_macros)]
 
 pub struct map<K, V> {
     entries: Vec<(K, V)>
@@ -29,23 +30,12 @@ impl<K, V> map<K, V> { // Implements for maps of all types
         x
     }
 }
-    
-macro_rules! deconstruct {
-    ( $($v: expr, $nickname: expr), *) => {
-        {
-            $(
-                let mut $nickname = Vec::new()
-                for each in v.iter() {
-                    $nickname.push(each)
-                };
-            );
-        };
-    };
-};
 
-pub fn train(map: map<K, V>) {
+pub fn train<K, V>(map: map<K, V>) {
     // Deconstructing map into his two arrays
-    map::deconstruct!(K, keys, V, values)
+    let keys: Vec<&K> = map.keys();
+    let values: Vec<&V> = map.values();
+
     // Now, let's create a mega array.
 
     for key in keys.iter() {
