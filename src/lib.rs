@@ -29,8 +29,26 @@ impl<K, V> map<K, V> { // Implements for maps of all types
         x
     }
 }
+    
+macro_rules! deconstruct {
+    ( $($v: expr, $nickname: expr), *) => {
+        {
+            $(
+                let mut $nickname = Vec::new()
+                for each in v.iter() {
+                    $nickname.push(each)
+                };
+            );
+        };
+    };
+};
 
+pub fn train(map: map<K, V>) {
+    // Deconstructing map into his two arrays
+    map::deconstruct!(K, keys, V, values)
+    // Now, let's create a mega array.
 
-        }
+    for key in keys.iter() {
+        
     }
 }
