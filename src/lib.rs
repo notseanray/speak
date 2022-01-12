@@ -28,9 +28,22 @@ impl<K, V> map<K, V> { // Implements for maps of all types
         }
         x
     }
+
+    macro_rules! deconstruct {
+        ( $($v: expr, $nickname: expr), *) => {
+            {
+                $(
+                    let mut $nickname = Vec::new()
+                    for each in v.iter() {
+                        $nickname.push(each)
+                    };
+                );
+            };
+        };
+    };
 }
 
-
-        }
-    }
+pub fn train(map: map<K, V>) {
+    // Deconstruct map into his two arrays
+    deconstruct!(K, keys, V, values)
 }
