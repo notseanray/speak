@@ -3,7 +3,8 @@
 #![allow(unused_variables)]
 #![allow(unused_macros)]
 
-pub mod map {
+
+pub mod mapping {
     pub struct map<K, V> {
         entries: Vec<(K, V)>,
     }
@@ -42,8 +43,17 @@ pub mod map {
 
             Deconstructed { keys, values }
         }
+
+        pub(crate) fn reconstruct(keys: Vec<K>, values: Vec<V>) -> map<K, V> {
+            let mut entries: Vec<(K, V)> = Vec::new();
+            for i in 0..keys.len() {
+                entries.push((keys[i], values[i]));
+            }
+            return map {entries};
+        }
     }
 }
+
     // Deconstructing map into his two arrays
 
     // Now, let's create a mega array.
