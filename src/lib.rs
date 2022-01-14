@@ -54,7 +54,13 @@ pub mod mapping {
     }
 }
 
-    // Deconstructing map into his two arrays
+pub fn train(map: mapping::map<K, V>) {
 
+    // Deconstructing map into his two arrays
+    let dec: mapping::Deconstructed<K, V> = map.deconstruct();
+    let keys = dec.keys;
+    let values = dec.values;
+    
     // Now, let's create a mega array.
+    let mut mega: Deconstructed<K, u32>
 }
