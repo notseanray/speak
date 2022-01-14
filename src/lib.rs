@@ -6,7 +6,7 @@
 
 pub mod mapping {
     pub struct map<K, V> {
-        entries: Vec<(K, V)>,
+        pub entries: Vec<(K, V)>,
     }
 
     pub(crate) struct Deconstructed<K, V> {
@@ -17,17 +17,17 @@ pub mod mapping {
     impl<K, V> map<K, V> {
 // Implements for maps of all types
 // ^ UX:
-        
-            pub fn new() -> map<K, V> {
+
+            pub fn new() -> Self {
                 map {
-                    entries: Vec::new(),
+                    entries: Vec::new()
                 }
             }
 
             pub fn from(entries: Vec<(K, V)>) -> map<K, V> {
-                map {
+                return map {
                     entries
-                }
+                };
             }
 
 // ^ Auxiliar
@@ -39,28 +39,41 @@ pub mod mapping {
             for (key, value) in self.entries.iter() {
                 keys.push(key);
                 values.push(value);
-            }
+            };
 
             Deconstructed { keys, values }
         }
-
-        pub(crate) fn reconstruct(keys: Vec<K>, values: Vec<V>) -> map<K, V> {
-            let mut entries: Vec<(K, V)> = Vec::new();
-            for i in 0..keys.len() {
-                entries.push((keys[i], values[i]));
+    }
+    pub(crate) fn contains(map: Vec<String>, target: String) -> bool {
+        for entry in map {
+            if entry == target {
+                return true;
             }
-            return map {entries};
         }
+        return false;
     }
 }
 
-pub fn train(map: mapping::map<K, V>) {
-
+pub fn train(map: mapping::map<String, String>) {
     // Deconstructing map into his two arrays
-    let dec: mapping::Deconstructed<K, V> = map.deconstruct();
+
+    let dec = map.deconstruct();
     let keys = dec.keys;
     let values = dec.values;
-    
+
     // Now, let's create a mega array.
-    let mut mega: Deconstructed<K, u32>
+
+    let mut frequency: mapping::Deconstructed<String, u32> = mapping::Deconstructed {
+        keys: Vec::new(),
+        values: Vec::new()
+    };
+
+    for key in keys {
+        for word in key.split_whitespace() {
+            let mut count = 0;
+            if frequency.keys.contains(&word.to_string()) {
+                
+            };
+        };
+    };
 }
