@@ -3,9 +3,9 @@
 #![allow(unused_variables)]
 #![allow(unused_macros)]
 
-
 pub mod mapping {
-    pub struct map<K, V> {
+    pub struct map<K, V> { // This is basically just a wrapper for the Deconstructed map.
+
         pub entries: Vec<(K, V)>,
     }
 
@@ -44,14 +44,15 @@ pub mod mapping {
             Deconstructed { keys, values }
         }
     }
-    pub(crate) fn contains(map: Vec<String>, target: String) -> bool {
-        for entry in map {
-            if entry == target {
-                return true;
-            }
+}
+
+fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
+    for (i, item) in vec.iter().enumerate() {
+        if item == &&s {
+            return (true, i);
         }
-        return false;
     }
+    return (false, 0);
 }
 
 pub fn train(map: mapping::map<String, String>) {
@@ -59,21 +60,22 @@ pub fn train(map: mapping::map<String, String>) {
 
     let dec = map.deconstruct();
     let keys = dec.keys;
+    let ckeys = keys.clone();
     let values = dec.values;
 
     // Now, let's create a mega array.
 
-    let mut frequency: mapping::Deconstructed<String, u32> = mapping::Deconstructed {
+    let mut frequency: mapping::Deconstructed<String, usize> = mapping::Deconstructed {
         keys: Vec::new(),
         values: Vec::new()
     };
 
     for key in keys {
         for word in key.split_whitespace() {
-            let mut count = 0;
-            if frequency.keys.contains(&word.to_string()) {
-                
-            };
+            let container = contains(&ckeys, word.to_string());
+            if container.0 {
+                frequency.values[container.1] += 1;
+            }
         };
     };
 }
