@@ -35,7 +35,8 @@ pub mod mapping {
 
     pub(crate) struct Deconstructed<K, V> {
         pub keys: Vec<K>,
-        pub values: Vec<V>
+        pub values: Vec<V>,
+        pub size: usize // I know, this isn't the best way to do it, but I'm fighting with the borrow checker and the len function.
     }
 
     impl<K, V> map<K, V> {
@@ -60,12 +61,14 @@ pub mod mapping {
             let mut keys = Vec::new();
             let mut values = Vec::new();
 
+            let mut size: usize = 0;
             for (key, value) in self.entries.iter() {
                 keys.push(key);
                 values.push(value);
+                size += 1;
             };
 
-            Deconstructed { keys, values }
+            Deconstructed { keys, values, size }
         }
     }
 
@@ -83,11 +86,11 @@ pub mod mapping {
         }
     }
 
-    pub(crate) fn display<T: Display>(map: map<T, T>) {
+    pub(crate) fn display<T: Display>(dmap: Deconstructed<T, T>) {
         let mut string = String::new();
 
-        for (key, value) in map.entries.iter() {
-            string.push_str(&format!("{} => {}\n", key, value));
+        for i in 0..dmap.size {
+            string.push_str(&format!("{} => {}\n", dmap.keys[i], dmap.values[i]));
         };
 
         println!("{}", string);
@@ -115,7 +118,8 @@ pub fn train(map: mapping::map<String, String>) {
 
     let mut frequency: mapping::Deconstructed<String, usize> = mapping::Deconstructed {
         keys: Vec::new(),
-        values: Vec::new()
+        values: Vec::new(),
+        size: 0
     };
 
     for key in keys {
@@ -131,5 +135,6 @@ pub fn train(map: mapping::map<String, String>) {
             };
         };
     };
-    mapping::display(frequency.reconstruct());
+
+    mapping::display(frequency);
 }
