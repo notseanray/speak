@@ -1,5 +1,5 @@
 /*
- Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
+Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
 
 This crate allows you to talk with your machine. 0 dependencies neededt. (That's the goal).
 
@@ -7,6 +7,7 @@ TODO(s):
 - Check if this works in Linux, MacOS and old Windows.
 - Program the algorithm.
 - Create the documentation.
+- Configuration available (With default values).
 
 - Complete the Rust version.
 - Create the Python version.
@@ -73,11 +74,11 @@ pub mod mapping {
     }
 
     impl<K, V> Deconstructed<K, V> {
-        pub(crate) fn reconstruct(&self) -> map<K, V> {
+        pub(crate) fn reconstruct(&self) -> map<&K, &V> {
             let mut entries = Vec::new();
 
-            for i in 0..(self.keys.len()) {
-                entries.push((self.keys[i], self.values[i]));
+            for i in 0..self.size {
+                entries.push((&self.keys[i], &self.values[i]));
             }
 
             return map {
@@ -85,24 +86,14 @@ pub mod mapping {
             };
         }
     }
-
-    pub(crate) fn display<T: Display>(dmap: Deconstructed<T, T>) {
-        let mut string = String::new();
-
-        for i in 0..dmap.size {
-            string.push_str(&format!("{} => {}\n", dmap.keys[i], dmap.values[i]));
-        };
-
-        println!("{}", string);
-    }
 }
 
 fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
     for (i, item) in vec.iter().enumerate() {
         if item == &&s {
             return (true, i);
-        }
-    }
+        };
+    };
     return (false, 0);
 }
 
@@ -125,16 +116,19 @@ pub fn train(map: mapping::map<String, String>) {
     for key in keys {
         for word in key.split_whitespace() {
             let container = contains(&ckeys, word.to_string());
-            if container.0 {
-                if container.1 < frequency.keys.len() {
+            
+            if container.0 && container.1 < frequency.keys.len() {
                 frequency.values[container.1] += 1;
-                } else {
-                    frequency.keys.push(word.to_string());
-                    frequency.values.push(1);
-                }
+            }
+
+            else {
+                frequency.keys.push(word.to_string());
+                frequency.values.push(1);
             };
+
         };
     };
 
-    mapping::display(frequency);
+    println!("{:?}", frequency.keys);
+    println!("{:?}", frequency.values);
 }
