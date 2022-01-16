@@ -86,6 +86,25 @@ pub mod mapping {
             };
         }
     }
+    
+    pub(crate) fn translate(vec: &Vec<&String>) -> Vec<Vec<u32>> {
+        // Keys:
+        let mut V: Vec<Vec<u32>> = Vec::new();
+        let mut ram: Vec<u32> = Vec::new();
+        for pkey in vec.iter() {
+            let mut sum: u32 = 0;
+            for word in pkey.split_whitespace() {
+                for c in pkey.chars() {
+                    sum += 5 * c as u32;
+                };
+                ram.push(sum);
+                sum = 0;
+            };
+            V.push(ram.clone());
+            ram.clear();
+        };
+        return V;
+    }
 }
 
 fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
@@ -95,40 +114,15 @@ fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
         };
     };
     return (false, 0);
+
 }
 
 pub fn train(map: mapping::map<String, String>) {
-    // Deconstructing map into his two arrays
-
     let dec = map.deconstruct();
-    let keys = dec.keys;
-    let ckeys = keys.clone();
-    let values = dec.values;
+    let keys = mapping::translate(&dec.keys);
+    let values = mapping::translate(&dec.values);
 
-    // Now, let's create a mega array.
-
-    let mut frequency: mapping::Deconstructed<String, usize> = mapping::Deconstructed {
-        keys: Vec::new(),
-        values: Vec::new(),
-        size: 0
+    for each in keys {
+        
     };
-
-    for key in keys {
-        for word in key.split_whitespace() {
-            let container = contains(&ckeys, word.to_string());
-            
-            if container.0 && container.1 < frequency.keys.len() {
-                frequency.values[container.1] += 1;
-            }
-
-            else {
-                frequency.keys.push(word.to_string());
-                frequency.values.push(1);
-            };
-
-        };
-    };
-
-    println!("{:?}", frequency.keys);
-    println!("{:?}", frequency.values);
 }
