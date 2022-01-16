@@ -23,13 +23,18 @@ I think 4 libs will be enough.
 
 */
 
+#![allow(dead_code)]
+
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(unused_variables)]
 #![allow(unused_macros)]
 
+// & CONSTS (do not touch)
+pub const MULT: u32 = 5;
+
+// & TYPES (map and Deconstructed)
 pub mod mapping {
-    use std::fmt::Display;
     pub struct map<K, V> { // This is just a wrapper for the Deconstructed map.
         pub entries: Vec<(K, V)>,
     }
@@ -95,7 +100,7 @@ pub mod mapping {
             let mut sum: u32 = 0;
             for word in pkey.split_whitespace() {
                 for c in pkey.chars() {
-                    sum += 5 * c as u32;
+                    sum += MULT * c as u32;
                 };
                 ram.push(sum);
                 sum = 0;
@@ -114,24 +119,34 @@ fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
         };
     };
     return (false, 0);
-
 }
 
-pub fn train(map: mapping::map<String, String>) {
-    let dec = map.deconstruct();
-    let keys = mapping::translate(&dec.keys);
-    let values = mapping::translate(&dec.values);
+pub fn train(map: mapping::map<String, String>) -> Vec<f32> { 
+        let dec = map.deconstruct();
+        let keys = mapping::translate(&dec.keys);
+        let values = mapping::translate(&dec.values);
 
-    let mut mega: Vec<f32> = Vec::new();
-    for aphrase in keys.iter() {
-        for (x, aword) in aphrase.iter().enumerate() { 
-            for bphrase in values.iter() {
-                for (z, bword) in bphrase.iter().enumerate() {
-                    mega.push(*aword as f32 / *bword as f32 + ((1 + x) / (1 + z)) as f32);
+        let mut mega: Vec<f32> = Vec::new();
+        for aphrase in keys.iter() {
+            for (x, aword) in aphrase.iter().enumerate() {
+                for bphrase in values.iter() {
+                    for (z, bword) in bphrase.iter().enumerate() {
+                        mega.push(*aword as f32 / *bword as f32 + ((1 + x) / (1 + z)) as f32);
+                    };
                 };
-            }
-        }
-    };
-
-    println!("{:?}", mega);
+            };
+        };
+        return mega;
 }
+
+pub fn run(
+    input: String,
+    mega: Vec<f32>) {
+        let mut result: String = String::new();
+        for (i, word) in input.split_whitespace().enumerate() {
+            let mut sum: u32 = 0;
+            for c in word.chars() {
+                sum += MULTIPLIER * c as u32;
+            }
+        };
+    }
