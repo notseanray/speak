@@ -122,7 +122,16 @@ pub fn train(map: mapping::map<String, String>) {
     let keys = mapping::translate(&dec.keys);
     let values = mapping::translate(&dec.values);
 
-    for each in keys {
-        
+    let mut mega: Vec<f32> = Vec::new();
+    for aphrase in keys.iter() {
+        for (x, aword) in aphrase.iter().enumerate() { 
+            for bphrase in values.iter() {
+                for (z, bword) in bphrase.iter().enumerate() {
+                    mega.push(*aword as f32 / *bword as f32 + ((1 + x) / (1 + z)) as f32);
+                };
+            }
+        }
     };
+
+    println!("{:?}", mega);
 }
