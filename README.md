@@ -10,7 +10,7 @@ Speak doesn't use other crates, and itself is very lightweight, so it wont slow 
 
 * The Rust file is very small, less than 4 KB, while being easy to understand, so you can even customize the engine for your purposes. (I recommend trying to customize the main function before modifying the engine for yourself.)
 
-* A lot of customization and dynamic range, there is practically no limit, even with the default settings. (Unless you want to make a +131k index map, then you'll need like 10 characters)
+* A lot of customization and dynamic range, there is practically no limit, even with the default settings. (Unless you want to make a +131k index map, then you'll need to change like 10 characters)
 
 * Custom map types, for optimization purposes. (Named Data and TranslatedData)
 * Fully 100% Open Source.
