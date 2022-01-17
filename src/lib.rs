@@ -28,10 +28,11 @@ I think 4 libs will be enough.
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(unused_variables)]
-#![allow(unused_macros)]
 
-// & CONSTS (do not touch)
-pub const MULT: u32 = 5;
+// & CONSTS (Do not touch)
+static CONFIG: [u32; 1] = [
+    0x5
+];
 
 // & TYPES (map and Deconstructed)
 pub mod mapping {
@@ -100,7 +101,7 @@ pub mod mapping {
             let mut sum: u32 = 0;
             for word in pkey.split_whitespace() {
                 for c in pkey.chars() {
-                    sum += MULT * c as u32;
+                    sum += super::CONFIG[0] * c as u32;
                 };
                 ram.push(sum);
                 sum = 0;
@@ -139,14 +140,20 @@ pub fn train(map: mapping::map<String, String>) -> Vec<f32> {
         return mega;
 }
 
-pub fn run(
-    input: String,
-    mega: Vec<f32>) {
-        let mut result: String = String::new();
-        for (i, word) in input.split_whitespace().enumerate() {
-            let mut sum: u32 = 0;
-            for c in word.chars() {
-                sum += MULTIPLIER * c as u32;
-            }
-        };
-    }
+pub fn run(winput: String, mega: Vec<f32>) {
+    
+    let mut input: Vec<u32> = Vec::new();
+    let mut sum: u32 = 0;
+    
+    // Translating the input to numbers.
+    for (i, word) in winput.split_whitespace().enumerate() {
+        for c in word.chars() {
+            sum += CONFIG[0] * c as u32;
+        }
+        input.push(sum);
+        sum = 0;
+    };
+    
+    // & Calculating the result
+    let mut result: String = String::new();
+}
