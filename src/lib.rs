@@ -90,7 +90,6 @@ pub mod mapping {
     impl<K, V> Deconstructed<K, V> {
         pub(crate) fn reconstruct(&self) -> map<&K, &V> {
             let mut entries = Vec::new();
-
             for i in 0..self.size {
                 entries.push((&self.keys[i], &self.values[i]));
             }
@@ -121,20 +120,13 @@ pub mod mapping {
                                                                 }
 }
 
-pub mod vectors {
-    fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
-        for (i, item) in vec.iter().enumerate() {
-            if item == &&s {
-                return (true, i);
-            };
+fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
+    for (i, item) in vec.iter().enumerate() {
+        if item == &&s {
+            return (true, i);
         };
-        return (false, 0);
-    }
-
-    pub(crate) fn cycle<T>(vec: Vec<&T>, index: usize) -> &T {
-        if index >= vec.len() { return vec[0]; };
-        return vec[index];
-    }
+    };
+    return (false, 0);
 }
 
 pub fn train(map: mapping::map<String, String>) -> Vec<Vec<f32>> {
@@ -173,20 +165,16 @@ pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec
         sum = 0;
     };
 
-    // &**********************************
+    /* 
     
-    // &**********************************
-    // ^ Calculating the resul
+    ^ *********************************
+
+    & ********************************** */
+    // ^ Calculating the result
 
     let mut result: String = String::new();
-    for (i, &anum) in input.iter().enumerate() {
-        for (x, &bnum) in TrainedData.iter().enumerate() {
-            if ((anum / bnum) - 1.0).abs() < config.THRESHOLD {
-                result.push_str(vectors::cycle(map.deconstruct().keys, x).as_str());
-                result.push(' ');
-            };
-        };
-    };
+    for (i, input_word) in input.iter().enumerate() {
+        
+    }
 
-    // &**********************************
 }
