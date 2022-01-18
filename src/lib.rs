@@ -30,9 +30,17 @@ I think 4 libs will be enough.
 #![allow(unused_variables)]
 
 // & CONSTS (Do not touch)
-static CONFIG: [u32; 1] = [
-    0x5
-];
+
+pub struct CONFIG {
+    MULTIPLIER: u32,
+    THRESHOLD: f32
+}
+
+static config: CONFIG = CONFIG {
+    MULTIPLIER: 17,
+    THRESHOLD: 0.1
+};
+
 
 // & TYPES (map and Deconstructed)
 pub mod mapping {
@@ -95,65 +103,90 @@ pub mod mapping {
     
     pub(crate) fn translate(vec: &Vec<&String>) -> Vec<Vec<u32>> {
         // Keys:
-        let mut V: Vec<Vec<u32>> = Vec::new();
+        let mut result: Vec<Vec<u32>> = Vec::new();
         let mut ram: Vec<u32> = Vec::new();
         for pkey in vec.iter() {
             let mut sum: u32 = 0;
             for word in pkey.split_whitespace() {
                 for c in pkey.chars() {
-                    sum += super::CONFIG[0] * c as u32;
+                    sum += super::config.MULTIPLIER * c as u32;
                 };
                 ram.push(sum);
                 sum = 0;
             };
-            V.push(ram.clone());
+            result.push(ram.clone());
             ram.clear();
         };
-        return V;
+        return result;
+                                                                }
+}
+
+pub mod vectors {
+    fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
+        for (i, item) in vec.iter().enumerate() {
+            if item == &&s {
+                return (true, i);
+            };
+        };
+        return (false, 0);
+    }
+
+    pub(crate) fn cycle<T>(vec: Vec<&T>, index: usize) -> &T {
+        if index >= vec.len() { return vec[0]; };
+        return vec[index];
     }
 }
 
-fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
-    for (i, item) in vec.iter().enumerate() {
-        if item == &&s {
-            return (true, i);
-        };
-    };
-    return (false, 0);
-}
-
-pub fn train(map: mapping::map<String, String>) -> Vec<f32> { 
+pub fn train(map: mapping::map<String, String>) -> Vec<Vec<f32>> {
         let dec = map.deconstruct();
         let keys = mapping::translate(&dec.keys);
         let values = mapping::translate(&dec.values);
 
-        let mut mega: Vec<f32> = Vec::new();
+        let mut TrainedData: Vec<Vec<f32>> = Vec::new();
+        let mut ram: Vec<f32> = Vec::new();
         for aphrase in keys.iter() {
             for (x, aword) in aphrase.iter().enumerate() {
                 for bphrase in values.iter() {
                     for (z, bword) in bphrase.iter().enumerate() {
-                        mega.push(*aword as f32 / *bword as f32 + ((1 + x) / (1 + z)) as f32);
+                        ram.push(*aword as f32 / *bword as f32 + ((1 + x) / (1 + z)) as f32);
                     };
                 };
+                TrainedData.push(ram.clone());
+                ram.clear();
             };
         };
-        return mega;
+        return TrainedData;
 }
 
-pub fn run(winput: String, mega: Vec<f32>) {
-    
-    let mut input: Vec<u32> = Vec::new();
+pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec<f32>) {
+    let mut input: Vec<f32> = Vec::new();
     let mut sum: u32 = 0;
     
-    // Translating the input to numbers.
-    for (i, word) in winput.split_whitespace().enumerate() {
+    // &**********************************
+    // ^ Translating the input to numbers.
+
+    for (i, word) in RawInput.split_whitespace().enumerate() {
         for c in word.chars() {
-            sum += CONFIG[0] * c as u32;
-        }
-        input.push(sum);
+            sum += config.MULTIPLIER * c as u32;
+        };
+        input.push(sum as f32);
         sum = 0;
     };
+
+    // &**********************************
     
-    // & Calculating the result
+    // &**********************************
+    // ^ Calculating the resul
+
     let mut result: String = String::new();
+    for (i, &anum) in input.iter().enumerate() {
+        for (x, &bnum) in TrainedData.iter().enumerate() {
+            if ((anum / bnum) - 1.0).abs() < config.THRESHOLD {
+                result.push_str(vectors::cycle(map.deconstruct().keys, x).as_str());
+                result.push(' ');
+            };
+        };
+    };
+
+    // &**********************************
 }
