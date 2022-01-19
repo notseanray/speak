@@ -23,8 +23,6 @@ I think 4 libs will be enough.
 
 */
 
-#![allow(dead_code)]
-
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(unused_variables)]
@@ -117,7 +115,7 @@ pub mod mapping {
             ram.clear();
         };
         return result;
-                                                                }
+    }
 }
 
 fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
@@ -137,17 +135,8 @@ pub fn train(map: mapping::map<String, String>) -> Vec<Vec<f32>> {
         let mut TrainedData: Vec<Vec<f32>> = Vec::new();
         let mut ram: Vec<f32> = Vec::new();
         for aphrase in keys.iter() {
-            for (x, aword) in aphrase.iter().enumerate() {
-                for bphrase in values.iter() {
-                    for (z, bword) in bphrase.iter().enumerate() {
-                        ram.push(*aword as f32 / *bword as f32 + ((1 + x) / (1 + z)) as f32);
-                    };
-                };
-                TrainedData.push(ram.clone());
-                ram.clear();
-            };
-        };
-        return TrainedData;
+            
+        }
 }
 
 pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec<f32>) {
@@ -166,15 +155,11 @@ pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec
     };
 
     /* 
-    
     ^ *********************************
-
     & ********************************** */
     // ^ Calculating the result
 
     let mut result: String = String::new();
-    for (i, input_word) in input.iter().enumerate() {
-        
+    for (i, input_word) in input.iter().enumerate() {   
     }
-
 }
