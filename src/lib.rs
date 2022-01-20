@@ -25,25 +25,30 @@ I think 4 libs will be enough.
 
 */
 
-
-#![allow(non_snake_case)]
-#![allow(non_camel_case_types)]
-#![allow(unused_variables)]
-
 //endregion
 
-// ^ CONFIG
-pub struct CONFIG {
-    MULTIPLIER: u32,
-    THRESHOLD: f32}
-static config: CONFIG = CONFIG {
-    MULTIPLIER: 17,
-    THRESHOLD: 0.1};
+#![forbid(unsafe_code)]
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 
+// ^ Config
+pub struct Config {
+    multiplier: u32,
+    threshold: f32,
+    memory: usize,
+}
+
+static CONFIG: Config = Config {
+    multiplier: 17,
+    threshold: 0.1,
+    memory: 3,
+};
 
 // & TYPES (map and Deconstructed)
 // region
 pub mod mapping {
+    #[allow(non_camel_case_types)]
     pub struct map<K, V> {
         // This is just a wrapper for the Deconstructed map.
         pub entries: Vec<(K, V)>,
@@ -52,7 +57,7 @@ pub mod mapping {
     pub(crate) struct Deconstructed<K, V> {
         pub keys: Vec<K>,
         pub values: Vec<V>,
-        pub size: usize, // I know, this isn't the best way to do it, but I'm fighting with the borrow checker and the len function.
+        pub size: usize,
     }
 
     impl<K, V> map<K, V> {
@@ -103,7 +108,7 @@ pub mod mapping {
             let mut sum: u32 = 0;
             for word in pkey.split_whitespace() {
                 for c in pkey.chars() {
-                    sum += super::config.MULTIPLIER * c as u32;
+                    sum += super::CONFIG.multiplier * c as u32;
                 }
                 ram.push(sum);
                 sum = 0;
@@ -120,40 +125,67 @@ pub mod mapping {
 // ^ AUXILIAR FUNCTIONS
 //region
 
-fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
-    for (i, item) in vec.iter().enumerate() {
-        if item == &&s {
-            return (true, i);
+pub(crate) mod math {
+    fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
+        for (i, item) in vec.iter().enumerate() {
+            if item == &&s {
+                return (true, i);
+            };
         };
+        return (false, 0);
     }
-    return (false, 0);
-}
 
-fn sum(vec: Vec<u32>) -> u32 {
-    let mut sum: u32 = 0;
-    for each in vec.iter() {
-        sum += each;
+    pub(crate) fn sum(vec: Vec<u32>) -> u32 {
+        let mut sum: u32 = 0;
+        for each in vec.iter() {
+            sum += each;
+        };
+        return sum;
     }
-    return sum;
+
+    pub(crate) fn sort(vec: Vec<f32>) -> Vec<f32>{
+        let mut v = vec;
+        for i in 0..v.len() {
+            for j in 0..v.len() {
+                if v[i] > v[j] {
+                    v.swap(i, j);
+                };
+            };
+        };
+        return v;
+    }
 }
 
 //endregion
 
-pub fn train(map: mapping::map<String, String>, memory: usize) { // -> Vec<Vec<f32>>
+pub fn train(map: mapping::map<String, String>) -> Vec<f32> {
     let dec = map.deconstruct();
     let keys = mapping::translate(&dec.keys);
     let values = mapping::translate(&dec.values);
 
-    let mut TrainedData: Vec<Vec<f32>> = Vec::new();
-    let mut ram: Vec<f32> = Vec::new();
+    let mut mega: Vec<f32> = vec![];
 
-    let mut guess: u32 = 0;
+    let mut temporal: f32;
+    let memory: usize = CONFIG.memory;
+
     for (i, aphrase) in keys.iter().enumerate() {
-        if i - memory >= 0 {
-            // Then we guess the next word
-            // if sum(aphrase[i - memory..i].to_vec())
+        for (z, bphrase) in values.iter().enumerate() {
+            if i - memory >= 0 {
+                temporal = math::sum(aphrase[i - memory..(i - 1)].to_vec()) as f32;
+                // Then we guess the next word.
+                for x in 0..mega.len() {
+                    if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
+                        mega[x] += 1.0;
+                    } else {
+                        mega.push(temporal);
+                    };
+                };
+            } else {
+                continue;
+            };
         };
     };
+    return math::sort(mega);
 }
 
 //region
@@ -166,16 +198,19 @@ pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec
 
     for (i, word) in RawInput.split_whitespace().enumerate() {
         for c in word.chars() {
-            sum += config.MULTIPLIER * c as u32;
+            sum += CONFIG.multiplier * c as u32;
         }
         input.push(sum as f32);
         sum = 0;
-    }
+    };
 
     // ^ Calculating the result
 
     let mut result: String = String::new();
-    for (i, input_word) in input.iter().enumerate() {}
+    /*for (i, input_word) in input.iter().enumerate() {
+
+    }*/
+
 }
 
 //endregion
