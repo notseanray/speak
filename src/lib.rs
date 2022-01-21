@@ -1,5 +1,3 @@
-//region
-
 /*
 Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
 
@@ -27,6 +25,7 @@ I think 4 libs will be enough.
 
 //endregion
 
+
 #![forbid(unsafe_code)]
 #![allow(dead_code)]
 #![allow(unused_imports)]
@@ -39,10 +38,10 @@ pub struct Config {
     memory: usize,
 }
 
-static CONFIG: Config = Config {
+static CONFIG: Config = Config { // Recommended config
     multiplier: 17,
     threshold: 0.1,
-    memory: 3,
+    memory: 2,
 };
 
 // & TYPES (map and Deconstructed)
@@ -158,20 +157,20 @@ pub(crate) mod math {
 
 //endregion
 
-pub fn train(map: mapping::map<String, String>) -> Vec<f32> {
+pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
     let dec = map.deconstruct();
     let keys = mapping::translate(&dec.keys);
     let values = mapping::translate(&dec.values);
 
-    let mut mega: Vec<f32> = vec![];
+    let mut mega: Vec<f32> = Vec::new();
 
     let mut temporal: f32;
     let memory: usize = CONFIG.memory;
 
     for (i, aphrase) in keys.iter().enumerate() {
         for (z, bphrase) in values.iter().enumerate() {
-            if i - memory >= 0 {
-                temporal = math::sum(aphrase[i - memory..(i - 1)].to_vec()) as f32;
+            if i + memory >= 0 {
+                temporal = math::sum(aphrase[(memory - i)..i].to_vec()) as f32;
                 // Then we guess the next word.
                 for x in 0..mega.len() {
                     if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
@@ -190,7 +189,7 @@ pub fn train(map: mapping::map<String, String>) -> Vec<f32> {
 
 //region
 
-pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec<f32>) {
+pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Vec<f32>) {
     let mut input: Vec<f32> = Vec::new();
     let mut sum: u32 = 0;
     // &**********************************
@@ -207,9 +206,9 @@ pub fn run(RawInput: String, map: mapping::map<String, String>, TrainedData: Vec
     // ^ Calculating the result
 
     let mut result: String = String::new();
-    /*for (i, input_word) in input.iter().enumerate() {
+    for (i, input_word) in input.iter().enumerate() {
 
-    }*/
+    }
 
 }
 
