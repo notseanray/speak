@@ -25,23 +25,17 @@ I think 4 libs will be enough.
 
 //endregion
 
-
-#![forbid(unsafe_code)]
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
 // ^ Config
 pub struct Config {
     multiplier: u32,
     threshold: f32,
-    memory: usize,
+    memory: i32,
 }
 
 static CONFIG: Config = Config { // Recommended config
     multiplier: 17,
     threshold: 0.1,
-    memory: 2,
+    memory: 1,
 };
 
 // & TYPES (map and Deconstructed)
@@ -94,7 +88,7 @@ pub mod mapping {
             let mut entries = Vec::new();
             for i in 0..self.size {
                 entries.push((&self.keys[i], &self.values[i]));
-            }
+            };
 
             return map { entries };
         }
@@ -108,7 +102,7 @@ pub mod mapping {
             for word in pkey.split_whitespace() {
                 for c in pkey.chars() {
                     sum += super::CONFIG.multiplier * c as u32;
-                }
+                };
                 ram.push(sum);
                 sum = 0;
             }
@@ -118,7 +112,6 @@ pub mod mapping {
         return result;
     }
 }
-
 //endregion
 
 // ^ AUXILIAR FUNCTIONS
@@ -134,12 +127,12 @@ pub(crate) mod math {
         return (false, 0);
     }
 
-    pub(crate) fn sum(vec: Vec<u32>) -> u32 {
+    pub(crate) fn sum(vec: Vec<u32>) -> f32 {
         let mut sum: u32 = 0;
         for each in vec.iter() {
             sum += each;
         };
-        return sum;
+        return sum as f32;
     }
 
     pub(crate) fn sort(vec: Vec<f32>) -> Vec<f32>{
@@ -165,22 +158,17 @@ pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
     let mut mega: Vec<f32> = Vec::new();
 
     let mut temporal: f32;
-    let memory: usize = CONFIG.memory;
+    let mut memory: i32 = CONFIG.memory;
 
     for (i, aphrase) in keys.iter().enumerate() {
-        for (z, bphrase) in values.iter().enumerate() {
-            if i + memory >= 0 {
-                temporal = math::sum(aphrase[(memory - i)..i].to_vec()) as f32;
-                // Then we guess the next word.
-                for x in 0..mega.len() {
-                    if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
-                        mega[x] += 1.0;
-                    } else {
-                        mega.push(temporal);
-                    };
-                };
+        // Then we guess the next word.
+        memory = if i as i32 - memory < 0 { i as i32 } else { 0 };
+        temporal = math::sum(aphrase[memory as usize..i].to_vec()) as f32;
+        for x in 0..mega.len() {
+            if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
+                mega[x] += 1.0;
             } else {
-                continue;
+                mega.push(temporal);
             };
         };
     };
@@ -198,7 +186,7 @@ pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Ve
     for (i, word) in RawInput.split_whitespace().enumerate() {
         for c in word.chars() {
             sum += CONFIG.multiplier * c as u32;
-        }
+        };
         input.push(sum as f32);
         sum = 0;
     };
@@ -208,8 +196,7 @@ pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Ve
     let mut result: String = String::new();
     for (i, input_word) in input.iter().enumerate() {
 
-    }
-
+    };
 }
 
 //endregion
