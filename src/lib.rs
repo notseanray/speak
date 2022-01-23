@@ -1,170 +1,58 @@
-//region
-/*
-Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
+#[path = "lib/utils.rs"]
+pub mod utils;
 
-This crate allows you to talk with your machine. 0 dependencies neededt. (That's the goal).
+// Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
 
-TODO(s):
-- Check if this works in Linux, MacOS and old Windows.
-- Program the algorithm.
-- Create the documentation.
-- Configuration available (With default values).
-
-- Complete the Rust version.
-- Create the Python version.
-- Create the WebAssembly version.
-- Create the C++ version.
-
-I think 4 libs will be enough.
-
-- Create some standarized tests.
-- Learn how to use Docker.
-- Fail the tests.
-- Cry. ✅
-
-*/
-//endregion
-// ^ Config
-pub struct Config {
-    multiplier: u32,
-    threshold: f32,
-    memory: i32,
-}
-
-static CONFIG: Config = Config {
-    multiplier: 13,
-    threshold: 0.1,
-    memory: 1
-};
-
-// & TYPES (map and Deconstructed)
-// region
-pub mod mapping {
-    #[allow(non_camel_case_types)]
-    pub struct map<K, V> {
-        // This is just a wrapper for the Deconstructed map.
-        pub entries: Vec<(K, V)>,
-    }
-
-    pub(crate) struct Deconstructed<K, V> {
-        pub keys: Vec<K>,
-        pub values: Vec<V>
-    }
-
-    impl<K, V> map<K, V> {
-        // ^ UX:
-
-        pub fn new() -> Self {
-            map {
-                entries: Vec::new(),
-            }
-        }
-
-        pub fn from(entries: Vec<(K, V)>) -> map<K, V> {
-            return map { entries };
-        }
-
-        // ^ Auxiliar
-
-        pub(crate) fn deconstruct(&self) -> Deconstructed<&K, &V> {
-            let mut keys = Vec::new();
-            let mut values = Vec::new();
-
-            for (key, value) in self.entries.iter() {
-                keys.push(key);
-                values.push(value);
-            }
-
-            Deconstructed { keys, values }
-        }
-    }
-
-    pub(crate) fn translate(vec: &Vec<&String>) -> Vec<Vec<u32>> {
-        // Keys:
-        let mut result: Vec<Vec<u32>> = Vec::new();
-        let mut ram: Vec<u32> = Vec::new();
-        for pkey in vec.iter() {
-            let mut sum: u32 = 0;
-            for word in pkey.split_whitespace() {
-                for c in word.chars() {
-                    sum += super::CONFIG.multiplier * c as u32;
-                };
-                ram.push(sum);
-                sum = 0;
-            }
-            result.push(ram.clone());
-            ram.clear();
-        }
-        return result;
-    }
-}
-//endregion
-
-// ^ AUXILIAR FUNCTIONS
-//region
-
-pub(crate) mod math {
-    /*fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
-        for (i, item) in vec.iter().enumerate() {
-            if item == &&s {
-                return (true, i);
+// &* MACROS
+#[macro_export]
+macro_rules! contains {
+    ($mega: expr, $temporal: expr, $length: expr, $threshold: expr) => {
+        // $mega: Vec<f32>
+        // $temporal: Vec<f32>
+        for x in 0..$length {
+            if ($temporal / $mega[x] - 1.0).abs() > $threshold {
+                $mega[x] += 1.0;
+            } else {
+                $mega.push($temporal);
             };
         };
-        return (false, 0);
-    }*/
-
-    pub(crate) fn sum(vec: Vec<u32>) -> f32 {
-        let mut sum: u32 = 0;
-        for each in vec.iter() {
-            sum += each;
-        };
-        return sum as f32;
-    }
-
-    pub(crate) fn sort(vec: Vec<f32>) -> Vec<f32>{
-        let mut v = vec;
-        for i in 0..v.len() {
-            for j in 0..v.len() {
-                if v[i] > v[j] {
-                    v.swap(i, j);
-                };
-            };
-        };
-        return v;
-    }
+    };
 }
 
-//endregion
+// &* TRAIN & RUN!
 
-pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
+pub fn train(map: &utils::mapping::map<String, String>) -> Vec<f32> {
     let dec = map.deconstruct();
-    let keys = mapping::translate(&dec.keys);
+    let keys = utils::mapping::translate(&dec.keys);
     //let values = mapping::translate(&dec.values);
 
     let mut temporal: f32;
-    let memory: usize = CONFIG.memory as usize;
+    let memory: usize = utils::CONFIG.memory as usize;
 
     let mut mega: Vec<f32> = Vec::new();
 
     for (i, aphrase) in keys.iter().enumerate() {
         // Then we guess the next word.
-        if i < (memory as usize) { temporal = math::sum(aphrase[0..i].to_vec()); }
-        else { temporal = math::sum(aphrase[(memory as usize)..i].to_vec()); };
+        if i < (memory as usize) { temporal = utils::sum(aphrase[0..i].to_vec()); }
+        else { temporal = utils::sum(aphrase[(memory as usize)..i].to_vec()); };
 
         println!("{}", temporal);
-< 
-        if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
-            mega[x] += 1.0;
+
+        if i != 0 {
+                contains!(mega, temporal, mega.len(), utils::CONFIG.threshold);
         } else {
             mega.push(temporal);
-        };
+        }
+
     };
-    return math::sort(mega);
+    return utils::sort(mega);
 }
 
 //region
 
-pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Vec<f32>) {
+/*
+
+pub fn run(RawInput: String, map: &utils::mapping::map<String, String>, TrainedData: Vec<f32>) {
     let mut input: Vec<f32> = Vec::new();
     let mut sum: u32 = 0;
     // &**********************************
@@ -172,7 +60,7 @@ pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Ve
 
     for (i, word) in RawInput.split_whitespace().enumerate() {
         for c in word.chars() {
-            sum += CONFIG.multiplier * c as u32;
+            sum += utils::CONFIG.multiplier * c as u32;
         };
         input.push(sum as f32);
         sum = 0;
@@ -187,3 +75,4 @@ pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Ve
 }
 
 //endregion
+*/
