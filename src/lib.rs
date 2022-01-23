@@ -159,13 +159,14 @@ pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
     let mut mega: Vec<f32> = Vec::new();
 
     let mut temporal: f32;
-    let mut memory: i32 = CONFIG.memory;
+    let memory: i32 = CONFIG.memory;
 
-    let mut m = memory;
+
     for (i, aphrase) in keys.iter().enumerate() {
         // Then we guess the next word.
-        m = if (memory) - (i as i32) < 0 { i as i32 } else { memory };
-        temporal = math::sum(aphrase[..i].to_vec()) as f32;
+        if i < memory as usize { temporal = math::sum(aphrase[i - memory as usize..i].to_vec()); }
+        else { temporal = math::sum(aphrase[(memory as usize)..i].to_vec()); };
+        
         println!("{}", temporal);
         for x in 0..mega.len() {
             if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
