@@ -1,3 +1,4 @@
+//region
 /*
 Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
 
@@ -22,9 +23,7 @@ I think 4 libs will be enough.
 - Cry. ✅
 
 */
-
 //endregion
-
 // ^ Config
 pub struct Config {
     multiplier: u32,
@@ -49,8 +48,7 @@ pub mod mapping {
 
     pub(crate) struct Deconstructed<K, V> {
         pub keys: Vec<K>,
-        pub values: Vec<V>,
-        pub size: usize,
+        pub values: Vec<V>
     }
 
     impl<K, V> map<K, V> {
@@ -72,25 +70,12 @@ pub mod mapping {
             let mut keys = Vec::new();
             let mut values = Vec::new();
 
-            let mut size: usize = 0;
             for (key, value) in self.entries.iter() {
                 keys.push(key);
                 values.push(value);
-                size += 1;
             }
 
-            Deconstructed { keys, values, size }
-        }
-    }
-
-    impl<K, V> Deconstructed<K, V> {
-        pub(crate) fn reconstruct(&self) -> map<&K, &V> {
-            let mut entries = Vec::new();
-            for i in 0..self.size {
-                entries.push((&self.keys[i], &self.values[i]));
-            };
-
-            return map { entries };
+            Deconstructed { keys, values }
         }
     }
 
@@ -101,7 +86,7 @@ pub mod mapping {
         for pkey in vec.iter() {
             let mut sum: u32 = 0;
             for word in pkey.split_whitespace() {
-                for c in pkey.chars() {
+                for c in word.chars() {
                     sum += super::CONFIG.multiplier * c as u32;
                 };
                 ram.push(sum);
@@ -119,14 +104,14 @@ pub mod mapping {
 //region
 
 pub(crate) mod math {
-    fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
+    /*fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
         for (i, item) in vec.iter().enumerate() {
             if item == &&s {
                 return (true, i);
             };
         };
         return (false, 0);
-    }
+    }*/
 
     pub(crate) fn sum(vec: Vec<u32>) -> f32 {
         let mut sum: u32 = 0;
@@ -154,20 +139,20 @@ pub(crate) mod math {
 pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
     let dec = map.deconstruct();
     let keys = mapping::translate(&dec.keys);
-    let values = mapping::translate(&dec.values);
+    //let values = mapping::translate(&dec.values);
 
     let mut mega: Vec<f32> = Vec::new();
 
     let mut temporal: f32;
-    let memory: i32 = CONFIG.memory;
-
+    let memory: usize = CONFIG.memory as usize;
 
     for (i, aphrase) in keys.iter().enumerate() {
         // Then we guess the next word.
-        if i < memory as usize { temporal = math::sum(aphrase[i - memory as usize..i].to_vec()); }
+        if i < (memory as usize) { temporal = math::sum(aphrase[0..i].to_vec()); }
         else { temporal = math::sum(aphrase[(memory as usize)..i].to_vec()); };
-        
+
         println!("{}", temporal);
+
         for x in 0..mega.len() {
             if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
                 mega[x] += 1.0;
