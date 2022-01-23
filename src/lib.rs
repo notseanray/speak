@@ -32,10 +32,10 @@ pub struct Config {
     memory: i32,
 }
 
-static CONFIG: Config = Config { // Recommended config
-    multiplier: 17,
+static CONFIG: Config = Config {
+    multiplier: 13,
     threshold: 0.1,
-    memory: 1,
+    memory: 1
 };
 
 // & TYPES (map and Deconstructed)
@@ -93,6 +93,7 @@ pub mod mapping {
             return map { entries };
         }
     }
+
     pub(crate) fn translate(vec: &Vec<&String>) -> Vec<Vec<u32>> {
         // Keys:
         let mut result: Vec<Vec<u32>> = Vec::new();
@@ -160,10 +161,12 @@ pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
     let mut temporal: f32;
     let mut memory: i32 = CONFIG.memory;
 
+    let mut m = memory;
     for (i, aphrase) in keys.iter().enumerate() {
         // Then we guess the next word.
-        memory = if i as i32 - memory < 0 { i as i32 } else { 0 };
-        temporal = math::sum(aphrase[memory as usize..i].to_vec()) as f32;
+        m = if (memory) - (i as i32) < 0 { i as i32 } else { memory };
+        temporal = math::sum(aphrase[..i].to_vec()) as f32;
+        println!("{}", temporal);
         for x in 0..mega.len() {
             if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
                 mega[x] += 1.0;
