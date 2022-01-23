@@ -23,40 +23,50 @@ I think 4 libs will be enough.
 
 */
 
-#![allow(non_snake_case)]
-#![allow(non_camel_case_types)]
-#![allow(unused_variables)]
-#![allow(unused_macros)]
+//endregion
 
+// ^ Config
+pub struct Config {
+    multiplier: u32,
+    threshold: f32,
+    memory: i32,
+}
+
+static CONFIG: Config = Config { // Recommended config
+    multiplier: 17,
+    threshold: 0.1,
+    memory: 1,
+};
+
+// & TYPES (map and Deconstructed)
+// region
 pub mod mapping {
-    use std::fmt::Display;
-    pub struct map<K, V> { // This is just a wrapper for the Deconstructed map.
+    #[allow(non_camel_case_types)]
+    pub struct map<K, V> {
+        // This is just a wrapper for the Deconstructed map.
         pub entries: Vec<(K, V)>,
     }
 
     pub(crate) struct Deconstructed<K, V> {
         pub keys: Vec<K>,
         pub values: Vec<V>,
-        pub size: usize // I know, this isn't the best way to do it, but I'm fighting with the borrow checker and the len function.
+        pub size: usize,
     }
 
     impl<K, V> map<K, V> {
-// Implements for maps of all types
-// ^ UX:
+        // ^ UX:
 
-            pub fn new() -> Self {
-                map {
-                    entries: Vec::new()
-                }
+        pub fn new() -> Self {
+            map {
+                entries: Vec::new(),
             }
+        }
 
-            pub fn from(entries: Vec<(K, V)>) -> map<K, V> {
-                return map {
-                    entries
-                };
-            }
+        pub fn from(entries: Vec<(K, V)>) -> map<K, V> {
+            return map { entries };
+        }
 
-// ^ Auxiliar
+        // ^ Auxiliar
 
         pub(crate) fn deconstruct(&self) -> Deconstructed<&K, &V> {
             let mut keys = Vec::new();
@@ -67,7 +77,7 @@ pub mod mapping {
                 keys.push(key);
                 values.push(value);
                 size += 1;
-            };
+            }
 
             Deconstructed { keys, values, size }
         }
@@ -76,59 +86,117 @@ pub mod mapping {
     impl<K, V> Deconstructed<K, V> {
         pub(crate) fn reconstruct(&self) -> map<&K, &V> {
             let mut entries = Vec::new();
-
             for i in 0..self.size {
                 entries.push((&self.keys[i], &self.values[i]));
-            }
-
-            return map {
-                entries
             };
+
+            return map { entries };
         }
+    }
+    pub(crate) fn translate(vec: &Vec<&String>) -> Vec<Vec<u32>> {
+        // Keys:
+        let mut result: Vec<Vec<u32>> = Vec::new();
+        let mut ram: Vec<u32> = Vec::new();
+        for pkey in vec.iter() {
+            let mut sum: u32 = 0;
+            for word in pkey.split_whitespace() {
+                for c in pkey.chars() {
+                    sum += super::CONFIG.multiplier * c as u32;
+                };
+                ram.push(sum);
+                sum = 0;
+            }
+            result.push(ram.clone());
+            ram.clear();
+        }
+        return result;
+    }
+}
+//endregion
+
+// ^ AUXILIAR FUNCTIONS
+//region
+
+pub(crate) mod math {
+    fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
+        for (i, item) in vec.iter().enumerate() {
+            if item == &&s {
+                return (true, i);
+            };
+        };
+        return (false, 0);
+    }
+
+    pub(crate) fn sum(vec: Vec<u32>) -> f32 {
+        let mut sum: u32 = 0;
+        for each in vec.iter() {
+            sum += each;
+        };
+        return sum as f32;
+    }
+
+    pub(crate) fn sort(vec: Vec<f32>) -> Vec<f32>{
+        let mut v = vec;
+        for i in 0..v.len() {
+            for j in 0..v.len() {
+                if v[i] > v[j] {
+                    v.swap(i, j);
+                };
+            };
+        };
+        return v;
     }
 }
 
-fn contains(vec: &Vec<&String>, s: String) -> (bool, usize) {
-    for (i, item) in vec.iter().enumerate() {
-        if item == &&s {
-            return (true, i);
-        };
-    };
-    return (false, 0);
-}
+//endregion
 
-pub fn train(map: mapping::map<String, String>) {
-    // Deconstructing map into his two arrays
-
+pub fn train(map: &mapping::map<String, String>) -> Vec<f32> {
     let dec = map.deconstruct();
-    let keys = dec.keys;
-    let ckeys = keys.clone();
-    let values = dec.values;
+    let keys = mapping::translate(&dec.keys);
+    let values = mapping::translate(&dec.values);
 
-    // Now, let's create a mega array.
+    let mut mega: Vec<f32> = Vec::new();
 
-    let mut frequency: mapping::Deconstructed<String, usize> = mapping::Deconstructed {
-        keys: Vec::new(),
-        values: Vec::new(),
-        size: 0
-    };
+    let mut temporal: f32;
+    let mut memory: i32 = CONFIG.memory;
 
-    for key in keys {
-        for word in key.split_whitespace() {
-            let container = contains(&ckeys, word.to_string());
-            
-            if container.0 && container.1 < frequency.keys.len() {
-                frequency.values[container.1] += 1;
-            }
-
-            else {
-                frequency.keys.push(word.to_string());
-                frequency.values.push(1);
+    for (i, aphrase) in keys.iter().enumerate() {
+        // Then we guess the next word.
+        memory = if i as i32 - memory < 0 { i as i32 } else { 0 };
+        temporal = math::sum(aphrase[memory as usize..i].to_vec()) as f32;
+        for x in 0..mega.len() {
+            if (temporal / mega[x] - 1.0).abs() > CONFIG.threshold {
+                mega[x] += 1.0;
+            } else {
+                mega.push(temporal);
             };
-
         };
     };
-
-    println!("{:?}", frequency.keys);
-    println!("{:?}", frequency.values);
+    return math::sort(mega);
 }
+
+//region
+
+pub fn run(RawInput: String, map: &mapping::map<String, String>, TrainedData: Vec<f32>) {
+    let mut input: Vec<f32> = Vec::new();
+    let mut sum: u32 = 0;
+    // &**********************************
+    // ^ Translating the input to numbers.
+
+    for (i, word) in RawInput.split_whitespace().enumerate() {
+        for c in word.chars() {
+            sum += CONFIG.multiplier * c as u32;
+        };
+        input.push(sum as f32);
+        sum = 0;
+    };
+
+    // ^ Calculating the result
+
+    let mut result: String = String::new();
+    for (i, input_word) in input.iter().enumerate() {
+
+    };
+}
+
+//endregion
