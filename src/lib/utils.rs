@@ -1,7 +1,7 @@
-
 // * /////////////////////////////
 // ^ CONFIG //////////////////////
 // * /////////////////////////////
+
 pub struct Config {
     pub multiplier: u32,
     pub threshold: f32,
@@ -80,14 +80,14 @@ pub mod mapping {
 
 // * /////////////////////////////
 // ^ MISC. ///////////////////////
-// * /////////////////////////////
+// * ////////////////////////////
 
-pub(crate) fn sum(vec: Vec<u32>) -> f32 {
+pub(crate) fn sum(vec: Vec<u32>) -> u32{
     let mut sum: u32 = 0;
     for each in vec.iter() {
         sum += each;
     };
-    return sum as f32;
+    return sum as u32;
 }
 
 pub(crate) fn sort(vec: Vec<f32>) -> Vec<f32>{

@@ -21,37 +21,14 @@ macro_rules! contains {
 
 // &* TRAIN & RUN!
 
-pub fn train(map: &utils::mapping::map<String, String>) -> Vec<f32> {
-    let dec = map.deconstruct();
-    let keys = utils::mapping::translate(&dec.keys);
-    //let values = mapping::translate(&dec.values);
-
-    let mut temporal: f32;
-    let memory: usize = utils::CONFIG.memory as usize;
-
-    let mut mega: Vec<f32> = Vec::new();
-
-    for (i, aphrase) in keys.iter().enumerate() {
-        // Then we guess the next word.
-        if i < (memory as usize) { temporal = utils::sum(aphrase[0..i].to_vec()); }
-        else { temporal = utils::sum(aphrase[(memory as usize)..i].to_vec()); };
-
-        println!("{}", temporal);
-
-        if i != 0 {
-                contains!(mega, temporal, mega.len(), utils::CONFIG.threshold);
-        } else {
-            mega.push(temporal);
-        }
-
-    };
-    return utils::sort(mega);
+pub(crate) fn train<T>(
+    data: utils::mapping::map<T, T>
+) -> String {
+    // Train function.
 }
 
 //region
-
 /*
-
 pub fn run(RawInput: String, map: &utils::mapping::map<String, String>, TrainedData: Vec<f32>) {
     let mut input: Vec<f32> = Vec::new();
     let mut sum: u32 = 0;
@@ -74,5 +51,4 @@ pub fn run(RawInput: String, map: &utils::mapping::map<String, String>, TrainedD
     };
 }
 
-//endregion
-*/
+//endregion */
