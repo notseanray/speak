@@ -1,5 +1,6 @@
 #[path = "lib/utils.rs"]
 pub mod utils;
+use utils::*;
 
 // Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
 
@@ -21,10 +22,20 @@ macro_rules! contains {
 
 // &* TRAIN & RUN!
 
-pub(crate) fn train<T>(
-    data: utils::mapping::map<T, T>
-) -> String {
-    // Train function.
+pub(crate) fn train<T: Allowed>(
+    rawdata: utils::mapping::map<T, T>,
+    config: utils::Config // I recommend using the default config: utils::CONFIG
+) {
+    let data = rawdata.deconstruct();
+    let translated_keys: Allowed = data.keys.translate();
+
+    for phrase in data.keys { // Number vectors (Ej: [[a, b, c, d] <- This is phrase, ···])
+
+         {
+
+        }
+
+    }
 }
 
 //region

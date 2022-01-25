@@ -1,4 +1,45 @@
 // * /////////////////////////////
+// ^ TRAITS //////////////////////
+// * /////////////////////////////
+
+pub trait Allowed {
+    fn translate(self) -> Vec<Vec<f32>>;
+}
+
+fn __translate__<T: Allowed>(vec: Vec<String>) -> Vec<Vec<f32>> {
+    let mut result: Vec<Vec<f32>> = Vec::new();
+    for word in vec {
+        for (i, word) in word.split_whitespace().enumerate() {
+            let mut sum: u32 = 0;
+            for c in word.chars() {
+                sum += CONFIG.multiplier * c as u32;
+            };
+            result.push(vec![sum as f32]);
+        };
+    };
+        result
+}
+
+impl Allowed for Vec<&str> {
+    fn translate(self) -> Vec<Vec<f32>> {
+        
+        let mut replacement: Vec<String> = Vec::new();
+        
+        for word in self {
+            replacement.push(word.to_string());
+        };
+
+        return __translate__::<Vec<String>>(replacement);
+    }
+}
+
+impl Allowed for Vec<String> {
+    fn translate(self) -> Vec<Vec<f32>> {
+        return __translate__::<Vec<String>>(self)
+    }
+}
+
+// * /////////////////////////////
 // ^ CONFIG //////////////////////
 // * /////////////////////////////
 
@@ -8,7 +49,7 @@ pub struct Config {
     pub memory: i32,
 }
 
-pub(crate) static CONFIG: Config = Config {
+pub static CONFIG: Config = Config {
     multiplier: 13,
     threshold: 0.1,
     memory: 1
@@ -56,25 +97,6 @@ pub mod mapping {
 
             Deconstructed { keys, values }
         }
-    }
-
-    pub(crate) fn translate(vec: &Vec<&String>) -> Vec<Vec<u32>> {
-        // Keys:
-        let mut result: Vec<Vec<u32>> = Vec::new();
-        let mut ram: Vec<u32> = Vec::new();
-        for pkey in vec.iter() {
-            let mut sum: u32 = 0;
-            for word in pkey.split_whitespace() {
-                for c in word.chars() {
-                    sum += super::CONFIG.multiplier * c as u32;
-                };
-                ram.push(sum);
-                sum = 0;
-            }
-            result.push(ram.clone());
-            ram.clear();
-        }
-        return result;
     }
 }
 
