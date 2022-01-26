@@ -30,21 +30,21 @@ impl Allowed for Vec<&str> {}
 impl Allowed for u32 {}
 impl Allowed for Vec<u32> {}
 
-pub struct Map<K: Allowed, V: Allowed> { entries: Vec<(K, V)> }
-pub(crate) struct Deconstructed<K: Allowed, V: Allowed> { keys: Vec<K>, values: Vec<V> }
+pub struct Map<T: Allowed> { entries: Vec<(T, T)> }
+pub(crate) struct Deconstructed<T: Allowed> { keys: Vec<T>, values: Vec<T> }
 
 // Creates a new map
 
-pub(self) fn __new__<T: Allowed>() -> Map<T, T> { return Map { entries: Vec::new() } }
+pub(self) fn __new__<T: Allowed>() -> Map<T> { return Map { entries: Vec::new() } }
 
 // Creates a new map with the given entries
 
-pub(self) fn __from__<T: Allowed>(vec1: Vec<T>, vec2: Vec<T>) -> Map<T, T> {
+pub(self) fn __from__<T: Allowed>(vec1: Vec<T>, vec2: Vec<T>) -> Map<T> {
     let mut entries: Vec<(T, T)> = Vec::new();
     for (key, value) in vec1.iter().zip(vec2.iter()) { entries.push((*key, *value)); }
     return Map { entries }; }
 
-pub(crate) fn __deconstruct__<T: Allowed>(map: Map<T, T>) -> Deconstructed<T, T> {
+pub(crate) fn __deconstruct__<T: Allowed>(map: Map<T>) -> Deconstructed<T> {
     let mut keys: Vec<T> = Vec::new();
     let mut values: Vec<T> = Vec::new();
 
@@ -59,10 +59,10 @@ pub(crate) fn __deconstruct__<T: Allowed>(map: Map<T, T>) -> Deconstructed<T, T>
 macro_rules! impl_map {
     ($($T: path),*) => {
         $(
-            impl Map<$T, $T> {
-                pub fn new() -> Map<$T, $T> { return __new__::<$T>(); }
-                pub fn from(vec1: Vec<$T>, vec2: Vec<$T>) -> Map<$T, $T> { return __from__::<$T>(vec1, vec2); }
-                pub fn deconstruct(self) -> Deconstructed<$T, $T> { return __deconstruct__::<$T>(self); }
+            impl Map<$T> {
+                pub fn new() -> Map<$T> { return __new__::<$T>(); }
+                pub fn from(vec1: Vec<$T>, vec2: Vec<$T>) -> Map<$T> { return __from__::<$T>(vec1, vec2); }
+                pub fn deconstruct(self) -> Deconstructed<$T> { return __deconstruct__::<$T>(self); }
             }
         )*
     };
@@ -110,7 +110,7 @@ impl<K, V> Map<K, V> {
 // ^ MISC. ///////////////////////
 // * ////////////////////////////
 
-trait LiteralTrait {
+pub(crate) trait LiteralTrait {
     fn literal(&self) -> String;
 }
 
@@ -127,15 +127,18 @@ pub(crate) fn translate<Literal: LiteralTrait>(vec: Vec<Literal>) -> Vec<Vec<u32
         let word = word.literal();
         for (i, word) in word.split_whitespace().enumerate() {
             let mut sum: u32 = 0;
+
             for c in word.chars() {
                 sum += CONFIG.multiplier * c as u32;
             };
+            
             ram.push(sum);
             sum = 0;
         };
         result.push(ram);
+        ram.clear();
     };
-        result
+        return result;
 }
 
 pub(crate) fn sum(vec: Vec<u32>) -> u32{

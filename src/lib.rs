@@ -1,22 +1,14 @@
+// Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
+
 #[path = "lib/utils.rs"]
 pub mod utils;
 use utils::*;
 
-// Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
-
-// * /////////////////////////////
-// ^ Traits / Types / Conversion //////////////////////
-// * /////////////////////////////
-
-type T = String;
-
-// &* TRAIN & RUN!
-
 pub(crate) fn train(
-    rawdata: utils::mapping::map<T, T>,
-    config: utils::Config // I recommend using the default config: utils::CONFIG
+    rawdata: Map<LiteralTrait, LiteralTrait>,
+    config: Config // I recommend using the default config: utils::CONFIG
 ) {
-    let data: mapping::Deconstructed<&T, &T> = rawdata.deconstruct::<T>();
+    let data: Deconstructed<&T, &T> = rawdata.deconstruct::<T>();
     let keys = translate(data.keys);
     let values = translate(data.values);
 
