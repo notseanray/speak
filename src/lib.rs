@@ -4,37 +4,24 @@ use utils::*;
 
 // Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
 
-// &* MACROS
-#[macro_export]
-macro_rules! contains {
-    ($mega: expr, $temporal: expr, $length: expr, $threshold: expr) => {
-        // $mega: Vec<f32>
-        // $temporal: Vec<f32>
-        for x in 0..$length {
-            if ($temporal / $mega[x] - 1.0).abs() > $threshold {
-                $mega[x] += 1.0;
-            } else {
-                $mega.push($temporal);
-            };
-        };
-    };
-}
+// * /////////////////////////////
+// ^ Traits / Types / Conversion //////////////////////
+// * /////////////////////////////
+
+type T = String;
 
 // &* TRAIN & RUN!
 
-pub(crate) fn train<T: Allowed>(
+pub(crate) fn train(
     rawdata: utils::mapping::map<T, T>,
     config: utils::Config // I recommend using the default config: utils::CONFIG
 ) {
-    let data = rawdata.deconstruct();
-    let translated_keys: Allowed = data.keys.translate();
+    let data: mapping::Deconstructed<&T, &T> = rawdata.deconstruct::<T>();
+    let keys = translate(data.keys);
+    let values = translate(data.values);
 
-    for phrase in data.keys { // Number vectors (Ej: [[a, b, c, d] <- This is phrase, ···])
-
-         {
-
-        }
-
+    for phrase in keys { // Number vectors (Ej: [[a, b, c, d] <- This is phrase, ···])
+        
     }
 }
 

@@ -1,45 +1,4 @@
 // * /////////////////////////////
-// ^ TRAITS //////////////////////
-// * /////////////////////////////
-
-pub trait Allowed {
-    fn translate(self) -> Vec<Vec<f32>>;
-}
-
-fn __translate__<T: Allowed>(vec: Vec<String>) -> Vec<Vec<f32>> {
-    let mut result: Vec<Vec<f32>> = Vec::new();
-    for word in vec {
-        for (i, word) in word.split_whitespace().enumerate() {
-            let mut sum: u32 = 0;
-            for c in word.chars() {
-                sum += CONFIG.multiplier * c as u32;
-            };
-            result.push(vec![sum as f32]);
-        };
-    };
-        result
-}
-
-impl Allowed for Vec<&str> {
-    fn translate(self) -> Vec<Vec<f32>> {
-        
-        let mut replacement: Vec<String> = Vec::new();
-        
-        for word in self {
-            replacement.push(word.to_string());
-        };
-
-        return __translate__::<Vec<String>>(replacement);
-    }
-}
-
-impl Allowed for Vec<String> {
-    fn translate(self) -> Vec<Vec<f32>> {
-        return __translate__::<Vec<String>>(self)
-    }
-}
-
-// * /////////////////////////////
 // ^ CONFIG //////////////////////
 // * /////////////////////////////
 
@@ -86,7 +45,7 @@ pub mod mapping {
 
         // ^ Auxiliar
 
-        pub(crate) fn deconstruct(&self) -> Deconstructed<&K, &V> {
+        pub(crate) fn deconstruct<T>(&self) -> Deconstructed<&K, &V> {
             let mut keys = Vec::new();
             let mut values = Vec::new();
 
@@ -103,6 +62,20 @@ pub mod mapping {
 // * /////////////////////////////
 // ^ MISC. ///////////////////////
 // * ////////////////////////////
+
+pub(crate) fn translate(vec: Vec<&String>) -> Vec<Vec<f32>> {
+    let mut result: Vec<Vec<f32>> = Vec::new();
+    for word in vec {
+        for (i, word) in word.split_whitespace().enumerate() {
+            let mut sum: u32 = 0;
+            for c in word.chars() {
+                sum += CONFIG.multiplier * c as u32;
+            };
+            result.push(vec![sum as f32]);
+        };
+    };
+        result
+}
 
 pub(crate) fn sum(vec: Vec<u32>) -> u32{
     let mut sum: u32 = 0;
