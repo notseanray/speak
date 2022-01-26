@@ -18,33 +18,32 @@ pub static CONFIG: Config = Config {
 // ^ Maps ////////////////////////
 // * /////////////////////////////
 
-// A map only allows these types: String, &str, u32 and the vectors of these types.
+// A map only allows these types: String, &str
 
-pub(crate) trait Allowed {}
-impl Allowed for String {}
-impl Allowed for Vec<String> {}
+pub(crate) trait LiteralTrait {
+    fn literal(&self) -> String;
+}
 
-impl Allowed for &str {}
-impl Allowed for Vec<&str> {}
+// Using the .literal() method on a string or &str returns the String.
 
-impl Allowed for u32 {}
-impl Allowed for Vec<u32> {}
+impl LiteralTrait for String { fn literal(&self) -> String { return *self; } }
+impl LiteralTrait for &str { fn literal(&self) -> String { return String::from(*self); } }
 
-pub struct Map<T: Allowed> { entries: Vec<(T, T)> }
-pub(crate) struct Deconstructed<T: Allowed> { keys: Vec<T>, values: Vec<T> }
+pub struct Map<T> { entries: Vec<(T, T)> }
+pub(crate) struct Deconstructed<T: LiteralTrait> { keys: Vec<T>, values: Vec<T> }
 
 // Creates a new map
 
-pub(self) fn __new__<T: Allowed>() -> Map<T> { return Map { entries: Vec::new() } }
+pub(self) fn __new__<T: LiteralTrait>() -> Map<T> { return Map { entries: Vec::new() } }
 
 // Creates a new map with the given entries
 
-pub(self) fn __from__<T: Allowed>(vec1: Vec<T>, vec2: Vec<T>) -> Map<T> {
+pub(self) fn __from__<T: LiteralTrait>(vec1: Vec<T>, vec2: Vec<T>) -> Map<T> {
     let mut entries: Vec<(T, T)> = Vec::new();
     for (key, value) in vec1.iter().zip(vec2.iter()) { entries.push((*key, *value)); }
     return Map { entries }; }
 
-pub(crate) fn __deconstruct__<T: Allowed>(map: Map<T>) -> Deconstructed<T> {
+pub(crate) fn __deconstruct__<T: LiteralTrait>(map: Map<T>) -> Deconstructed<T> {
     let mut keys: Vec<T> = Vec::new();
     let mut values: Vec<T> = Vec::new();
 
@@ -74,10 +73,7 @@ type VT = Vec<String>;
 type U = &'static str; 
 type VU = Vec<&'static str>;
 
-type V = u32;
-type VV = Vec<u32>;
-
-impl_map!(T, VT, U, VU, V, VV);
+impl_map!(T, VT, U, VU);
 
 // I'm so proud of this thing.
 
@@ -109,15 +105,6 @@ impl<K, V> Map<K, V> {
 // * /////////////////////////////
 // ^ MISC. ///////////////////////
 // * ////////////////////////////
-
-pub(crate) trait LiteralTrait {
-    fn literal(&self) -> String;
-}
-
-// Using the .literal() method on a string or &str returns the String.
-
-impl LiteralTrait for String { fn literal(&self) -> String { return *self; } }
-impl LiteralTrait for &str { fn literal(&self) -> String { return String::from(*self); } }
 
 pub(crate) fn translate<Literal: LiteralTrait>(vec: Vec<Literal>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
