@@ -15,10 +15,10 @@ pub static CONFIG: Config = Config {
 };
 
 // * /////////////////////////////
-// ^ MapS ////////////////////////
+// ^ Maps ////////////////////////
 // * /////////////////////////////
 
-// A map only allows these types: String, &str, u32
+// A map only allows these types: String, &str, u32 and the vectors of these types.
 
 pub(crate) trait Allowed {}
 impl Allowed for String {}
@@ -68,7 +68,6 @@ macro_rules! impl_map {
     };
 }
 
-
 type T = String;
 type VT = Vec<String>;
 
@@ -79,6 +78,8 @@ type V = u32;
 type VV = Vec<u32>;
 
 impl_map!(T, VT, U, VU, V, VV);
+
+// I'm so proud of this thing.
 
 /*
 impl<K, V> Map<K, V> {
@@ -109,16 +110,30 @@ impl<K, V> Map<K, V> {
 // ^ MISC. ///////////////////////
 // * ////////////////////////////
 
-pub(crate) fn translate(vec: Vec<&String>) -> Vec<Vec<f32>> {
-    let mut result: Vec<Vec<f32>> = Vec::new();
+trait LiteralTrait {
+    fn literal(&self) -> String;
+}
+
+// Using the .literal() method on a string or &str returns the String.
+
+impl LiteralTrait for String { fn literal(&self) -> String { return *self; } }
+impl LiteralTrait for &str { fn literal(&self) -> String { return String::from(*self); } }
+
+pub(crate) fn translate<Literal: LiteralTrait>(vec: Vec<Literal>) -> Vec<Vec<u32>> {
+    let mut ram: Vec<u32> = Vec::new();
+    let mut result: Vec<Vec<u32>> = Vec::new();
+
     for word in vec {
+        let word = word.literal();
         for (i, word) in word.split_whitespace().enumerate() {
             let mut sum: u32 = 0;
             for c in word.chars() {
                 sum += CONFIG.multiplier * c as u32;
             };
-            result.push(vec![sum as f32]);
+            ram.push(sum);
+            sum = 0;
         };
+        result.push(ram);
     };
         result
 }
@@ -131,13 +146,11 @@ pub(crate) fn sum(vec: Vec<u32>) -> u32{
     return sum as u32;
 }
 
-pub(crate) fn sort(vec: Vec<f32>) -> Vec<f32>{
+pub(crate) fn sortf32(vec: Vec<f32>) -> Vec<f32>{
     let mut v = vec;
-    for i in 0..v.len() {
-        for j in 0..v.len() {
-            if v[i] > v[j] {
-                v.swap(i, j);
-            };
+    for i in 0..vec.len() {
+        if v[i] > v[i+1] {
+            v.swap(i, i+1);
         };
     };
     return v;
