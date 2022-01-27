@@ -4,11 +4,11 @@
 pub mod utils;
 use utils::*;
 
-pub(crate) fn train<T: LiteralTrait>(
+pub(crate) fn train<T: Literal>(
     rawdata: Map<T>,
     config: Config // I recommend using the default config: utils::CONFIG
-) {
-    let data: Deconstructed<T> = rawdata.deconstruct::<T>();
+) where T: Literal {
+    let data: Deconstructed<String> = deconstruct(rawdata);
     let keys = translate(data.keys);
     let values = translate(data.values);
 
