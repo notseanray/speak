@@ -1,11 +1,13 @@
+#![allow(dead_code, unused_variables)]
+
 // * /////////////////////////////
 // ^ CONFIG //////////////////////
 // * /////////////////////////////
 
 pub struct Config {
-    multiplier: u32
-    ,threshold: f32
-    ,memory:    i32
+    pub multiplier: u32,
+    pub threshold:  f32,
+    pub memory:     i32
 }
 
 pub static CONFIG: Config = Config {
@@ -18,40 +20,41 @@ pub static CONFIG: Config = Config {
 // ^ Maps ////////////////////////
 // * /////////////////////////////
 
-// A map only allows these types: String, &str, u32 and the vectors of these types.
+// A map only allows these types: String, &str
 
-pub(crate) trait Allowed {}
-impl Allowed for String {}
-impl Allowed for Vec<String> {}
+pub(crate) trait Literal {
+    fn literal(&self) -> String;
+}
 
-impl Allowed for &str {}
-impl Allowed for Vec<&str> {}
+// Using the .literal() method on a string or &str returns the String.
 
-impl Allowed for u32 {}
-impl Allowed for Vec<u32> {}
+impl Literal for String { fn literal(&self) -> String { return String::from(self)} }
+impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
 
-pub struct Map<T: Allowed> { entries: Vec<(T, T)> }
-pub(crate) struct Deconstructed<T: Allowed> { keys: Vec<T>, values: Vec<T> }
+pub struct Map<T> { entries: Vec<(T, T)> }
+pub(crate) struct Deconstructed<T: Literal> { pub keys: Vec<T>, pub values: Vec<T> }
 
 // Creates a new map
 
-pub(self) fn __new__<T: Allowed>() -> Map<T> { return Map { entries: Vec::new() } }
+pub(self) fn __new__<T: Literal>() -> Map<T> { return Map { entries: Vec::new() } }
 
 // Creates a new map with the given entries
 
-pub(self) fn __from__<T: Allowed>(vec1: Vec<T>, vec2: Vec<T>) -> Map<T> {
-    let mut entries: Vec<(T, T)> = Vec::new();
-    for (key, value) in vec1.iter().zip(vec2.iter()) { entries.push((*key, *value)); }
+pub(self) fn __from__<T: Literal>(vec1: Vec<T>, vec2: Vec<T>) -> Map<String> {
+    let mut entries: Vec<(String, String)> = Vec::new();
+    for i in 0..vec1.len() {
+        entries.push((vec1[i].literal().clone(), vec2[i].literal().clone()));
+    }
     return Map { entries }; }
 
-pub(crate) fn __deconstruct__<T: Allowed>(map: Map<T>) -> Deconstructed<T> {
-    let mut keys: Vec<T> = Vec::new();
-    let mut values: Vec<T> = Vec::new();
+pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
+    let mut keys: Vec<String> = Vec::new();
+    let mut values: Vec<String> = Vec::new();
 
-    for (key, value) in map.entries.iter() {
-        keys.push(*key);
-        values.push(*value);
-    }
+    for x in 0..map.entries.len() {
+        if x % 2 == 0 { keys.push(map.entries[x].0.literal()); }
+        else { values.push(map.entries[x].1.literal()); }
+    };
 
     return Deconstructed { keys, values };
 }
@@ -61,100 +64,38 @@ macro_rules! impl_map {
         $(
             impl Map<$T> {
                 pub fn new() -> Map<$T> { return __new__::<$T>(); }
-                pub fn from(vec1: Vec<$T>, vec2: Vec<$T>) -> Map<$T> { return __from__::<$T>(vec1, vec2); }
-                pub fn deconstruct(self) -> Deconstructed<$T> { return __deconstruct__::<$T>(self); }
+                pub fn from(vec1: Vec<$T>, vec2: Vec<$T>) -> Map<String> { return __from__::<$T>(vec1, vec2); }
             }
         )*
     };
 }
 
 type T = String;
-type VT = Vec<String>;
-
 type U = &'static str; 
-type VU = Vec<&'static str>;
 
-type V = u32;
-type VV = Vec<u32>;
-
-impl_map!(T, VT, U, VU, V, VV);
+impl_map!(T, U);
 
 // I'm so proud of this thing.
-
-/*
-impl<K, V> Map<K, V> {
-    // ^ UX:
-
-    pub fn new() -> Self { Map { entries: Vec::new() } }
-
-    pub fn from(entries: Vec<(K, V)>) -> Map<K, V> {
-        return Map { entries };
-    }
-
-    // ^ Auxiliar
-
-    pub(crate) fn deconstruct<T>(&self) -> Deconstructed<&K, &V> {
-        let mut keys = Vec::new();
-        let mut values = Vec::new();
-
-        for (key, value) in self.entries.iter() {
-            keys.push(key);
-            values.push(value);
-        }
-
-        Deconstructed { keys, values }
-    }
-}*/
 
 // * /////////////////////////////
 // ^ MISC. ///////////////////////
 // * ////////////////////////////
 
-pub(crate) trait LiteralTrait {
-    fn literal(&self) -> String;
-}
-
-// Using the .literal() method on a string or &str returns the String.
-
-impl LiteralTrait for String { fn literal(&self) -> String { return *self; } }
-impl LiteralTrait for &str { fn literal(&self) -> String { return String::from(*self); } }
-
-pub(crate) fn translate<Literal: LiteralTrait>(vec: Vec<Literal>) -> Vec<Vec<u32>> {
+pub(crate) fn translate<L: Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
     let mut result: Vec<Vec<u32>> = Vec::new();
-
+    let mut sum: u32 = 0;
     for word in vec {
         let word = word.literal();
         for (i, word) in word.split_whitespace().enumerate() {
-            let mut sum: u32 = 0;
-
             for c in word.chars() {
                 sum += CONFIG.multiplier * c as u32;
             };
-            
             ram.push(sum);
             sum = 0;
         };
-        result.push(ram);
+        result.push(ram.clone());
         ram.clear();
     };
         return result;
-}
-
-pub(crate) fn sum(vec: Vec<u32>) -> u32{
-    let mut sum: u32 = 0;
-    for each in vec.iter() {
-        sum += each;
-    };
-    return sum as u32;
-}
-
-pub(crate) fn sortf32(vec: Vec<f32>) -> Vec<f32>{
-    let mut v = vec;
-    for i in 0..vec.len() {
-        if v[i] > v[i+1] {
-            v.swap(i, i+1);
-        };
-    };
-    return v;
 }
