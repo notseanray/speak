@@ -1,4 +1,4 @@
-// Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak-rust for more information.
+// Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
 #[path = "lib/utils.rs"]
 pub mod utils;
@@ -13,7 +13,10 @@ pub(crate) fn train<T: Literal>(
     let values = translate(data.values);
 
     for phrase in keys { // Number vectors (Ej: [[a, b, c, d] <- This is phrase, ···])
-        
+        println!("{:?}", phrase);
+    }
+    for phrase in values {
+        println!("{:?}", phrase);
     }
 }
 

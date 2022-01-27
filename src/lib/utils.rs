@@ -31,7 +31,7 @@ pub(crate) trait Literal {
 impl Literal for String { fn literal(&self) -> String { return String::from(self)} }
 impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
 
-pub struct Map<T> { entries: Vec<[T; 2]> }
+pub struct Map<T> { entries: Vec<(T, T)> }
 pub(crate) struct Deconstructed<T: Literal> { pub keys: Vec<T>, pub values: Vec<T> }
 
 // Creates a new map
@@ -41,9 +41,9 @@ pub(self) fn __new__<T: Literal>() -> Map<T> { return Map { entries: Vec::new() 
 // Creates a new map with the given entries
 
 pub(self) fn __from__<T: Literal>(vec1: Vec<T>, vec2: Vec<T>) -> Map<String> {
-    let mut entries: Vec<[String; 2]> = Vec::new();
+    let mut entries: Vec<(String, String)> = Vec::new();
     for i in 0..vec1.len() {
-        entries.push([vec1[i].literal().clone(), vec2[i].literal().clone()]);
+        entries.push((vec1[i].literal().clone(), vec2[i].literal().clone()));
     }
     return Map { entries }; }
 
@@ -52,8 +52,8 @@ pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
     let mut values: Vec<String> = Vec::new();
 
     for x in 0..map.entries.len() {
-        if x % 2 == 0 { keys.push(map.entries[x][0].literal()); }
-        else { values.push(map.entries[x][1].literal()); }
+        if x % 2 == 0 { keys.push(map.entries[x].0.literal()); }
+        else { values.push(map.entries[x].1.literal()); }
     };
 
     return Deconstructed { keys, values };
