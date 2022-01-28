@@ -47,6 +47,8 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     }
     return Map { entries }; }
 
+// Deconstructs a map into a Deconstructed struct (two vectors of strings, keys & values)
+
 pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
     let mut keys: Vec<String> = Vec::new();
     let mut values: Vec<String> = Vec::new();
@@ -54,11 +56,7 @@ pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
     for (key, value) in map.entries.iter() {
         keys.push(key.literal());
         values.push(value.literal());
-    }
-
-
-    println!("#{:?}", keys);
-    println!("-{:?}", values);
+    };
 
     return Deconstructed { keys, values };
 }
