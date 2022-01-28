@@ -40,12 +40,19 @@ pub(self) fn __new__<T: Literal>() -> Map<T> { return Map { entries: Vec::new() 
 
 // Creates a new map with the given entries
 
-pub(self) fn __from__<T: Literal>(vec1: Vec<T>, vec2: Vec<T>) -> Map<String> {
+pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     let mut entries: Vec<(String, String)> = Vec::new();
-    for i in 0..vec1.len() {
-        entries.push((vec1[i].literal().clone(), vec2[i].literal().clone()));
+    for i in 0..vec.len() - 1 {
+        entries.push((vec[i].0.literal(), vec[i + 1].0.literal()));
     }
     return Map { entries }; }
+
+// TODO NOT TESTED!! I'LL TEST IT LATER
+pub(self) fn __insert__<T: Literal>(map: &mut Map<T>, index: usize, tuple: (T, T)) -> Map<T> {
+    std::mem::replace(map.entries[index], tuple);
+    return map;
+}
+
 
 pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
     let mut keys: Vec<String> = Vec::new();
@@ -64,7 +71,13 @@ macro_rules! impl_map {
         $(
             impl Map<$T> {
                 pub fn new() -> Map<$T> { return __new__::<$T>(); }
-                pub fn from(vec1: Vec<$T>, vec2: Vec<$T>) -> Map<String> { return __from__::<$T>(vec1, vec2); }
+                pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
+
+                // TODO NOT TESTED!! I'LL TEST IT LATER
+                pub fn push(&mut self, to_push: ($T, $T)) -> Map<$T> {
+                    self.entries.push(to_push);
+                    return self;
+                }
             }
         )*
     };
