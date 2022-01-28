@@ -42,8 +42,8 @@ pub(self) fn __new__<T: Literal>() -> Map<T> { return Map { entries: Vec::new() 
 
 pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     let mut entries: Vec<(String, String)> = Vec::new();
-    for i in 0..vec.len() - 1 {
-        entries.push((vec[i].0.literal(), vec[i + 1].0.literal()));
+    for (key, value) in vec {
+        entries.push((key.literal(), value.literal()));
     }
     return Map { entries }; }
 
