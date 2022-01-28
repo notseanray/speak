@@ -8,7 +8,7 @@ Speak doesn't use other crates, and itself is very lightweight, so it wont slow 
 
 <h1 align=center>Features</h1>
 
-* The Rust file is very small, less than 4 KB, while being easy to understand, so you can even customize the engine for your purposes. (I recommend trying to customize the main function before modifying the engine for yourself.)
+* The Rust file is very small, while being easy to understand, so you can even customize the engine for your purposes. (I recommend trying to customize the main function before modifying the engine for yourself.)
 
 * A lot of customization and dynamic range, there is practically no limit, even with the default settings. (Unless you want to make a +131k index map, then you'll need to change like 10 characters)
 
