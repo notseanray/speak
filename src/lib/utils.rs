@@ -6,14 +6,14 @@
 
 pub struct Config {
     pub multiplier: u32,
-    pub threshold:  f32,
-    pub memory:     i32
+    pub threshold: f32,
+    pub memory: i32
 }
 
 pub static CONFIG: Config = Config {
     multiplier: 1
     ,threshold: 0.1
-    ,memory:    1
+    ,memory: 1
 };
 
 // * /////////////////////////////
@@ -22,7 +22,7 @@ pub static CONFIG: Config = Config {
 
 // A map only allows these types: String, &str
 
-pub(crate) trait Literal {
+pub trait Literal {
     fn literal(&self) -> String;
 }
 
@@ -31,7 +31,7 @@ pub(crate) trait Literal {
 impl Literal for String { fn literal(&self) -> String { return String::from(self)} }
 impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
 
-pub struct Map<T> { entries: Vec<(T, T)> }
+pub struct Map<T: Literal> { pub entries: Vec<(T, T)> }
 pub(crate) struct Deconstructed<T: Literal> { pub keys: Vec<T>, pub values: Vec<T> }
 
 // Creates a new map
@@ -47,21 +47,18 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     }
     return Map { entries }; }
 
-// TODO NOT TESTED!! I'LL TEST IT LATER
-pub(self) fn __insert__<T: Literal>(map: &mut Map<T>, index: usize, tuple: (T, T)) -> Map<T> {
-    std::mem::replace(map.entries[index], tuple);
-    return map;
-}
-
-
 pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
     let mut keys: Vec<String> = Vec::new();
     let mut values: Vec<String> = Vec::new();
 
-    for x in 0..map.entries.len() {
-        if x % 2 == 0 { keys.push(map.entries[x].0.literal()); }
-        else { values.push(map.entries[x].1.literal()); }
-    };
+    for (key, value) in map.entries.iter() {
+        keys.push(key.literal());
+        values.push(value.literal());
+    }
+
+
+    println!("#{:?}", keys);
+    println!("-{:?}", values);
 
     return Deconstructed { keys, values };
 }
@@ -74,8 +71,13 @@ macro_rules! impl_map {
                 pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
 
                 // TODO NOT TESTED!! I'LL TEST IT LATER
-                pub fn push(&mut self, to_push: ($T, $T)) -> Map<$T> {
+                pub fn push(mut self, to_push: ($T, $T)) -> Map<$T> {
                     self.entries.push(to_push);
+                    return self;
+                }
+
+                pub fn insert(mut self, index: usize, to_insert: ($T, $T)) -> Map<$T> {
+                    self.entries.insert(index, to_insert);
                     return self;
                 }
             }

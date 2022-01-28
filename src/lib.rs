@@ -7,13 +7,12 @@ pub use utils::*;
 pub(crate) fn train<T: Literal>(
     rawdata: Map<T>,
     config: &Config // I recommend using the default config: utils::CONFIG
-) where T: Literal {
-    /*let data: Deconstructed<String> = deconstruct(rawdata);
-    let keys = translate(data.keys);
-    let values = translate(data.values);*/
+) {
+    //let keys = translate(data.keys);
+    //let values = translate(data.values);
 
-    for (key, value) in rawdata {
-        
+    for tuple in rawdata.entries {
+        println!("{}", tuple.0.literal());
+        println!("{}", tuple.1.literal());
     }
-
 }
