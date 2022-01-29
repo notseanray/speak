@@ -7,7 +7,7 @@
 pub struct Config {
     pub multiplier: u32,
     pub threshold: f32,
-    pub memory: i32
+    pub memory: usize
 }
 
 pub static CONFIG: Config = Config {
@@ -91,7 +91,7 @@ impl_map!(T, U);
 // I'm so proud of this thing.
 
 // * /////////////////////////////
-// ^ MISC. ///////////////////////
+// ^ For the algorithm. //////////
 // * ////////////////////////////
 
 pub(crate) fn translate<L: Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
@@ -111,4 +111,12 @@ pub(crate) fn translate<L: Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
         ram.clear();
     };
         return result;
+}
+
+pub(crate) fn sum(vec: &Vec<u32>) -> u32 {
+    let mut sum: u32 = 0;
+    for i in vec {
+        sum += i;
+    };
+    return sum;
 }

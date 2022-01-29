@@ -4,7 +4,7 @@
 pub mod utils;
 pub use utils::*;
 
-pub(crate) fn train<T: Literal>(
+pub fn train<T: Literal>(
     rawdata: Map<T>,
     config: &Config // I recommend using the default config: utils::CONFIG
 ) {
@@ -16,5 +16,18 @@ pub(crate) fn train<T: Literal>(
     Ok, now we have all we need to train our model.
     keys: a list of all the TRANSLATED keys in the data
     values: a list of all the TRANSLATED values in the data
+    */
+
+    let mut mega: Vec<u32> = Vec::new();
+    println!("{:?}", keys);
+
+    /*
+    for key in keys {
+        for i in 0..key.len() {
+            if i > config.memory {
+
+            }
+        }
+    }
     */
 }
