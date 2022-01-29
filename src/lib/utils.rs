@@ -44,7 +44,7 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     let mut entries: Vec<(String, String)> = Vec::new();
     for (key, value) in vec {
         entries.push((key.literal(), value.literal()));
-    }
+    };
     return Map { entries }; }
 
 // Deconstructs a map into a Deconstructed struct (two vectors of strings, keys & values)

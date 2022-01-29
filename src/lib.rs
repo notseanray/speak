@@ -10,7 +10,7 @@ pub fn train<T: Literal>(
 ) {
     let data: Deconstructed<String> = deconstruct(rawdata);
     let keys = translate(data.keys);
-    let values = translate(data.values);
+    //let values = translate(data.values);
 
     /*
     Ok, now we have all we need to train our model.
@@ -19,17 +19,15 @@ pub fn train<T: Literal>(
     */
 
     let mut mega: Vec<u32> = Vec::new();
-    println!("{:?}", keys);
+    println!("{:?}\t-\t{}", keys, keys.len());
 
-    let mut m: usize;
+    let mut from: usize;
     for key in keys {
-        for i in 0..key.len() {
-            m = if i > config.memory { config.memory - i } else { config.memory };
-            if i > config.memory {
-                m = config.memory - i;
-            }
-
-            mega.push(sum(&key[i - m .. i].to_vec()));
-        }
+        for i in 0..key.len(){
+            from = if i < config.memory { 0 } else { i - config.memory };
+                println!("{:?} = {}", key[from .. i + 1].to_vec(), sum(&key[from .. i + 1].to_vec()));
+                mega.push(sum(&key[from .. i + 1].to_vec()));
+        };
     }
+    println!("{:?}", mega);
 }
