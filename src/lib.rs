@@ -21,13 +21,15 @@ pub fn train<T: Literal>(
     let mut mega: Vec<u32> = Vec::new();
     println!("{:?}", keys);
 
-    /*
+    let mut m: usize;
     for key in keys {
         for i in 0..key.len() {
+            m = if i > config.memory { config.memory - i } else { config.memory };
             if i > config.memory {
-
+                m = config.memory - i;
             }
+
+            mega.push(sum(&key[i - m .. i].to_vec()));
         }
     }
-    */
 }
