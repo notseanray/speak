@@ -19,7 +19,7 @@ pub fn train<T: Literal>(
     */
 
     let mut mega: Vec<f32> = Vec::new();
-    println!("{:?}\t-\t{}", keys, keys.len());
+    // println!("{:?}\t-\t{}", keys, keys.len());
 
     let mut from_i: usize;
     let mut from_x: usize;
@@ -30,7 +30,7 @@ pub fn train<T: Literal>(
             for value in &values {
                 for x in 0..value.len() {
                     from_x = if x < config.memory { 0 } else { x - config.memory };
-                    println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
+                    // println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
 
                     mega.push(sum(&key[from_i .. i + 1].to_vec()) / sum(&value[from_x .. x + 1].to_vec()));
                 };
@@ -38,4 +38,12 @@ pub fn train<T: Literal>(
         };
     };
     return mega;
+}
+
+pub fn run(
+    trained: Vec<f32>,
+    config: &Config
+) -> String {
+    let mut result: String = String::new();
+    return result;
 }
