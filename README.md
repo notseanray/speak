@@ -1,3 +1,4 @@
+<h6>Currently Speak is in development, please don't use it, it won't work</h6>
 <h1 align=center>Speak</h1>
 
 **Speak** is a simple, easy to use Natural Language Processor (NLP) written in Rust.
