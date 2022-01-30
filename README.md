@@ -21,8 +21,6 @@ Speak doesn't use other crates, and itself is very lightweight, so it wont slow 
 <h1 align=center>Status</h1>
 Please, do not try to use Speak yet, I'm working every day to make this happend.
 
-In less than one week I'll deploy an usable version. But I need to create the rest of the algorithm, from scratch. With 0 inspiration.
-
 <h1 align=center>Setup</h1>
 Currently Speak is not published, and is in Beta, please don't use it.
 
