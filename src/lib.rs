@@ -56,8 +56,19 @@ pub fn run(
     config: &Config
 ) -> String {
     let mut result: String = String::new();
-    let input = translate(rawinput.split_whitespace().collect());
-
-    
+// * /////////////////////////////
+// ^ Translate input /////////
+// * ////////////////////////////    
+    let mut input: Vec<f32> = Vec::new();
+    {
+        let mut sum: f32;
+        for word in rawinput.split_whitespace() {
+            sum = 0.0;
+            for c in word.chars() {
+                sum += (config.multiplier * c as u32) as f32;
+            };
+            input.push(sum);
+        };
+    };
     return result;
 }
