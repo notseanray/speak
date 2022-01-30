@@ -120,3 +120,7 @@ pub(crate) fn sum(vec: &Vec<u32>) -> f32 {
     };
     return sum as f32;
 }
+
+pub(crate) fn addword(str: String, part: String) -> String {
+    return format!("{} {}", str, part);
+}

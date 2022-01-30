@@ -26,13 +26,23 @@ pub fn train<T: Literal>(
 
     for key in keys {
         for i in 0..key.len(){
-            from_i = if i < config.memory { 0 } else { i - config.memory };
+            from_i =
+            
+            if i < config.memory { 0 }
+            else { i - config.memory };
+            
             for value in &values {
                 for x in 0..value.len() {
-                    from_x = if x < config.memory { 0 } else { x - config.memory };
-                    // println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
+                    from_x =
 
-                    mega.push(sum(&key[from_i .. i + 1].to_vec()) / sum(&value[from_x .. x + 1].to_vec()));
+                    if x < config.memory { 0 }
+                    else { x - config.memory };
+
+                    //println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
+
+                    mega.push(
+                        sum(&key[from_i .. i + 1].to_vec()) / sum(&value[from_x .. x + 1].to_vec())
+                    );
                 };
             };
         };
@@ -41,9 +51,13 @@ pub fn train<T: Literal>(
 }
 
 pub fn run(
+    rawinput: String,
     trained: Vec<f32>,
     config: &Config
 ) -> String {
     let mut result: String = String::new();
+    let input = translate(rawinput.split_whitespace().collect());
+
+    
     return result;
 }
