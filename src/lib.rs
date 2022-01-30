@@ -1,5 +1,4 @@
 // Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
-
 #[path = "lib/utils.rs"]
 pub mod utils;
 pub use utils::*;
@@ -71,14 +70,14 @@ pub fn run(
         };
     };
 
+    println!("{:#?}", trained.mega);
     for word in input {
         for i in 0..trained.mega.len() {
-            if word / trained.mega[i] < config.threshold {
-
-            }
         }
     }
     //println!("++{:?}", input);
+
+    result.pop();
     println!("result = {}", result);
     return result;
 }

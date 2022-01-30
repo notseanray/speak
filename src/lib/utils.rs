@@ -12,7 +12,7 @@ pub struct Config {
 
 pub static CONFIG: Config = Config {
     multiplier: 1
-    ,threshold: 0.1
+    ,threshold: 0.3
     ,memory: 1
 };
 
@@ -122,6 +122,9 @@ pub(crate) fn sum(vec: &Vec<u32>) -> f32 {
     return sum as f32;
 }
 
-pub(crate) fn addword(str: String, part: String) -> String {
-    return format!("{} {}", str, part);
+macro_rules! addword {
+    ($str: expr, $newword: expr) => {
+        $str = format!("{} {}", $str, $newword);
+    };
 }
+pub(crate) use addword;
