@@ -33,7 +33,6 @@ impl Literal for &str { fn literal(&self) -> String { return String::from(*self)
 
 pub struct Map<T: Literal> { pub entries: Vec<(T, T)> }
 pub(crate) struct Deconstructed<T: Literal> { pub keys: Vec<T>, pub values: Vec<T> }
-pub struct TrainedData<T: Literal> { pub values: Vec<T>, pub mega: Vec<f32> } // Please don't use this struct.
 
 // Creates a new map
 
@@ -122,9 +121,10 @@ pub(crate) fn sum(vec: &Vec<u32>) -> f32 {
     return sum as f32;
 }
 
-macro_rules! addword {
-    ($str: expr, $newword: expr) => {
-        $str = format!("{} {}", $str, $newword);
+macro_rules! fromindex {
+    ($index: expr, $memory: expr) => {
+        if $index < $memory { 0 } else {$index - $memory}
     };
 }
-pub(crate) use addword;
+
+pub(crate) use fromindex;
