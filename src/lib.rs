@@ -7,10 +7,10 @@ pub use utils::*;
 pub fn train<T: Literal>(
     rawdata: Map<T>,
     config: &Config // I recommend using the default config: utils::CONFIG
-) -> Vec<f32> {
+) -> TrainedData<String> {
     let data: Deconstructed<String> = deconstruct(rawdata);
-    let keys = translate(data.keys);
-    let values = translate(data.values);
+    let keys = translate(&data.keys);
+    let values = translate(&data.values);
 
     /*
     Ok, now we have all we need to train our model.
@@ -47,18 +47,18 @@ pub fn train<T: Literal>(
             };
         };
     };
-    return mega;
+    return TrainedData { values: data.values, mega: mega};
 }
 
 pub fn run(
     rawinput: String,
-    trained: Vec<f32>,
+    trained: TrainedData<String>,
     config: &Config
 ) -> String {
     let mut result: String = String::new();
 // * /////////////////////////////
-// ^ Translate input /////////
-// * ////////////////////////////    
+// ^ Translate input ////////////
+// * ////////////////////////////
     let mut input: Vec<f32> = Vec::new();
     {
         let mut sum: f32;
@@ -70,5 +70,15 @@ pub fn run(
             input.push(sum);
         };
     };
+
+    for word in input {
+        for i in 0..trained.mega.len() {
+            if word / trained.mega[i] < config.threshold {
+
+            }
+        }
+    }
+    //println!("++{:?}", input);
+    println!("result = {}", result);
     return result;
 }

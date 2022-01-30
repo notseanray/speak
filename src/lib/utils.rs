@@ -33,6 +33,7 @@ impl Literal for &str { fn literal(&self) -> String { return String::from(*self)
 
 pub struct Map<T: Literal> { pub entries: Vec<(T, T)> }
 pub(crate) struct Deconstructed<T: Literal> { pub keys: Vec<T>, pub values: Vec<T> }
+pub struct TrainedData<T: Literal> { pub values: Vec<T>, pub mega: Vec<f32> } // Please don't use this struct.
 
 // Creates a new map
 
@@ -94,7 +95,7 @@ impl_map!(T, U);
 // ^ For the algorithm. //////////
 // * ////////////////////////////
 
-pub(crate) fn translate<L: Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
+pub(crate) fn translate<L: Literal>(vec: &Vec<L>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
     let mut result: Vec<Vec<u32>> = Vec::new();
     let mut sum: u32 = 0;
