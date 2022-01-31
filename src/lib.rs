@@ -1,7 +1,7 @@
 // Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 #[path = "lib/utils.rs"]
 pub(crate) mod utils;
-pub(crate) use utils::*;
+pub(crate) use utils;
 
 pub struct Config {
     pub multiplier: u32,
@@ -66,7 +66,6 @@ macro_rules! impl_map {
                 pub fn new() -> Map<$T> { return __new__::<$T>(); }
                 pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
 
-                // TODO NOT TESTED!! I'LL TEST IT LATER
                 pub fn push(mut self, to_push: ($T, $T)) -> Map<$T> {
                     self.entries.push(to_push);
                     return self;
@@ -96,15 +95,17 @@ pub(crate) use fromindex;
 
 // * /////////////////////////////
 // ^ For the algorithm. //////////
-// * ////////////////////////////
+// * /////////////////////////////
+
+// * /////////////////////////////
+// ^ Training. ///////////////////
+// * /////////////////////////////
 
 pub fn train<T: Literal>(
     rawdata: Map<T>,
     config: &Config // I recommend using the default config: utils::CONFIG
 ) -> (
-    Deconstructed<Vec<u32>>, // Keys & Values
-    Vec<String>, // Raw Values
-    Vec<f32> // Mega
+    Translated<String>
 ) {
     let data: Deconstructed<String> = deconstruct(rawdata);
     let keys = translate(&data.keys);
@@ -123,14 +124,14 @@ pub fn train<T: Literal>(
     let mut from_x: usize;
 
     for key in &keys {
-        for i in 0..key.len(){
+        for i in 0..key.len(){ 
             from_i = fromindex!(i, config.memory);
             
             for value in &values {
                 for x in 0..value.len() {
                     from_x = fromindex!(x, config.memory);
 
-                    //println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
+                    println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
 
                     mega.push(
                         sum(&key[from_i .. i].to_vec()) / sum(&value[from_x .. x].to_vec())
@@ -139,8 +140,24 @@ pub fn train<T: Literal>(
             };
         };
     };
-    return (Deconstructed::<Vec<u32>> {
-        keys,
-        values
-    }, data.values, mega);
+    return Translated {
+        Deconstructed::<Vec<u32>> {
+            keys,
+            values
+        },
+        data.values,
+        mega
+    };
+}
+
+// * /////////////////////////////
+// ^ Running /////////////////////
+// * /////////////////////////////
+
+pub fn run(
+    input: String,
+    model: Translated<String>,
+    config: &Config
+) {
+
 }

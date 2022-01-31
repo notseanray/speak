@@ -9,6 +9,8 @@ use lib::*;
 
 pub struct Deconstructed<T> { pub keys: Vec<T>, pub values: Vec<T> }
 
+pub(crate) struct Translated<T> { pub dec: Deconstructed<T>, pub values: Vec<String>, pub mega: Vec<f32>}
+
 // I'm so proud of this thing.
 
 // * /////////////////////////////
