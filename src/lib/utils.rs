@@ -1,92 +1,13 @@
 #![allow(dead_code, unused_variables)]
+#[path = "../lib.rs"]
+mod lib;
+use lib::*;
 
 // * /////////////////////////////
 // ^ CONFIG //////////////////////
 // * /////////////////////////////
 
-pub struct Config {
-    pub multiplier: u32,
-    pub threshold: f32,
-    pub memory: usize
-}
-
-pub static CONFIG: Config = Config {
-    multiplier: 1
-    ,threshold: 0.3
-    ,memory: 1
-};
-
-// * /////////////////////////////
-// ^ Maps ////////////////////////
-// * /////////////////////////////
-
-// A map only allows these types: String, &str
-
-pub trait Literal {
-    fn literal(&self) -> String;
-}
-
-// Using the .literal() method on a string or &str returns the String.
-
-impl Literal for String { fn literal(&self) -> String { return String::from(self)} }
-impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
-
-pub struct Map<T: Literal> { pub entries: Vec<(T, T)> }
-pub(crate) struct Deconstructed<T: Literal> { pub keys: Vec<T>, pub values: Vec<T> }
-
-// Creates a new map
-
-pub(self) fn __new__<T: Literal>() -> Map<T> { return Map { entries: Vec::new() } }
-
-// Creates a new map with the given entries
-
-pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
-    let mut entries: Vec<(String, String)> = Vec::new();
-    for (key, value) in vec {
-        entries.push((key.literal(), value.literal()));
-    };
-    return Map { entries }; }
-
-// Deconstructs a map into a Deconstructed struct (two vectors of strings, keys & values)
-
-pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
-    let mut keys: Vec<String> = Vec::new();
-    let mut values: Vec<String> = Vec::new();
-
-    for (key, value) in map.entries.iter() {
-        keys.push(key.literal());
-        values.push(value.literal());
-    };
-
-    return Deconstructed { keys, values };
-}
-
-macro_rules! impl_map {
-    ($($T: path),*) => {
-        $(
-            impl Map<$T> {
-                pub fn new() -> Map<$T> { return __new__::<$T>(); }
-                pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
-
-                // TODO NOT TESTED!! I'LL TEST IT LATER
-                pub fn push(mut self, to_push: ($T, $T)) -> Map<$T> {
-                    self.entries.push(to_push);
-                    return self;
-                }
-
-                pub fn insert(mut self, index: usize, to_insert: ($T, $T)) -> Map<$T> {
-                    self.entries.insert(index, to_insert);
-                    return self;
-                }
-            }
-        )*
-    };
-}
-
-type T = String;
-type U = &'static str; 
-
-impl_map!(T, U);
+pub struct Deconstructed<T> { pub keys: Vec<T>, pub values: Vec<T> }
 
 // I'm so proud of this thing.
 
@@ -94,7 +15,7 @@ impl_map!(T, U);
 // ^ For the algorithm. //////////
 // * ////////////////////////////
 
-pub(crate) fn translate<L: Literal>(vec: &Vec<L>) -> Vec<Vec<u32>> {
+pub(crate) fn translate<L: lib::Literal>(vec: &Vec<L>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
     let mut result: Vec<Vec<u32>> = Vec::new();
     let mut sum: u32 = 0;
@@ -120,11 +41,3 @@ pub(crate) fn sum(vec: &Vec<u32>) -> f32 {
     };
     return sum as f32;
 }
-
-macro_rules! fromindex {
-    ($index: expr, $memory: expr) => {
-        if $index < $memory { 0 } else {$index - $memory}
-    };
-}
-
-pub(crate) use fromindex;
