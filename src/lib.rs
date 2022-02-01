@@ -85,14 +85,6 @@ type U = &'static str;
 
 impl_map!(T, U);
 
-macro_rules! fromindex {
-    ($index: expr, $memory: expr) => {
-        if $index < $memory { 0 } else {$index - $memory}
-    };
-}
-
-pub(crate) use fromindex;
-
 // * /////////////////////////////
 // ^ For the algorithm. //////////
 // * /////////////////////////////
@@ -103,61 +95,14 @@ pub(crate) use fromindex;
 
 pub fn train<T: Literal>(
     rawdata: Map<T>,
-    config: &Config // I recommend using the default config: utils::CONFIG
-) -> (
-    Translated<String>
-) {
-    let data: Deconstructed<String> = deconstruct(rawdata);
-    let keys = translate(&data.keys);
-    let values = translate(&data.values);
-
-    /*
-    Ok, now we have all we need to train our model.
-    keys: a list of all the TRANSLATED keys in the data
-    values: a list of all the TRANSLATED values in the data
-    */
-
-    let mut mega: Vec<f32> = Vec::new();
-    // println!("{:?}\t-\t{}", keys, keys.len());
-
-    let mut from_i: usize;
-    let mut from_x: usize;
-
-    for key in &keys {
-        for i in 0..key.len(){ 
-            from_i = fromindex!(i, config.memory);
-            
-            for value in &values {
-                for x in 0..value.len() {
-                    from_x = fromindex!(x, config.memory);
-
-                    println!("――――――\n{:?} = {}", key[from_i .. i + 1].to_vec(), sum(&key[from_i .. i + 1].to_vec()));
-
-                    mega.push(
-                        sum(&key[from_i .. i].to_vec()) / sum(&value[from_x .. x].to_vec())
-                    );
-                };
-            };
-        };
+) -> Translated<String> {
+    let data: Deconstruct<u32>;
+    {
+    let _data: Deconstructed<String> = deconstruct(rawdata);
+    data.keys = translate(_data.keys);
+    data.values = translate(_data.values);
     };
-    return Translated {
-        Deconstructed::<Vec<u32>> {
-            keys,
-            values
-        },
-        data.values,
-        mega
-    };
-}
-
-// * /////////////////////////////
-// ^ Running /////////////////////
-// * /////////////////////////////
-
-pub fn run(
-    input: String,
-    model: Translated<String>,
-    config: &Config
-) {
-
+    for (key, value) in data {
+        
+    }
 }
