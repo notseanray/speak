@@ -1,8 +1,6 @@
 // Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 #[path = "lib/utils.rs"]
 pub(crate) mod utils;
-pub(crate) use utils;
-
 pub struct Config {
     pub multiplier: u32,
     pub threshold: f32,
@@ -89,20 +87,10 @@ impl_map!(T, U);
 // ^ For the algorithm. //////////
 // * /////////////////////////////
 
-// * /////////////////////////////
-// ^ Training. ///////////////////
-// * /////////////////////////////
+#[path = "lib/mainfunctions/train.rs"]
+pub mod train;
+pub use train::*;
 
-pub fn train<T: Literal>(
-    rawdata: Map<T>,
-) -> Translated<String> {
-    let data: Deconstruct<u32>;
-    {
-    let _data: Deconstructed<String> = deconstruct(rawdata);
-    data.keys = translate(_data.keys);
-    data.values = translate(_data.values);
-    };
-    for (key, value) in data {
-        
-    }
-}
+#[path = "lib/mainfunctions/run.rs"]
+pub mod run;
+pub use run::*;
