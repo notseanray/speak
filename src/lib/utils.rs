@@ -4,6 +4,11 @@
 // * /////////////////////////////
 
 pub struct Deconstructed<T> { pub keys: Vec<T>, pub values: Vec<T> }
+impl<T> Deconstructed<T> {
+    pub fn new() -> Deconstructed<T> {
+        Deconstructed { keys: Vec::new(), values: Vec::new() }
+    }
+}
 
 pub(crate) struct Translated<T> { pub dec: Deconstructed<T>, pub values: Vec<String>, pub mega: Vec<f32>}
 
@@ -19,7 +24,7 @@ pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
     let mut sum: u32 = 0;
     for word in vec {
         let word = word.literal();
-        for (i, word) in word.split_whitespace().enumerate() {
+        for word in word.split_whitespace() {
             for c in word.chars() {
                 sum += crate::CONFIG.multiplier * c as u32;
             };
