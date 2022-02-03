@@ -37,7 +37,7 @@ pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
         return result;
 }
 
-pub(crate) fn sum(vec: &Vec<u32>) -> f32 {
+pub(crate) fn sum(vec: Vec<u32>) -> f32 {
     let mut sum: u32 = 0;
     for i in vec {
         sum += i;

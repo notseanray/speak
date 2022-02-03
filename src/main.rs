@@ -6,5 +6,6 @@ fn main() {
         ("Quien eres", "Me llamo Alex")
     ]);
     //run(input, train(map, &utils::CONFIG), &lib::utils::CONFIG);
-    train(map);
+    // Split_whitespace and collect into vector
+    println!("{:#?}", utils::chunks(vec![2343, 325, 3421, 4565, 1244, 2465]));
 }

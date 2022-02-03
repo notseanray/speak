@@ -21,13 +21,13 @@ pub fn train<T: Literal>(rawdata: Map<T>) {
     // Data.1 - Length
 
     // * ////////////////////////////////////
-    // ^ // Training! ///////////////////////f
+    // ^ // Spliting into chunks ////////////
     // * ////////////////////////////////////
-    println!("{:?}", data);
-    let mut kl: usize = 0; // Current Key length
-    let mut kv: usize = 0; // Current Value length
-    for (key, value) in data {
-        kv = key.len();
-    }
 
+    let mut chunks: Vec<(Vec<Vec<u32>>, Vec<Vec<u32>>)> = Vec::new();
+    let mut i: usize = 0;
+
+    let mut ram: Vec<u32> = Vec::new();
+    for (key, value) in data {
+    }
 }
