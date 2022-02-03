@@ -1,6 +1,6 @@
 /target
 Cargo.lock
-main*
+ignore*
 .exe
 .pdb
 .vscode
