@@ -1,5 +1,6 @@
-use crate::*;
+use crate::{Literal, Map, Deconstructed, deconstruct, translate, utils};
 pub fn train<T: Literal>(rawdata: Map<T>) {
+    let memory: usize = crate::CONFIG.memory;
     // * ////////////////////////////////////
     // ^ // Deconstructing & Translating ///
     // * ////////////////////////////////////Minor changes
@@ -19,15 +20,29 @@ pub fn train<T: Literal>(rawdata: Map<T>) {
 
     // Data.0 - Vec<(Keys, Values)>
     // Data.1 - Length
-
-    // * ////////////////////////////////////
-    // ^ // Spliting into chunks ////////////
-    // * ////////////////////////////////////
-
-    let mut chunks: Vec<(Vec<Vec<u32>>, Vec<Vec<u32>>)> = Vec::new();
-    let mut i: usize = 0;
-
-    let mut ram: Vec<u32> = Vec::new();
     for (key, value) in data {
-    }
+        
+        // * ////////////////////////////////////
+        // ^ // Keys ////////////////////////////
+        // * ////////////////////////////////////
+        
+        let mut ram: Vec<f32> = Vec::new();
+{
+        for i in 0..key.len() {
+            if i % memory == 0 || i == key.len() {
+                ram.push(utils::sum(key[i - memory .. i].to_vec()));
+            }
+        };
+}
+// Clearing ownerships.
+
+        // * ////////////////////////////////////
+        // ^ // Values //////////////////////////
+        // * ////////////////////////////////////
+
+{
+
+}
+
+    };
 }
