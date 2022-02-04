@@ -1,5 +1,5 @@
 ###### Currently Speak is in early development, it wont execute correctly
-# Speak
+<h1 align=center> Speak </h1>
 Speak is a Natural Language Processor Bot / Conversational Bot written in Rust (But with plans to expand to other languages).<br>
 Speak is the tool to use if you want to:
 
@@ -8,15 +8,18 @@ Speak is the tool to use if you want to:
 * Experiment.
 
 ---
-## ⚙️ Installation
+<h2 align=center> ⚙️ Installation </h2>
 
 Currently **Speak isn't published**.
 
-## 💻 Usage
+<h2 align=center> 💻 Usage </h2>
 
 Using Speak is very simple, because you just need to know about two functions and a struct. (Being public ***just*** the necessary interface you'll use.)
 
-**1.&nbsp;&nbsp;`Map<T>`:**
+<h3 align=center>
+
+`Map<T>`:
+</h3>
 
 This struct is like a `HashMap`, but with just the necessary functions to create and modify the struct.
 
@@ -31,7 +34,11 @@ let map = Map::<&str>::from(vec![
 ]);
 ```
 
-**2.&nbsp;&nbsp;`train(Map<T>)`:**
+<h3 align=center> 
+
+`train(Map<T>)`: 
+
+</h3>
 
 The `train(Map<T>)` takes **1** argument, `Map<T>`, this function **returns a Vec<Vec<u32>>**, this numbers will not make sense for human, that's why we need the `run` function to interpret it, figure out a sentence based on the input and return it!.
 
@@ -45,7 +52,11 @@ let map: Map::<&str>::from(vec![
 let trainedData: Vec<Vec<u32>> = train(map);
 ```
 
-**3.&nbsp;&nbsp;`run(String, Vec<Vec<u32>>)`**
+<h3 align=center>
+
+`run(String, Vec<Vec<u32>>)`
+
+</h3>
 
 The `run(String, Vec<Vec<u32>>)` function creates a sentence based on the Map you gave it.
 
@@ -66,7 +77,7 @@ let result: String = run(input, trainedData);
 println!("{}", result);
 ```
 
-## ⚖️ License & Credits
+<h2 align=center> ⚖️ License & Credits</h2>
 
 Speak uses the [GPL-2.0 License](https://github.com/SpeakML/speak/blob/current/LICENSE/)
 
