@@ -1,4 +1,4 @@
-###### Currently Speak is in early development, it wont execute correctly
+###### Currently Speak is in early development, it wont execute correctly, it isn't even with all functions.
 <h1 align=center> Speak </h1>
 Speak is a Natural Language Processor Bot / Conversational Bot written in Rust (But with plans to expand to other languages).<br>
 Speak is the tool to use if you want to:
