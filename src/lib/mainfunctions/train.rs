@@ -1,9 +1,21 @@
-use crate::{Literal, Map, Deconstructed, deconstruct, translate, utils};
-pub fn train<T: Literal>(rawdata: Map<T>) {
-    let memory: usize = crate::CONFIG.memory;
+use crate::*;
+
+#[macro_use]
+macro_rules! train {
+    (rawdata: expr) => {
+        __train__(rawdata, CONFIG);
+    };
+    (rawdata: expr, config: expr) => {
+        __train__(rawdata, config)
+    }
+}
+
+fn __train__<T: Literal>(rawdata: Map<T>, config: Config) {
+    let memory: usize = CONFIG.memory;
+    let mut mega: Vec<Vec<f32>> = Vec::new();
     // * ////////////////////////////////////
-    // ^ // Deconstructing & Translating ///
-    // * ////////////////////////////////////Minor changes
+    // ^ // Deconstructing & Translating ////
+    // * ////////////////////////////////////
     
     let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
     {
@@ -21,28 +33,27 @@ pub fn train<T: Literal>(rawdata: Map<T>) {
     // Data.0 - Vec<(Keys, Values)>
     // Data.1 - Length
     for (key, value) in data {
-        
+        println!("-{:?}", key);
         // * ////////////////////////////////////
         // ^ // Keys ////////////////////////////
         // * ////////////////////////////////////
-        
-        let mut ram: Vec<f32> = Vec::new();
-{
-        for i in 0..key.len() {
-            if i % memory == 0 || i == key.len() {
-                ram.push(utils::sum(key[i - memory .. i].to_vec()));
-            }
-        };
-}
-// Clearing ownerships.
 
+        let mut ram: Vec<f32> = Vec::new();
+
+        if memory > key.len() {
+            println!("No")
+        } else {
+            for ki in 0..key.len() {
+                for vi in 0..value.len() {
+                    //ram.push(utils::sum(key[]));
+                }
+            }
+        }
+        
         // * ////////////////////////////////////
         // ^ // Values //////////////////////////
         // * ////////////////////////////////////
 
-{
-
-}
-
+        println!("{:?}", mega);
     };
 }
