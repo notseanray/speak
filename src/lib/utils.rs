@@ -3,7 +3,10 @@
 // ^ CONFIG //////////////////////
 // * /////////////////////////////
 
-pub struct Deconstructed<T> { pub keys: Vec<T>, pub values: Vec<T> }
+pub struct Deconstructed<T> {    
+    pub keys: Vec<T>,
+    pub values: Vec<T>
+}
 impl<T> Deconstructed<T> {
     pub fn new() -> Deconstructed<T> {
         Deconstructed { keys: Vec::new(), values: Vec::new() }

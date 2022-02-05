@@ -1,16 +1,17 @@
 use crate::*;
-
-#[macro_use]
-macro_rules! train {
-    (rawdata: expr) => {
-        __train__(rawdata, CONFIG);
+pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<Config>) {
+    /// Holds
+    match config {
+        Some(x) => {
+            __train__::<T>(rawdata, &x);
+        },
+        None => {
+            __train__::<T>(rawdata, &crate::CONFIG);
+        }
     };
-    (rawdata: expr, config: expr) => {
-        __train__(rawdata, config)
-    }
 }
 
-fn __train__<T: Literal>(rawdata: Map<T>, config: Config) {
+fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
     let memory: usize = CONFIG.memory;
     let mut mega: Vec<Vec<f32>> = Vec::new();
     // * ////////////////////////////////////
