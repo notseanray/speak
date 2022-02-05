@@ -1,5 +1,8 @@
 // Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
+#![crate_type = "lib"]
+#![crate_name = "speak"]
+
 #![allow(dead_code)]
 #[path = "lib/utils.rs"]
 pub(crate) mod utils;
@@ -41,6 +44,7 @@ impl Literal for &str {
 }
 
 pub struct Map<T: Literal> {
+    /// <h1 align=center>Map</h1>
     pub entries: Vec<(T, T)>,
 }
 
