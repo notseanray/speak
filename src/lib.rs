@@ -1,4 +1,4 @@
-// Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
+//! Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
 #![crate_type = "lib"]
 #![crate_name = "speak"]

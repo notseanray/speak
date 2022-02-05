@@ -1,6 +1,5 @@
 use crate::*;
 pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<Config>) {
-    /// Holds
     match config {
         Some(x) => {
             __train__::<T>(rawdata, &x);
