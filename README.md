@@ -79,6 +79,6 @@ println!("{}", result);
 
 <h2 align=center> ⚖️ License & Credits</h2>
 
-Speak uses the [GPL-2.0 License](https://github.com/SpeakML/speak/blob/current/LICENSE/)
+Speak uses the [**GNU General Public License v2.0**](https://github.com/SpeakML/speak/blob/current/LICENSE/)
 
 Currently I, [Alex G. C, aka Blyxyas](https://github.com/blyxyas), do the **100%** of this project **alone** and **just for learning and fun.**
