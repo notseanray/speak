@@ -1,16 +1,16 @@
 //! Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
-//////////////////////////////////
-//////////// CONFIG //////////////
-//////////////////////////////////
+// ^ ##################
+// &* ## Crate Config ##
+//^ ###################
 
 #![crate_type = "lib"]
 #![crate_name = "speak"]
 #![allow(dead_code)]
 
-//////////////////////////////////
-///////////// PUBLIC /////////////
-//////////////////////////////////
+// ^ ##################
+// &* ###### PUBLIC ######
+//^ ###################
 
 pub struct Config {
     pub multiplier: u32,
@@ -24,9 +24,9 @@ pub static CONFIG: Config = Config {
     memory: 1,
 };
 
-// * /////////////////////////////
-// ^ Maps ////////////////////////
-// * /////////////////////////////
+// ^ ##################
+// & ###### MAPS ######
+//^ ###################
 
 // A map only allows these types: String, &str
 
@@ -52,11 +52,42 @@ pub struct Map<T: Literal> {
     pub entries: Vec<(T, T)>,
 }
 
+// ^ ##################
+// &* ###### Train & Run ######
+//^ ###################
 
+#[path = "lib/train.rs"]
+pub(crate) mod train;
 
-//////////////////////////////////
-//////////// UTILS /////////////
-//////////////////////////////////
+// Train wrapper:
+pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<Config>) {
+    match config {
+        Some(x) => {
+            train::__train__::<T>(rawdata, &x);
+        },
+        None => {
+            train::__train__::<T>(rawdata, &crate::CONFIG);
+        }
+    };
+}
+
+#[path = "lib/run.rs"]
+pub(crate) mod run;
+
+pub fn run(input: String, trainData: Vec<Vec<u32>>, config: Option<Config>) {
+    match config {
+        Some(x) => {
+            run::__run__(input, trainData, &x);
+        },
+        None => {
+            run::__run__(input, trainData, &crate::CONFIG);
+        }
+    };
+}
+
+// ^ ##################
+// & ###### UTILS ######
+//^ ###################
 
 // Creates a new map
 

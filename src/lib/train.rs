@@ -1,16 +1,6 @@
 use crate::*;
-pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<Config>) {
-    match config {
-        Some(x) => {
-            __train__::<T>(rawdata, &x);
-        },
-        None => {
-            __train__::<T>(rawdata, &crate::CONFIG);
-        }
-    };
-}
 
-fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
+pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
     let memory: usize = CONFIG.memory;
     let mut mega: Vec<Vec<f32>> = Vec::new();
     // * ////////////////////////////////////
@@ -20,7 +10,7 @@ fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
     let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
     {
         let _data: Deconstructed<String> = deconstruct(rawdata);
-        let decdata: utils::Deconstructed<Vec<u32>> = Deconstructed::<Vec<u32>> {
+        let decdata: Deconstructed<Vec<u32>> = Deconstructed::<Vec<u32>> {
             keys: translate(_data.keys),
             values: translate(_data.values)
         };
@@ -34,9 +24,11 @@ fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
     // Data.1 - Length
     for (key, value) in data {
         println!("-{:?}", key);
-        // * ////////////////////////////////////
-        // ^ // Keys ////////////////////////////
-        // * ////////////////////////////////////
+
+// ^ ##################
+// & ###### Keys ######
+//^ ###################
+
 
         let mut ram: Vec<f32> = Vec::new();
 
@@ -50,9 +42,9 @@ fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
             }
         }
 
-        // * ////////////////////////////////////
-        // ^ // Values //////////////////////////
-        // * ////////////////////////////////////
+// ^ ##################
+// & ###### Values ######
+//^ ###################
 
         println!("{:?}", mega);
 
