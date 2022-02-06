@@ -16,7 +16,7 @@ fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
     // * ////////////////////////////////////
     // ^ // Deconstructing & Translating ////
     // * ////////////////////////////////////
-    
+
     let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
     {
         let _data: Deconstructed<String> = deconstruct(rawdata);
@@ -24,7 +24,7 @@ fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
             keys: translate(_data.keys),
             values: translate(_data.values)
         };
-        
+
         for x in 0..decdata.values.len() {
             data.push((decdata.keys[x].clone(), decdata.values[x].clone()));
         }
@@ -49,11 +49,12 @@ fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
                 }
             }
         }
-        
+
         // * ////////////////////////////////////
         // ^ // Values //////////////////////////
         // * ////////////////////////////////////
 
         println!("{:?}", mega);
+
     };
 }

@@ -1,12 +1,16 @@
 //! Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
+//////////////////////////////////
+//////////// CONFIG //////////////
+//////////////////////////////////
+
 #![crate_type = "lib"]
 #![crate_name = "speak"]
-
 #![allow(dead_code)]
-#[path = "lib/utils.rs"]
-pub(crate) mod utils;
-pub(crate) use utils::*;
+
+//////////////////////////////////
+///////////// PUBLIC /////////////
+//////////////////////////////////
 
 pub struct Config {
     pub multiplier: u32,
@@ -37,6 +41,7 @@ impl Literal for String {
         return String::from(self);
     }
 }
+
 impl Literal for &str {
     fn literal(&self) -> String {
         return String::from(*self);
@@ -44,9 +49,14 @@ impl Literal for &str {
 }
 
 pub struct Map<T: Literal> {
-    /// <h1 align=center>Map</h1>
     pub entries: Vec<(T, T)>,
 }
+
+
+
+//////////////////////////////////
+//////////// UTILS /////////////
+//////////////////////////////////
 
 // Creates a new map
 
@@ -112,15 +122,45 @@ type U = &'static str;
 
 impl_map!(T, U);
 
-// * /////////////////////////////
-// ^ For the algorithm. //////////
-// * /////////////////////////////
+pub(crate) struct Deconstructed<T> {
+    pub keys: Vec<T>,
+    pub values: Vec<T>
+}
 
+impl<T> Deconstructed<T> {
+    pub fn new() -> Deconstructed<T> {
+        Deconstructed { keys: Vec::new(), values: Vec::new() }
+    }
+}
 
-#[path = "lib/mainfunctions/train.rs"]
-pub mod train;
-pub use train::*;
+pub(crate) struct Translated<T> {
+    pub dec: Deconstructed<T>,
+    pub values: Vec<String>,
+    pub mega: Vec<f32>}
 
-#[path = "lib/mainfunctions/run.rs"]
-pub mod run;
-pub use run::*;
+pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
+    let mut ram: Vec<u32> = Vec::new();
+    let mut result: Vec<Vec<u32>> = Vec::new();
+    let mut sum: u32 = 0;
+    for word in vec {
+        let word = word.literal();
+        for word in word.split_whitespace() {
+            for c in word.chars() {
+                sum += crate::CONFIG.multiplier * c as u32;
+            };
+            ram.push(sum);
+            sum = 0;
+        };
+        result.push(ram.clone());
+        ram.clear();
+    };
+        return result;
+}
+
+pub(crate) fn sum(vec: Vec<u32>) -> f32 {
+    let mut sum: u32 = 0;
+    for i in vec {
+        sum += i;
+    };
+    return sum as f32;
+}
