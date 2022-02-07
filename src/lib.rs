@@ -167,7 +167,8 @@ impl<T> Deconstructed<T> {
 pub(crate) struct Translated<T> {
     pub dec: Deconstructed<T>,
     pub values: Vec<String>,
-    pub mega: Vec<f32>}
+    pub mega: Vec<f32>
+}
 
 pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
