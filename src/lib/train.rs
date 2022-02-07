@@ -23,30 +23,29 @@ pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, config: &Config) {
     // Data.0 - Vec<(Keys, Values)>
     // Data.1 - Length
     for (key, value) in data {
+// ^ ##################
+// & ##### GLOBAL #####
+// ^ ##################
+
         println!("-{:?}", key);
 
 // ^ ##################
 // & ###### Keys ######
-//^ ###################
+// ^ ##################
 
 
         let mut ram: Vec<f32> = Vec::new();
-
         if memory > key.len() {
             println!("No")
-        } else {
-            for ki in 0..key.len() {
-                for vi in 0..value.len() {
-                    //ram.push(utils::sum(key[]));
-                }
+        } else if memory < key.len() {
+            for i in (memory..key.len()).step_by(memory) {
+                // Algorithm
             }
         }
 
 // ^ ##################
 // & ###### Values ######
 //^ ###################
-
-        println!("{:?}", mega);
 
     };
 }
