@@ -1,4 +1,3 @@
-
 //
 // ──────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: T R A I N   F U N C T I O N : :  :   :    :     :        :          :
@@ -11,9 +10,6 @@ pub(self) use crate::{
     Literal,
 
     Map,
-
-    Config,
-    CONFIG,
 
     translate,
     sum
@@ -42,28 +38,44 @@ pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) {
     
     // Data.0 - Vec<(Keys, Values)>
     // Data.1 - Length
+
+    let mut generalmega: Vec<Vec<f32>> = Vec::new();
+    let mut ram: Vec<f32> = Vec::new();
+
     for (key, value) in data {
 
 //
 // ─── KEYS ───────────────────────────────────────────────────────────────────────
 //
 
-        let mut generalmega: Vec<Vec<f32>> = Vec::new();
-        let mut keysmega: Vec<Vec<f32>> = Vec::new();
-        let mut ram: Vec<f32> = Vec::new();
+    let mut keysmega: Vec<&Vec<f32>> = Vec::new();
 
-        if memory > key.len() {
-            println!("No")
-        } else if memory < key.len() {
-            // I thought a lot of these 5 lines 
-            for i in (memory..key.len()).step_by(memory) {
-                ram.push(sum(key[i - memory..i].to_vec()));
+    if memory > key.len() {
+        println!("NoK")
+    } else if memory < key.len() {
+
+        // I thought a lot of these 5 lines 
+        for i in (memory..key.len()).step_by(memory) {
+            ram.push(sum(key[i - memory..i].to_vec()));
+        };
+
+        if memory % key.len() != 0 {
+            // key[(key.len() - memory)..]
+                    ram.push(sum(key[(key.len() - memory ..)].to_vec()))
+                }
+                keysmega.push(&ram);
             };
-            if memory % key.len() != 0 {
-                // key[(key.len() - memory)..]
-                        ram.push(sum(key[(key.len() - memory ..)].to_vec()))
-                    }
-                    keysmega.push(ram);
-                };
+	ram.clear();
+
+//
+// Values
+//
+
+        let mut valuesmega: Vec<Vec<f32>> = Vec::new();
+        if memory > value.len() {
+            println!("NoV");
+        } else {
+            
+        }
     };
 }

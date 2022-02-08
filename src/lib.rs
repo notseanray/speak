@@ -56,7 +56,7 @@ pub struct Map<T: Literal> {
 // ─── ALGORITHM ──────────────────────────────────────────────────────────────────
 //
 
-#[path = "lib/train.rs"]
+#[path = "libs/train.rs"]
 pub(crate) mod train;
 
 // Train wrapper:
@@ -72,7 +72,7 @@ pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<usize>) {
     };
 }
 
-#[path = "lib/run.rs"]
+#[path = "libs/run.rs"]
 pub(crate) mod run;
 
 #[optargs::optfn]
