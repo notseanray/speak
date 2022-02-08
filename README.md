@@ -49,7 +49,7 @@ let map: Map::<&str>::from(vec![
     ("What's your name", "My name is Speak!")
 ]);
 
-let trainedData: Vec<Vec<u32>> = train(map);
+let trainedData: Vec<Vec<u32>> = train!(map); // ← Note: You can add a u32 to use as memory, but if you don't add anything, it works with the 
 ```
 
 <h3 align=center>
@@ -72,7 +72,7 @@ let map: Map::<&str>::from(vec![
 
 let trainedData: Vec<Vec<u32>> = train(map);
 let input: String = String::from("How are you?");
-let result: String = run(input, trainedData);
+let result: String = run!(input, trainedData); // ← Note: You can add a f32 to use as threshold, but if you don't add anything, it works with the
 
 println!("{}", result);
 ```
