@@ -39,43 +39,51 @@ pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) {
     // Data.0 - Vec<(Keys, Values)>
     // Data.1 - Length
 
-    let mut generalmega: Vec<Vec<f32>> = Vec::new();
+    let mut generalmega: Vec<(Vec<f32>, Vec<f32>)> = Vec::new();
     let mut ram: Vec<f32> = Vec::new();
+
+	let mut key_length: usize;
+	let mut value_length: usize;
 
     for (key, value) in data {
 
+        key_length = key.len();
+        value_length = value.len();
+
 //
-// ─── KEYS ───────────────────────────────────────────────────────────────────────
+// ^ ─── KEYS ───────────────────────────────────────────────────────────────────────
 //
 
-    let mut keysmega: Vec<&Vec<f32>> = Vec::new();
+        let mut keysmega: Vec<&Vec<f32>> = Vec::new();
 
-    if memory > key.len() {
-        println!("NoK")
-    } else if memory < key.len() {
+        if memory < key_length {
+            println!("NoK")
+        } else if memory < key_length {
 
-        // I thought a lot of these 5 lines 
-        for i in (memory..key.len()).step_by(memory) {
-            ram.push(sum(key[i - memory..i].to_vec()));
-        };
-
-        if memory % key.len() != 0 {
-            // key[(key.len() - memory)..]
-                    ram.push(sum(key[(key.len() - memory ..)].to_vec()))
-                }
-                keysmega.push(&ram);
+            // I thought a lot of these 5 lines 
+            for i in (memory..key_length).step_by(memory) {
+                ram.push(sum(key[i - memory..i].to_vec()));
             };
-	ram.clear();
 
-//
-// Values
-//
+            if memory % key.len() != 0 {
+                ram.push(sum(key[(key_length - memory ..)].to_vec()))
+            }
+                keysmega.push(&ram);
+                ram.clear();
+                };
 
-        let mut valuesmega: Vec<Vec<f32>> = Vec::new();
-        if memory > value.len() {
-            println!("NoV");
+// ─── VALUES ─────────────────────────────────────────────────────────────────────
+
+            let mut valuesmega: Vec<Vec<f32>> = Vec::new();
+            if memory > value_length {
+                println!("NoV");
         } else {
-            
-        }
-    };
+            for i in (memory..value_length).step_by(memory) {
+                ram.push(sum(value[i - memory .. i].to_vec()));
+            }
+            if memory % value_length != 0 {
+                ram.push(sum(value[(value_length - memory ..)].to_vec()));
+            }
+        };
+    }
 }

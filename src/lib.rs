@@ -8,6 +8,15 @@
 #![crate_name = "speak"]
 #![allow(dead_code)]
 
+use optargs;
+
+/*
+This crates is made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
+
+^ Thanks to the Rust community.
+^ Thanks to optargs crate.
+*/
+
 //
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
 //
