@@ -1,16 +1,16 @@
 //! Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
-// ^ ##################
-// &* ## Crate Config ##
-//^ ###################
+//
+// ─── CRATE CONFIG ───────────────────────────────────────────────────────────────
+//
 
 #![crate_type = "lib"]
 #![crate_name = "speak"]
 #![allow(dead_code)]
 
-// ^ ##################
-// &* ###### PUBLIC ######
-//^ ###################
+//
+// ─── PUBLIC ─────────────────────────────────────────────────────────────────────
+//
 
 pub struct Config {
     pub multiplier: u32,
@@ -24,9 +24,9 @@ pub static CONFIG: Config = Config {
     memory: 1,
 };
 
-// ^ ##################
-// & ###### MAPS ######
-//^ ###################
+//
+// ─── MAPS ───────────────────────────────────────────────────────────────────────
+//
 
 // A map only allows these types: String, &str
 
@@ -52,21 +52,22 @@ pub struct Map<T: Literal> {
     pub entries: Vec<(T, T)>,
 }
 
-// ^ ##################
-// &* ###### Train & Run ######
-//^ ###################
+//
+// ─── ALGORITHM ──────────────────────────────────────────────────────────────────
+//
 
 #[path = "lib/train.rs"]
 pub(crate) mod train;
 
 // Train wrapper:
-pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<Config>) {
+#[optargs::optfn]
+pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<usize>) {
     match config {
         Some(x) => {
-            train::__train__::<T>(rawdata, &x);
+            train::__train__::<T>(rawdata, x);
         },
         None => {
-            train::__train__::<T>(rawdata, &crate::CONFIG);
+            train::__train__::<T>(rawdata, crate::CONFIG.memory);
         }
     };
 }
@@ -74,20 +75,25 @@ pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<Config>) {
 #[path = "lib/run.rs"]
 pub(crate) mod run;
 
-pub fn run(input: String, trainData: Vec<Vec<u32>>, config: Option<Config>) {
-    match config {
+#[optargs::optfn]
+pub fn run(
+    input: String,
+    traindata: Vec<Vec<u32>>,
+    threshold: Option<f32>
+) {
+    return match threshold {
         Some(x) => {
-            run::__run__(input, trainData, &x);
+            run::__run__(input, traindata, x);
         },
         None => {
-            run::__run__(input, trainData, &crate::CONFIG);
+            run::__run__(input, traindata, crate::CONFIG.threshold);
         }
     };
 }
 
-// ^ ##################
-// & ###### UTILS ######
-//^ ###################
+//
+// ─── UTILS ──────────────────────────────────────────────────────────────────────
+//
 
 // Creates a new map
 
