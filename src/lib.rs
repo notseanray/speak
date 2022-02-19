@@ -4,6 +4,7 @@
 // ─── CRATE CONFIG ───────────────────────────────────────────────────────────────
 //
 
+#![allow(unused_attributes)]
 #![crate_type = "lib"]
 #![crate_name = "speak"]
 #![allow(dead_code)]
@@ -12,7 +13,6 @@
 This crates is made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
 ^ Thanks to the Rust community.
-^ Thanks to optargs crate.
 */
 
 //
@@ -38,13 +38,13 @@ pub static CONFIG: Config = Config {
 // A map only allows these types: String, &str
 
 pub trait Literal {
-    fn literal(&self) -> String;
+    fn literal(self) -> String;
 }
 
 // Using the .literal() method on a String or &str returns the String.
 
-impl Literal for String { fn literal(&self) -> String { return String::from(self); } }
-impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
+impl Literal for String { fn literal(self) -> String { self } }
+impl Literal for &str { fn literal(self) -> String { return self.to_string(); } }
 
 pub struct Map<T: Literal> {
     pub entries: Vec<(T, T)>,
@@ -81,14 +81,11 @@ pub(crate) mod train;
 // Train wrapper:
 
 pub fn train<T: Literal>(rawdata: Map<T>, memory: Option::<usize>) -> Vec<Vec<f32>> {
-    match memory {
-        Some(x) => {
-            return train::__train__::<T>(rawdata, x);
-        },
-        None => {
-            return train::__train__::<T>(rawdata, crate::CONFIG.memory);
-        }
-    };
+    if let Some(x) = memory {
+        return train::__train__::<T>(rawdata, x);
+    } else {
+        return train::__train__::<T>(rawdata, crate::CONFIG.memory);
+    }
 }
 
 // run wrapper
@@ -97,18 +94,14 @@ pub(crate) mod run;
 
 pub fn run(
     input: String,
-    traindata: Vec<Vec<u32>>,
-    values: Vec<f32>,
+    traindata: Vec<Vec<f32>>,
     threshold: Option<f32>
 ) -> String {
-    match threshold {
-        Some(x) => {
-            return run::__run__(input, (traindata, values), x);
-        },
-        None => {
-            return run::__run__(input, (traindata, values), crate::CONFIG.threshold);
-        }
-    };
+    if let Some(x) = threshold {
+        return run::__run__(input, traindata, x);
+    } else {
+        return run::__run__(input, traindata, crate::CONFIG.threshold);
+    }
 }
 
 //
@@ -121,7 +114,7 @@ pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
     let mut keys: Vec<String> = Vec::new();
     let mut values: Vec<String> = Vec::new();
 
-    for (key, value) in map.entries.iter() {
+    for (key, value) in map.entries {
         keys.push(key.literal());
         values.push(value.literal());
     }

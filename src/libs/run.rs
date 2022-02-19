@@ -1,11 +1,10 @@
 pub(crate) fn __run__(
-    input: String,
-    trainingData: (Vec<Vec<u32>>, Vec<f32>),
-    threshold: f32
+    input: String, // The input string
+    trainingData: Vec<Vec<f32>>, // The training data (returned fro m the train function)
+    threshold: f32 // The threshold (default: 0.4)
 ) -> String {
-    let mega = trainingData.0;
-    let values = trainingData.1;
-
     let mut result: String = String::from("");
+    
+
     return result
 }
