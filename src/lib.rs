@@ -8,8 +8,6 @@
 #![crate_name = "speak"]
 #![allow(dead_code)]
 
-use optargs;
-
 /*
 This crates is made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
 
@@ -81,14 +79,14 @@ impl_map!(T, U);
 pub(crate) mod train;
 
 // Train wrapper:
-#[optargs::optfn]
-pub fn train<T: Literal>(rawdata: Map<T>, memory: Option::<usize>) {
+
+pub fn train<T: Literal>(rawdata: Map<T>, memory: Option::<usize>) -> Vec<Vec<f32>> {
     match memory {
         Some(x) => {
-            train::__train__::<T>(rawdata, x);
+            return train::__train__::<T>(rawdata, x);
         },
         None => {
-            train::__train__::<T>(rawdata, crate::CONFIG.memory);
+            return train::__train__::<T>(rawdata, crate::CONFIG.memory);
         }
     };
 }
@@ -97,18 +95,18 @@ pub fn train<T: Literal>(rawdata: Map<T>, memory: Option::<usize>) {
 #[path = "libs/run.rs"]
 pub(crate) mod run;
 
-#[optargs::optfn]
 pub fn run(
     input: String,
     traindata: Vec<Vec<u32>>,
+    values: Vec<f32>,
     threshold: Option<f32>
-) {
-    return match threshold {
+) -> String {
+    match threshold {
         Some(x) => {
-            run::__run__(input, traindata, x);
+            return run::__run__(input, (traindata, values), x);
         },
         None => {
-            run::__run__(input, traindata, crate::CONFIG.threshold);
+            return run::__run__(input, (traindata, values), crate::CONFIG.threshold);
         }
     };
 }
