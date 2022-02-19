@@ -1,89 +1,55 @@
-//
-// ──────────────────────────────────────────────────────────────────── I ──────────
-//   :::::: T R A I N   F U N C T I O N : :  :   :    :     :        :          :
-// ──────────────────────────────────────────────────────────────────────────────
-//
+use crate::*;
 
-pub(self) use crate::{
-    Deconstructed,
-    deconstruct,
-    Literal,
-
-    Map,
-
-    translate,
-    sum
-};
-
-pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) {
-
-//
-// ─── DECONSTRUCTING AND TRANSLATING ─────────────────────────────────────────────
-//
-
+pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Vec<Vec<f32>> {
+    let dec: Deconstructed<String> = deconstruct(rawdata);
     
-    
+    let decdata: Deconstructed<Vec<u32>> = Deconstructed {
+        keys: translate::<String>(dec.keys),
+        values: translate::<String>(dec.values)
+    };
+
     let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
-    {
-        let _data: Deconstructed<String> = deconstruct(rawdata);
-        let decdata: Deconstructed<Vec<u32>> = Deconstructed::<Vec<u32>> {
-            keys: translate(_data.keys),
-            values: translate(_data.values)
-        };
-        
-        for x in 0..decdata.values.len() {
-            data.push((decdata.keys[x].clone(), decdata.values[x].clone()));
-        }
+    for x in 0..decdata.values.len() {
+        data.push((decdata.keys[x].clone(), decdata.values[x].clone()));
     }
-    
-    // Data.0 - Vec<(Keys, Values)>
-    // Data.1 - Length
 
-    let mut generalmega: Vec<(Vec<f32>, Vec<f32>)> = Vec::new();
+    let mut mega: Vec<Vec<f32>> = Vec::new();
     let mut ram: Vec<f32> = Vec::new();
 
-	let mut key_length: usize;
-	let mut value_length: usize;
+    // Now, we can start learning the data relations between the keys and values.
+
+    let mut key_length: usize;
+    let mut value_length: usize;
+
+    let mut key_chunk: &[u32]; // ⇐ Slice of the key
+    let mut value_chunk: &[u32]; // ⇐ Slice of the value
+
+    let mut mem: usize;
 
     for (key, value) in data {
 
         key_length = key.len();
         value_length = value.len();
 
-//
-// ^ ─── KEYS ───────────────────────────────────────────────────────────────────────
-//
+        mem = if memory >= key_length { key_length } else { memory };
 
-        let mut keysmega: Vec<&Vec<f32>> = Vec::new();
-
-        if memory < key_length {
-            println!("NoK")
-        } else if memory < key_length {
-
-            // I thought a lot of these 5 lines 
-            for i in (memory..key_length).step_by(memory) {
-                ram.push(sum(key[i - memory..i].to_vec()));
+        for x in (mem..key_length).step_by(mem) {
+            key_chunk = &key[x - mem .. x];
+            
+            for y in (mem .. value_length).step_by(mem) {
+            value_chunk = &value[y - mem .. y];
+            
+                // We can now learn the relation between the key and value.
+                ram.push(
+                    key_chunk.iter().sum::<u32>() as f32 /
+                    value_chunk.iter().sum::<u32>() as f32
+                );
             };
-
-            if memory % key.len() != 0 {
-                ram.push(sum(key[(key_length - memory ..)].to_vec()))
-            }
-                keysmega.push(&ram);
-                ram.clear();
-                };
-
-// ─── VALUES ─────────────────────────────────────────────────────────────────────
-
-            let mut valuesmega: Vec<Vec<f32>> = Vec::new();
-            if memory > value_length {
-                println!("NoV");
-        } else {
-            for i in (memory..value_length).step_by(memory) {
-                ram.push(sum(value[i - memory .. i].to_vec()));
-            }
-            if memory % value_length != 0 {
-                ram.push(sum(value[(value_length - memory ..)].to_vec()));
-            }
         };
-    }
+
+        mega.push(ram.clone());
+        ram.clear();
+
+    };
+    return mega;
 }

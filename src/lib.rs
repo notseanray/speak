@@ -43,23 +43,35 @@ pub trait Literal {
     fn literal(&self) -> String;
 }
 
-// Using the .literal() method on a string or &str returns the String.
+// Using the .literal() method on a String or &str returns the String.
 
-impl Literal for String {
-    fn literal(&self) -> String {
-        return String::from(self);
-    }
-}
-
-impl Literal for &str {
-    fn literal(&self) -> String {
-        return String::from(*self);
-    }
-}
+impl Literal for String { fn literal(&self) -> String { return String::from(self); } }
+impl Literal for &str { fn literal(&self) -> String { return String::from(*self); } }
 
 pub struct Map<T: Literal> {
     pub entries: Vec<(T, T)>,
 }
+
+macro_rules! impl_map {
+    ($($T: path),*) => {
+        $(
+            impl Map<$T> {
+                pub fn new() -> Map<$T> { return __new__::<$T>(); }
+                pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
+
+                pub fn push(    mut self, to_push: ($T, $T)) { self.entries.push(to_push); }
+                pub fn insert(  mut self, index: usize, to_insert: ($T, $T)) { self.entries.insert(index, to_insert); }
+                pub fn remove(  mut self, index: usize) { self.entries.remove(index); }
+                pub fn clear(   mut self) { self.entries.clear(); }
+            }
+        )*
+    };
+}
+
+type T = String;
+type U = &'static str;
+
+impl_map!(T, U);
 
 //
 // ─── ALGORITHM ──────────────────────────────────────────────────────────────────
@@ -70,8 +82,8 @@ pub(crate) mod train;
 
 // Train wrapper:
 #[optargs::optfn]
-pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<usize>) {
-    match config {
+pub fn train<T: Literal>(rawdata: Map<T>, memory: Option::<usize>) {
+    match memory {
         Some(x) => {
             train::__train__::<T>(rawdata, x);
         },
@@ -81,6 +93,7 @@ pub fn train<T: Literal>(rawdata: Map<T>, config: Option::<usize>) {
     };
 }
 
+// run wrapper
 #[path = "libs/run.rs"]
 pub(crate) mod run;
 
@@ -104,6 +117,20 @@ pub fn run(
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
 //
 
+// Deconstructs a map into a Deconstructed struct (two vectors of strings, keys & values)
+
+pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
+    let mut keys: Vec<String> = Vec::new();
+    let mut values: Vec<String> = Vec::new();
+
+    for (key, value) in map.entries.iter() {
+        keys.push(key.literal());
+        values.push(value.literal());
+    }
+
+    return Deconstructed { keys, values };
+}
+
 // Creates a new map
 
 pub(self) fn __new__<T: Literal>() -> Map<T> {
@@ -121,52 +148,6 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     }
     return Map { entries };
 }
-
-// Deconstructs a map into a Deconstructed struct (two vectors of strings, keys & values)
-
-pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
-    let mut keys: Vec<String> = Vec::new();
-    let mut values: Vec<String> = Vec::new();
-
-    for (key, value) in map.entries.iter() {
-        keys.push(key.literal());
-        values.push(value.literal());
-    }
-
-    return Deconstructed { keys, values };
-}
-
-macro_rules! impl_map {
-    ($($T: path),*) => {
-        $(
-            impl Map<$T> {
-                pub fn new() -> Map<$T> { return __new__::<$T>(); }
-                pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
-
-                pub fn push(mut self, to_push: ($T, $T)) {
-                    self.entries.push(to_push);
-                }
-
-                pub fn insert(mut self, index: usize, to_insert: ($T, $T)) {
-                    self.entries.insert(index, to_insert);
-                }
-
-                pub fn remove(mut self, index: usize) {
-                    self.entries.remove(index);
-                }
-
-                pub fn clear(mut self) {
-                    self.entries.clear();
-                }
-            }
-        )*
-    };
-}
-
-type T = String;
-type U = &'static str;
-
-impl_map!(T, U);
 
 pub(crate) struct Deconstructed<T> {
     pub keys: Vec<T>,
@@ -196,12 +177,4 @@ pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
         ram.clear();
     };
         return result;
-}
-
-pub(crate) fn sum(vec: Vec<u32>) -> f32 {
-    let mut sum: u32 = 0;
-    for i in vec {
-        sum += i;
-    };
-    return sum as f32;
 }
