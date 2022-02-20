@@ -15,67 +15,7 @@ Currently **Speak isn't published**.
 <h2 align=center> 💻 Usage </h2>
 
 Using Speak is very simple, because you just need to know about two functions and a struct. (Being public ***just*** the necessary interface you'll use.)
-
-<h3 align=center>
-
-`Map<T>`:
-</h3>
-
-This struct is like a `HashMap`, but with just the necessary functions to create and modify the struct.
-
-The `Map<T>` is built with one parameter, a vector made up of tuples with type `String` or `&str`. `Vec(T, T)>` where `T`: `String` or `&str`.
-
-**Example:**
-
-```Rust
-let map = Map::<&str>::from(vec![
-        ("How are you?", "I'm fine!"),
-        ("What's your name", "My name is Speak!")
-]);
-```
-
-<h3 align=center> 
-
-`train(Map<T>)`: 
-
-</h3>
-
-The `train(Map<T>)` takes **1** argument, `Map<T>`, this function **returns a Vec<Vec<u32>>**, this numbers will not make sense for human, that's why we need the `run` function to interpret it, figure out a sentence based on the input and return it!.
-
-```Rust
-
-let map: Map::<&str>::from(vec![
-    ("How are you?", "I'm fine!"),
-    ("What's your name", "My name is Speak!")
-]);
-
-let trainedData: Vec<Vec<u32>> = train!(map); // ← Note: You can add a u32 to use as memory, but if you don't add anything, it works with the 
-```
-
-<h3 align=center>
-
-`run(String, Vec<Vec<u32>>)`
-
-</h3>
-
-The `run(String, Vec<Vec<u32>>)` function creates a sentence based on the Map you gave it.
-
-The second parameter (`Vec<Vec<u32>>`) is just the returning value of the `train(Map<T>)` function. You can just feed the `run(String, Vec<Vec<u32>>)` function the `train(Map<T>)` function
-
-Obviously, the first parameter, `String` is your input.
-
-```Rust
-let map: Map::<&str>::from(vec![
-    ("How are you?", "I'm fine!"),
-    ("What's your name", "My name is Speak!")
-]);
-
-let trainedData: Vec<Vec<u32>> = train(map);
-let input: String = String::from("How are you?");
-let result: String = run!(input, trainedData); // ← Note: You can add a f32 to use as threshold, but if you don't add anything, it works with the
-
-println!("{}", result);
-```
+Currently I cannot put example of the functions because they'll change. (At the same time the programming is happening, the design also changes.)
 
 <h2 align=center> ⚖️ License & Credits</h2>
 
