@@ -1,4 +1,6 @@
-//! Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
+//! Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
+
+// Thanks to the Rust community, compiler and creators for making Rust a great language.
 
 //
 // ─── CRATE CONFIG ───────────────────────────────────────────────────────────────
@@ -8,12 +10,6 @@
 #![crate_type = "lib"]
 #![crate_name = "speak"]
 #![allow(dead_code)]
-
-/*
-This crates is made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
-
-^ Thanks to the Rust community.
-*/
 
 //
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
@@ -95,12 +91,18 @@ pub(crate) mod run;
 pub fn run(
     input: String,
     traindata: Vec<Vec<f32>>,
-    threshold: Option<f32>
+    threshold: Option<f32>,
+    memory: Option<usize>
 ) -> String {
-    if let Some(x) = threshold {
-        return run::__run__(input, traindata, x);
-    } else {
-        return run::__run__(input, traindata, crate::CONFIG.threshold);
+    match (threshold, memory) {
+        (Some(x), Some(m)) => return run::__run__(input, traindata, x, m),
+
+        (Some(x), None) => return run::__run__(input, traindata, x, crate::CONFIG.memory),
+
+        (None, Some(m)) => return run::__run__(input, traindata, crate::CONFIG.threshold, m),
+
+        (None, None) => return run::__run__(input, traindata, crate::CONFIG.threshold, crate::CONFIG.memory)
+
     }
 }
 

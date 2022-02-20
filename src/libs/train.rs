@@ -1,6 +1,7 @@
 use crate::*;
 
 pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Vec<Vec<f32>> {
+
     let dec: Deconstructed<String> = deconstruct(rawdata);
     
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
