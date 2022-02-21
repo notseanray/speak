@@ -15,7 +15,7 @@ Currently **Speak isn't published**.
 <h2 align=center> 💻 Usage </h2>
 
 Using Speak is very simple, because you just need to know about two functions and a struct. (Being public ***just*** the necessary interface you'll use.)
-Currently I cannot put example of the functions because they'll change. (At the same time the programming is happening, the design also changes.)
+Currently I cannot put examples of the functions because they'll change. (At the same time the programming is happening, the design also changes.)
 
 <h2 align=center> ⚖️ License & Credits</h2>
 
