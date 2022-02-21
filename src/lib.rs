@@ -84,7 +84,7 @@ pub(crate) mod algo;
 
 // Train wrapper:
 
-pub fn train<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> Vec<Vec<f32>> {
+pub fn train<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> algo::Learnt {
     if let Some(x) = memory {
         return algo::__train__::<T>(rawdata, x);
     } else {
@@ -96,21 +96,21 @@ pub fn train<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> Vec<Vec<f32>
 
 pub fn run(
     input: String,
-    traindata: Vec<Vec<f32>>,
+    learnt: algo::Learnt,
     threshold: Option<f32>,
     memory: Option<usize>,
 ) -> String {
     match (threshold, memory) {
-        (Some(x), Some(m)) => return algo::__run__(input, traindata, x, m),
+        (Some(x), Some(m)) => return algo::__run__(input, learnt, x, m),
 
-        (Some(x), None) => return algo::__run__(input, traindata, x, crate::CONFIG.memory),
+        (Some(x), None) => return algo::__run__(input, learnt, x, crate::CONFIG.memory),
 
-        (None, Some(m)) => return algo::__run__(input, traindata, crate::CONFIG.threshold, m),
+        (None, Some(m)) => return algo::__run__(input, learnt, crate::CONFIG.threshold, m),
 
         (None, None) => {
             return algo::__run__(
                 input,
-                traindata,
+                learnt,
                 crate::CONFIG.threshold,
                 crate::CONFIG.memory,
             )
@@ -154,13 +154,14 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     return Map { entries };
 }
 
-pub(crate) struct Deconstructed<T> {
+pub struct Deconstructed<T> {
+    /// NOT MEANT FOR PUBLIC USE, PLEASE STOP USING THIS STRUCT.
     pub keys: Vec<T>,
     pub values: Vec<T>,
 }
 
 impl<T> Deconstructed<T> {
-    pub fn new() -> Deconstructed<T> {
+    pub(crate) fn new() -> Deconstructed<T> {
         Deconstructed {
             keys: Vec::new(),
             values: Vec::new(),
@@ -168,12 +169,12 @@ impl<T> Deconstructed<T> {
     }
 }
 
-pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
+pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
     let mut result: Vec<Vec<u32>> = Vec::new();
     let mut sum: u32 = 0;
     for word in vec {
-        let word = word.literal();
+        let word = word;
         for word in word.split_whitespace() {
             for c in word.chars() {
                 sum += crate::CONFIG.multiplier * c as u32;

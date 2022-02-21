@@ -2,13 +2,19 @@
 
 use crate::*;
 
+pub struct Learnt { // It'sn't meant to be used by the user, just returned by the train function and fed into the run function. I was going to use Learn-2F-ed but the name was confusing, my dreams crushed and my day was ruined.
 
+    pub learn_vec: Vec<Vec<f32>>,
+    pub translated_deconstructed: Deconstructed<Vec<u32>>,
+    pub raw_deconstructed: Deconstructed<String>
 
-pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Vec<Vec<f32>> {
+}
+
+pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
     let dec: Deconstructed<String> = deconstruct(rawdata);
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
-        keys: translate::<String>(dec.keys),
-        values: translate::<String>(dec.values),
+        keys: translate(&dec.keys),
+        values: translate(&dec.values),
     };
 
     let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
@@ -54,7 +60,11 @@ pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Vec<Vec<f
         mega.push(ram.clone());
         ram.clear();
     }
-    return mega;
+    return Learnt {
+        learn_vec: mega,
+        translated_deconstructed: decdata,
+        raw_deconstructed: dec,
+    }
 }
 
 
@@ -70,7 +80,7 @@ pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Vec<Vec<f
 
 pub(crate) fn __run__(
     input: String,               // The input string
-    trainingData: Vec<Vec<f32>>, // The training data (returned fro m the train function)
+    learnt_data: Learnt,        // The learnt data
     threshold: f32,              // The threshold (default: 0.4)
     memory: usize,
 ) -> String {
@@ -101,7 +111,8 @@ pub(crate) fn __run__(
     };
     
     for x in (mem..inputvec_length).step_by(mem) {
-        int_chunk = &inputvec[x - mem .. x];
+        int_chunk = &inputvec[x - mem..x];
+        
     }
 
     return result;
