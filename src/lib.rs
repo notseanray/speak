@@ -1,4 +1,6 @@
-//! Speak crate made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
+//! Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
+
+// Thanks to the Rust community, compiler and creators for making Rust a great language.
 
 //
 // ─── CRATE CONFIG ───────────────────────────────────────────────────────────────
@@ -8,12 +10,6 @@
 #![crate_type = "lib"]
 #![crate_name = "speak"]
 #![allow(dead_code)]
-
-/*
-This crates is made by Alex G. C. aka Blyxyas. Visit github.com/blyxyas/speak for more information.
-
-^ Thanks to the Rust community.
-*/
 
 //
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
@@ -43,8 +39,16 @@ pub trait Literal {
 
 // Using the .literal() method on a String or &str returns the String.
 
-impl Literal for String { fn literal(self) -> String { self } }
-impl Literal for &str { fn literal(self) -> String { return self.to_string(); } }
+impl Literal for String {
+    fn literal(self) -> String {
+        self
+    }
+}
+impl Literal for &str {
+    fn literal(self) -> String {
+        return self.to_string();
+    }
+}
 
 pub struct Map<T: Literal> {
     pub entries: Vec<(T, T)>,
@@ -75,32 +79,42 @@ impl_map!(T, U);
 // ─── ALGORITHM ──────────────────────────────────────────────────────────────────
 //
 
-#[path = "libs/train.rs"]
-pub(crate) mod train;
+#[path = "libs/algorithm.rs"]
+pub(crate) mod algo;
 
 // Train wrapper:
 
-pub fn train<T: Literal>(rawdata: Map<T>, memory: Option::<usize>) -> Vec<Vec<f32>> {
+pub fn train<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> algo::Learnt {
     if let Some(x) = memory {
-        return train::__train__::<T>(rawdata, x);
+        return algo::__train__::<T>(rawdata, x);
     } else {
-        return train::__train__::<T>(rawdata, crate::CONFIG.memory);
+        return algo::__train__::<T>(rawdata, crate::CONFIG.memory);
     }
 }
 
 // run wrapper
-#[path = "libs/run.rs"]
-pub(crate) mod run;
 
 pub fn run(
     input: String,
-    traindata: Vec<Vec<f32>>,
-    threshold: Option<f32>
+    learnt: algo::Learnt,
+    threshold: Option<f32>,
+    memory: Option<usize>,
 ) -> String {
-    if let Some(x) = threshold {
-        return run::__run__(input, traindata, x);
-    } else {
-        return run::__run__(input, traindata, crate::CONFIG.threshold);
+    match (threshold, memory) {
+        (Some(x), Some(m)) => return algo::__run__(input, learnt, x, m),
+
+        (Some(x), None) => return algo::__run__(input, learnt, x, crate::CONFIG.memory),
+
+        (None, Some(m)) => return algo::__run__(input, learnt, crate::CONFIG.threshold, m),
+
+        (None, None) => {
+            return algo::__run__(
+                input,
+                learnt,
+                crate::CONFIG.threshold,
+                crate::CONFIG.memory,
+            )
+        }
     }
 }
 
@@ -140,32 +154,36 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     return Map { entries };
 }
 
-pub(crate) struct Deconstructed<T> {
+pub struct Deconstructed<T> {
+    /// NOT MEANT FOR PUBLIC USE, PLEASE STOP USING THIS STRUCT.
     pub keys: Vec<T>,
-    pub values: Vec<T>
+    pub values: Vec<T>,
 }
 
 impl<T> Deconstructed<T> {
-    pub fn new() -> Deconstructed<T> {
-        Deconstructed { keys: Vec::new(), values: Vec::new() }
+    pub(crate) fn new() -> Deconstructed<T> {
+        Deconstructed {
+            keys: Vec::new(),
+            values: Vec::new(),
+        }
     }
 }
 
-pub(crate) fn translate<L: crate::Literal>(vec: Vec<L>) -> Vec<Vec<u32>> {
+pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
     let mut result: Vec<Vec<u32>> = Vec::new();
     let mut sum: u32 = 0;
     for word in vec {
-        let word = word.literal();
+        let word = word;
         for word in word.split_whitespace() {
             for c in word.chars() {
                 sum += crate::CONFIG.multiplier * c as u32;
-            };
+            }
             ram.push(sum);
             sum = 0;
-        };
+        }
         result.push(ram.clone());
         ram.clear();
-    };
-        return result;
+    }
+    return result;
 }
