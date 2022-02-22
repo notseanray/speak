@@ -15,16 +15,47 @@
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
 //
 
+/// # Config struct
+/// This (public) struct is used to configure the algorithm, it has 2 public fields:
+/// * threshold: f32,
+/// * memory: usize.
+/// 
+/// * The multiplier is used for the `translate(...)` function, this function **is private**, so you can't use it. Please, **keep this function at the default value:** ***2***.
+/// 
+/// * The threshold is used for the `run(...)` function, it's the way to demand more or less overlapping between words. If the threshold is low, it will demand more, if the threshold is high, it will demand less.
+/// 
+/// * The memory is used both for the `train(...)` & `run(...)` function, because of the way this NLP works, instead of linking between words (that would be lame), it links between phrases, so the memory is used to define how many words are in each phrase.
+/// 
+/// # WARNING
+/// There also another public struct, `CONFIG`, this config is the default configuration, it is strongly encouraged to use this one, also, it's the configuration used by both functions in the case of `None` as one of the final arguments.
+/// 
 pub struct Config {
+    
     pub multiplier: u32,
     pub threshold: f32,
     pub memory: usize,
 }
 
+
+/// # CONFIG
+/// This struct is the **default configuration** in the form of a `Config` struct, it's strongly encouraged to use this one, also, it's the configuration used by both functions in the case of `None` as one of the final arguments.
+/// 
+/// ## Also
+/// If you want to change something about this configuration, but mantaining the default values (because you're only experimenting, for example) you can create another struct with these values:
+/// 
+/// ```rust
+/// let my_config = Config {
+///     multiplier: 3,
+///     threshold: 0.5,
+///     memory: 2
+/// }
+/// ```
+/// And experiment with it.
+/// 
 pub static CONFIG: Config = Config {
-    multiplier: 1,
+    multiplier: 3,
     threshold: 0.3,
-    memory: 1,
+    memory: 2,
 };
 
 //
@@ -33,6 +64,13 @@ pub static CONFIG: Config = Config {
 
 // A map only allows these types: String, &str
 
+/// # Literal
+/// This is the trait made for the polymorphism required for the Map, the methods in this trait are only available for:
+/// * String,
+/// * &'static str
+/// 
+/// Please take in mind, you're not suposed to use this trait, it's just a helper for 90% of functions.
+/// 
 pub trait Literal {
     fn literal(self) -> String;
 }
@@ -49,6 +87,39 @@ impl Literal for &str {
         return self.to_string();
     }
 }
+
+/// # Map<T>
+/// The `Map<T>` is the most important struct in the whole crate, it's used to store the expected inputs and outputs of the NLP algorithm. If you used a HashMap before, it's almost the same.
+/// 
+/// # Example
+/// ```rust
+/// let map = Map::<&'static str>::from(vec![
+///     ("Hi", "Hello"),
+///     ("How are you?", "I'm fine, thank you!")
+/// ]);
+/// ```
+/// **OR**
+/// 
+/// ```rust
+/// let map = Map::<String>::from(vec![
+///    ("Hi".to_string(), "Hello".to_string()),
+///    ("How are you?".to_string(), "I'm fine, thank you!".to_string())
+/// 
+/// # Types
+/// The Map struct only accepts types with the `Literal` trait, those are:
+/// * String
+/// * &'static str
+/// 
+/// # Methods
+/// The Map struct has the following methods:
+/// * `from(Vec<(T, T)>)`: This method is used to create a Map from a Vec<(T, T)>, where T is the type of the Map.
+/// * `new()`: This method is used to create a Map from nothing, it creates a new Map with an empty Vec<(T, T)> as the main field.`
+/// * `push(mut self, to_push: (T, T))`: This method is used to push a new element to the Map, **This new element will be in the last position of the Map**.
+/// * `insert(mut self, index: usize, to_insert: (T, T))`: This method is used to insert a new element to the Map, **This new element will be in the position of the index**.
+/// * remove(mut self, index: usize): This method is used to remove an element with the given from the Map.
+/// * clear(): This method is used to clear the Map, it will remove all the elements.
+/// # WARNING
+/// Take in count that internally the Map is just a Vector, and this vector (named internally `entries`) uses all the methods of a Vector struct.
 
 pub struct Map<T: Literal> {
     pub entries: Vec<(T, T)>,
