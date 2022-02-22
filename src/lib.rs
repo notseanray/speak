@@ -24,7 +24,7 @@
 /// 
 /// * The threshold is used for the `run(...)` function, it's the way to demand more or less overlapping between words. If the threshold is low, it will demand more, if the threshold is high, it will demand less.
 /// 
-/// * The memory is used both for the `train(...)` & `run(...)` function, because of the way this NLP works, instead of linking between words (that would be lame), it links between phrases, so the memory is used to define how many words are in each phrase.
+/// * The memory is used both for the `learn(...)` & `run(...)` function, because of the way this NLP works, instead of linking between words (that would be lame), it links between phrases, so the memory is used to define how many words are in each phrase.
 /// 
 /// # WARNING
 /// There also another public struct, `CONFIG`, this config is the default configuration, it is strongly encouraged to use this one, also, it's the configuration used by both functions in the case of `None` as one of the final arguments.
@@ -153,17 +153,54 @@ impl_map!(T, U);
 #[path = "libs/algorithm.rs"]
 pub(crate) mod algo;
 
-// Train wrapper:
+// learn wrapper:
 
-pub fn train<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> algo::Learnt {
+///
+/// # learn
+/// This function is part of the main algorithm, that means two things:
+/// 
+/// * If you're training a very big map, I strongly recommend to make this function asynchroneous, because it will be a long process. Being O(n^(⌈ #n ÷ memory ⌉)).
+/// 
+/// * Second, this function haves the option to use the default configuration, it's strongly recommended to use this option, you can use `None` as the final argument to use the default configuration. If you don't want the recommended configuration, use your own `usize` as memory.
+/// 
+/// This function is used to learn the NLP algorithm. Its parameters are:
+/// * `Map<T>` (being T String or &'static str)
+/// * `Option<usize>`: The memory of the algortihm, if you don't want to change the default value, use `None`, if you don't know what this is, chech the docs for the `Config` struct.
+/// It will return a `Learnt` struct, which contains all the necessary info about the results. Feed with that struct to the `run(...)` function.
+/// # Example
+/// ```rust
+/// let map = Map::<&'static str>::from(vec![
+///    ("Hi", "Hello"),
+///   ("How are you?", "I'm fine, thank you!")
+/// ]);
+/// let learned = learn(map, None);
+/// ```
+/// 
+/// # Warning
+/// This function takes some time, so don't use it too much. Because of that, it's recommended to use it in a thread. But that's on your own. Because I want to keep the code the lightest as possible.
+/// 
+pub fn learn<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> algo::Learnt {
     if let Some(x) = memory {
-        return algo::__train__::<T>(rawdata, x);
+        return algo::__learn__::<T>(rawdata, x);
     } else {
-        return algo::__train__::<T>(rawdata, crate::CONFIG.memory);
+        return algo::__learn__::<T>(rawdata, crate::CONFIG.memory);
     }
 }
 
 // run wrapper
+
+/// # Run
+/// This function is one of the main function of the NLP algorithm, this means two things:
+/// 
+/// * If you trained over a very big, I recommend to make this function asynchroneous, because it will be a long process.
+/// 
+/// * Second, this function has option to use the recommended configuration with `None`, or with your own `f32` as threshold and `usize` as memory.
+/// 
+/// # Arguments
+/// * `input: String` (being the input of the user)
+/// * `Learnt` (being the struct returned by the `learn(...)` function)
+/// * `Option<f32>` is the threshold, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
+/// * `Option<usize>` is the memory, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
 
 pub fn run(
     input: String,
@@ -225,8 +262,8 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
     return Map { entries };
 }
 
+/// # ⚠️⚠️⚠️⚠️⚠️⚠️ NOT MEANT FOR PUBLIC USE, PLEASE STOP USING IT! ⚠️⚠️⚠️⚠️⚠️⚠️
 pub struct Deconstructed<T> {
-    /// NOT MEANT FOR PUBLIC USE, PLEASE STOP USING THIS STRUCT.
     pub keys: Vec<T>,
     pub values: Vec<T>,
 }

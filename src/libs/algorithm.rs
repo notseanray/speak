@@ -2,7 +2,7 @@
 
 use crate::*;
 
-pub struct Learnt { // It'sn't meant to be used by the user, just returned by the train function and fed into the run function. I was going to use Learn-2F-ed but the name was confusing, my dreams crushed and my day was ruined.
+pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function. I was going to use Learn-2F-ed but the name was confusing, my dreams crushed and my day was ruined.
 
     pub learn_vec: Vec<Vec<f32>>,
     pub translated_deconstructed: Deconstructed<Vec<u32>>,
@@ -10,7 +10,7 @@ pub struct Learnt { // It'sn't meant to be used by the user, just returned by th
 
 }
 
-pub(crate) fn __train__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
+pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
     let dec: Deconstructed<String> = deconstruct(rawdata);
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
         keys: translate(&dec.keys),
@@ -98,7 +98,7 @@ pub(crate) fn __run__(
         }
     };
 
-    // Then, we calculate the distance between the input and the training data.
+    // Then, we calculate the distance between the input and the learning data.
 
     let mut int_chunk: &[u32];
     let mut mem: usize;
