@@ -159,7 +159,7 @@ pub(crate) mod algo;
 /// # learn
 /// This function is part of the main algorithm, that means two things:
 /// 
-/// * If you're training a very big map, I strongly recommend to make this function asynchroneous, because it will be a long process. Being O(n^(⌈ #n ÷ memory ⌉)).
+/// * If you're training a very big map, I strongly recommend to make this function asynchroneous, because it will be a long process.
 /// 
 /// * Second, this function haves the option to use the default configuration, it's strongly recommended to use this option, you can use `None` as the final argument to use the default configuration. If you don't want the recommended configuration, use your own `usize` as memory.
 /// 

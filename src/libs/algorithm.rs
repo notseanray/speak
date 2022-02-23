@@ -1,12 +1,19 @@
+
 //! Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
 
 use crate::*;
 
-pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function. I was going to use Learn-2F-ed but the name was confusing, my dreams crushed and my day was ruined.
+pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function.
     learn_vec: Vec<Vec<f32>>,
     translated_deconstructed: Deconstructed<Vec<u32>>,
     raw_deconstructed: Deconstructed<String>
 }
+
+//
+// ──────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: T R A I N   F U N C T I O N : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────────
+//
 
 pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
     let dec: Deconstructed<String> = deconstruct(rawdata);
@@ -65,16 +72,11 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
     }
 }
 
-
-
 //
 // ──────────────────────────────────────────────────────────────── I ──────────
 //   :::::: R U N   F U N C T I O N : :  :   :    :     :        :          :
 // ──────────────────────────────────────────────────────────────────────────
 //
-
-
-
 
 pub(crate) fn __run__(
     input: String,               // The input string
@@ -101,17 +103,17 @@ pub(crate) fn __run__(
     let mut int_chunk: &[u32];
     let mut mem: usize;
     
-    let inputvec_length: usize = inputvec.len();
+    let inputvec_length: usize = inputvec.len() - 1;
     mem = if memory >= inputvec_length {
         inputvec.len()
     } else {
         memory
     };
-    
+
     for x in (mem..inputvec_length).step_by(mem) {
         int_chunk = &inputvec[x - mem..x];
-        
-    }
-
+        for y in 0..learnt_data.learn_vec.len() {
+        };
+    };
     return result;
 }
