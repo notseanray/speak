@@ -3,11 +3,9 @@
 use crate::*;
 
 pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function. I was going to use Learn-2F-ed but the name was confusing, my dreams crushed and my day was ruined.
-
-    pub learn_vec: Vec<Vec<f32>>,
-    pub translated_deconstructed: Deconstructed<Vec<u32>>,
-    pub raw_deconstructed: Deconstructed<String>
-
+    learn_vec: Vec<Vec<f32>>,
+    translated_deconstructed: Deconstructed<Vec<u32>>,
+    raw_deconstructed: Deconstructed<String>
 }
 
 pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
