@@ -1,4 +1,3 @@
-
 //! Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
 
 use crate::*;
@@ -120,6 +119,13 @@ C is a good election when A is in our input.
 So, we're finding the relation between the expected input, the expected output and the real input. But we're
 also spliting all this three things in chunks, previously to this change in the algorithm we observed word by word
 but splitting into chunks means that we can observe "I'm fine", that gives more information than "I'm" & "fine".
+
+So, if the current input chunk (we're going to call it ichunk) divided by the value chunk (vchunk) is at a close distance from
+a mega array (kchunk / vchunk) that means that ichunk is close to kchunk, that means that we're going to use vchunk.
+
+I don't know if that's a good explanation, but that's our process, and that's the thing I'm trying to make from an explanation
+from Rust code that's efficient, because that's the point of making this in Rust instead of Python or talking to a human. (Apart from
+creating a good crate).
 */
     for x in (mem..inputvec_length).step_by(mem) {
         int_chunk = &inputvec[x - mem..x];
