@@ -201,6 +201,16 @@ pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
 /// * `Learnt` (being the struct returned by the `learn(...)` function)
 /// * `Option<f32>` is the threshold, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
 /// * `Option<usize>` is the memory, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
+/// # Example
+/// ```rust
+/// let map = Map::<&'static str>::from(vec![
+///   ("Hi", "Hello"),
+///  ("How are you?", "I'm fine, thank you!")
+/// ]);
+/// let learned = learn(map, None);
+/// let result = run("Hi", learned, None, None);
+/// ```
+/// In this example the final 2 parameters are empty because I want to use the default configuration.
 pub fn run(
     input: String,
     learnt: algo::Learnt,

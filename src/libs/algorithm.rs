@@ -110,9 +110,21 @@ pub(crate) fn __run__(
         memory
     };
 
+/*
+Now we compare:
+Currently we have an input, and we're going to try and relate our learning experiences to this input.
+This works because if A/B = A/C then B = C, so we're seeing if B ≈ C, if that's the case, that means that
+B is probably the same word or derivated from C, and that means that we can use B, because we learned that
+C is a good election when A is in our input.
+
+So, we're finding the relation between the expected input, the expected output and the real input. But we're
+also spliting all this three things in chunks, previously to this change in the algorithm we observed word by word
+but splitting into chunks means that we can observe "I'm fine", that gives more information than "I'm" & "fine".
+*/
     for x in (mem..inputvec_length).step_by(mem) {
         int_chunk = &inputvec[x - mem..x];
         for y in 0..learnt_data.learn_vec.len() {
+		
         };
     };
     return result;
