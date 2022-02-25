@@ -15,7 +15,7 @@ pub struct Learnt { // It'sn't meant to be used by the user, just returned by th
 //
 
 pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
-    let dec: Deconstructed<String> = deconstruct(rawdata);
+    let dec: Deconstructed<String> = deconstruct::<T>(rawdata);
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
         keys: translate(&dec.keys),
         values: translate(&dec.values),
@@ -34,9 +34,6 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
     let mut key_length: usize;
     let mut value_length: usize;
 
-    let mut key_chunk: &[u32]; // ⇐ Slice of the key
-    let mut value_chunk: &[u32]; // ⇐ Slice of the value
-
     let mut mem: usize;
 
     for (key, value) in data {
@@ -50,13 +47,11 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
         };
 
         for x in (mem..key_length).step_by(mem) {
-            key_chunk = &key[x - mem..x];
-
             for y in (mem..value_length).step_by(mem) {
-                value_chunk = &value[y - mem..y];
                 // We can now learn the relation between the key and value.
                 ram.push(
-                    key_chunk.iter().sum::<u32>() as f32 / value_chunk.iter().sum::<u32>() as f32,
+                    key[x - mem..x].iter().sum::<u32>() as f32 /
+					value[y - mem..y].iter().sum::<u32>() as f32,
                 );
             }
         }
@@ -100,7 +95,11 @@ pub(crate) fn __run__(
     // Then, we calculate the distance between the input and the learning data.
 
     let mut int_chunk: &[u32];
-    let mut mem: usize;
+	
+	let mut vvec_length: usize;
+	let mut vvec_memory: usize;
+    
+	let mut mem: usize;
     
     let inputvec_length: usize = inputvec.len() - 1;
     mem = if memory >= inputvec_length {
@@ -127,11 +126,26 @@ I don't know if that's a good explanation, but that's our process, and that's th
 from Rust code that's efficient, because that's the point of making this in Rust instead of Python or talking to a human. (Apart from
 creating a good crate).
 */
-    for x in (mem..inputvec_length).step_by(mem) {
-        int_chunk = &inputvec[x - mem..x];
-        for y in 0..learnt_data.learn_vec.len() {
-		
-        };
-    };
-    return result;
+
+	for X in (memory..inputvec_length).step_by(mem) {
+		for vvec in learnt_data
+						.translated_deconstructed
+						.values.iter() {
+
+			vvec_length = vvec.len();
+			if memory >= vvec_length {
+				vvec_memory = vvec_length;
+			} else {
+				vvec_memory = memory;
+			};
+
+			for Y in (0..vvec_length).step_by(vvec_memory) {
+				for Z in (0..learnt_data.learn_vec) {
+					//if ((inputvec[X - mem .. X].iter().sum() as f32 / vvec[Y - vvec_memory .. Y]) - 1).abs() <= threshold {
+				}
+				}
+			};
+		};
+	};
+	return result
 }
