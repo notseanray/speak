@@ -20,7 +20,17 @@ Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0
 
 I cannot know when Speak will be ready, but I can promise that it will be ready soon. I'm trying to make it the most perfect tool I can, that's why I'm taking a lot of time to make it.
 
-<h2 align=center> ⚖️ License & Credits</h2>
+## Contributions
+
+You can contribute to this project with almost anything, it can be code, documentation, bug reports, feature requests... etc. You can do it opening an [issue](https://github.com/SpeakML/speak/issues/new) or a [pull request](https://github.com/SpeakML/speak/pulls/new), or you can contact me on social media.
+
+**Thanks for contributing!**
+
+[![Stargazers repo roster for @SpeakML/speak](https://reporoster.com/stars/SpeakML/speak)](https://github.com/SpeakML/speak/stargazers)
+
+[![Forkers repo roster for @SpeakML/speak](https://reporoster.com/forks/SpeakML/speak)](https://github.com/SpeakML/speak/network/members)
+
+## ⚖️ License & Credits
 
 Speak uses the [**GNU General Public License v2.0**](https://github.com/SpeakML/speak/blob/current/LICENSE/)
 
