@@ -15,48 +15,9 @@
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
 //
 
-/// # Config struct
-/// This (public) struct is used to configure the algorithm, it has 2 public fields:
-/// * threshold: f32,
-/// * memory: usize.
-/// 
-/// * The multiplier is used for the `translate(...)` function, this function **is private**, so you can't use it. Please, **keep this function at the default value:** ***2***.
-/// 
-/// * The threshold is used for the `run(...)` function, it's the way to demand more or less overlapping between words. If the threshold is low, it will demand more, if the threshold is high, it will demand less.
-/// 
-/// * The memory is used both for the `learn(...)` & `run(...)` function, because of the way this NLP works, instead of linking between words (that would be lame), it links between phrases, so the memory is used to define how many words are in each phrase.
-/// 
-/// # WARNING
-/// There also another public struct, `CONFIG`, this config is the default configuration, it is strongly encouraged to use this one, also, it's the configuration used by both functions in the case of `None` as one of the final arguments.
-/// 
-pub struct Config {
-    
-    pub multiplier: u32,
-    pub threshold: f32,
-    pub memory: usize,
-}
-
-
-/// # CONFIG
-/// This struct is the **default configuration** in the form of a `Config` struct, it's strongly encouraged to use this one, also, it's the configuration used by both functions in the case of `None` as one of the final arguments.
-/// 
-/// ## Also
-/// If you want to change something about this configuration, but mantaining the default values (because you're only experimenting, for example) you can create another struct with these values:
-/// 
-/// ```rust
-/// let my_config = Config {
-///     multiplier: 3,
-///     threshold: 0.5,
-///     memory: 2
-/// }
-/// ```
-/// And experiment with it.
-/// 
-pub static CONFIG: Config = Config {
-    multiplier: 3,
-    threshold: 0.3,
-    memory: 2,
-};
+static default_multiplier: u32 = 3;
+static default_threshold: f32 = 0.3;
+static default_memory: usize = 2;
 
 //
 // ─── MAPS ───────────────────────────────────────────────────────────────────────
@@ -113,11 +74,11 @@ impl Literal for &str {
 /// # Methods
 /// The Map struct has the following methods:
 /// * `from(Vec<(T, T)>)`: This method is used to create a Map from a Vec<(T, T)>, where T is the type of the Map.
-/// * `new()`: This method is used to create a Map from nothing, it creates a new Map with an empty Vec<(T, T)> as the main field.`
+/// * `new()`: This method is used to create a Map from nothing, it creates a new Map with an empty Vec<(T, T)> as the main field.
 /// * `push(mut self, to_push: (T, T))`: This method is used to push a new element to the Map, **This new element will be in the last position of the Map**.
 /// * `insert(mut self, index: usize, to_insert: (T, T))`: This method is used to insert a new element to the Map, **This new element will be in the position of the index**.
 /// * remove(mut self, index: usize): This method is used to remove an element with the given from the Map.
-/// * clear(): This method is used to clear the Map, it will remove all the elements.
+/// * clear(mut self): This method is used to clear the Map, it will remove all the elements.
 /// # WARNING
 /// Take in count that internally the Map is just a Vector, and this vector (named internally `entries`) uses all the methods of a Vector struct.
 
@@ -171,7 +132,7 @@ pub(crate) mod algo;
 /// ```rust
 /// let map = Map::<&'static str>::from(vec![
 ///    ("Hi", "Hello"),
-///   ("How are you?", "I'm fine, thank you!")
+///    ("How are you?", "I'm fine, thank you!")
 /// ]);
 /// let learned = learn(map, None);
 /// ```
@@ -183,7 +144,7 @@ pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
     if let Some(x) = memory {
         return algo::__learn__::<T>(map, x);
     } else {
-        return algo::__learn__::<T>(map, crate::CONFIG.memory);
+        return algo::__learn__::<T>(map, default_memory);
     }
 }
 
@@ -220,16 +181,16 @@ pub fn run(
     match (threshold, memory) {
         (Some(x), Some(m)) => return algo::__run__(input, learnt, x, m),
 
-        (Some(x), None) => return algo::__run__(input, learnt, x, crate::CONFIG.memory),
+        (Some(x), None) => return algo::__run__(input, learnt, x, default_memory),
 
-        (None, Some(m)) => return algo::__run__(input, learnt, crate::CONFIG.threshold, m),
+        (None, Some(m)) => return algo::__run__(input, learnt, default_threshold, m),
 
         (None, None) => {
             return algo::__run__(
                 input,
                 learnt,
-                crate::CONFIG.threshold,
-                crate::CONFIG.memory,
+                default_threshold,
+                default_memory,
             )
         }
     }
@@ -295,7 +256,7 @@ pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
         let word = word;
         for word in word.split_whitespace() {
             for c in word.chars() {
-                sum += crate::CONFIG.multiplier * c as u32;
+                sum += default_multiplier * c as u32;
             }
             ram.push(sum);
             sum = 0;
