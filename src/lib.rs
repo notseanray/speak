@@ -132,10 +132,10 @@ macro_rules! impl_map {
                 pub fn new() -> Map<$T> { return __new__::<$T>(); }
                 pub fn from(vec: Vec<($T, $T)>) -> Map<String> { return __from__::<$T>(vec); }
 
-                pub fn push(    mut self, to_push: ($T, $T)) { self.entries.push(to_push); }
-                pub fn insert(  mut self, index: usize, to_insert: ($T, $T)) { self.entries.insert(index, to_insert); }
-                pub fn remove(  mut self, index: usize) { self.entries.remove(index); }
-                pub fn clear(   mut self) { self.entries.clear(); }
+                pub fn push(mut self, to_push: ($T, $T)) { self.entries.push(to_push); }
+                pub fn insert(mut self, index: usize, to_insert: ($T, $T)) { self.entries.insert(index, to_insert); }
+                pub fn remove(mut self, index: usize) { self.entries.remove(index); }
+                pub fn clear(mut self) { self.entries.clear(); }
             }
         )*
     };
@@ -159,7 +159,7 @@ pub(crate) mod algo;
 /// # learn
 /// This function is part of the main algorithm, that means two things:
 /// 
-/// * If you're training a very big map, I strongly recommend to make this function asynchroneous, because it will be a long process. Being O(n^(⌈ #n ÷ memory ⌉)).
+/// * If you're training a very big map, I strongly recommend to make this function asynchroneous, because it will be a long process.
 /// 
 /// * Second, this function haves the option to use the default configuration, it's strongly recommended to use this option, you can use `None` as the final argument to use the default configuration. If you don't want the recommended configuration, use your own `usize` as memory.
 /// 
@@ -179,11 +179,11 @@ pub(crate) mod algo;
 /// # Warning
 /// This function takes some time, so don't use it too much. Because of that, it's recommended to use it in a thread. But that's on your own. Because I want to keep the code the lightest as possible.
 /// 
-pub fn learn<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> algo::Learnt {
+pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
     if let Some(x) = memory {
-        return algo::__learn__::<T>(rawdata, x);
+        return algo::__learn__::<T>(map, x);
     } else {
-        return algo::__learn__::<T>(rawdata, crate::CONFIG.memory);
+        return algo::__learn__::<T>(map, crate::CONFIG.memory);
     }
 }
 
@@ -201,7 +201,16 @@ pub fn learn<T: Literal>(rawdata: Map<T>, memory: Option<usize>) -> algo::Learnt
 /// * `Learnt` (being the struct returned by the `learn(...)` function)
 /// * `Option<f32>` is the threshold, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
 /// * `Option<usize>` is the memory, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
-
+/// # Example
+/// ```rust
+/// let map = Map::<&'static str>::from(vec![
+///   ("Hi", "Hello"),
+///  ("How are you?", "I'm fine, thank you!")
+/// ]);
+/// let learned = learn(map, None);
+/// let result = run("Hi", learned, None, None);
+/// ```
+/// In this example the final 2 parameters are empty because I want to use the default configuration.
 pub fn run(
     input: String,
     learnt: algo::Learnt,
@@ -263,6 +272,7 @@ pub(self) fn __from__<T: Literal>(vec: Vec<(T, T)>) -> Map<String> {
 }
 
 /// # ⚠️⚠️⚠️⚠️⚠️⚠️ NOT MEANT FOR PUBLIC USE, PLEASE STOP USING IT! ⚠️⚠️⚠️⚠️⚠️⚠️
+/// Please, this struct is just public
 pub struct Deconstructed<T> {
     pub keys: Vec<T>,
     pub values: Vec<T>,
