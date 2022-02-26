@@ -15,9 +15,9 @@
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
 //
 
-static default_multiplier: u32 = 3;
-static default_threshold: f32 = 0.3;
-static default_memory: usize = 2;
+static DEFAULT_MULTIPLIER: u32 = 3;
+static DEFAULT_THRESHOLD: f32 = 0.3;
+static DEFAULT_MEMORY: usize = 2;
 
 //
 // ─── MAPS ───────────────────────────────────────────────────────────────────────
@@ -144,7 +144,7 @@ pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
     if let Some(x) = memory {
         return algo::__learn__::<T>(map, x);
     } else {
-        return algo::__learn__::<T>(map, default_memory);
+        return algo::__learn__::<T>(map, DEFAULT_MEMORY);
     }
 }
 
@@ -181,16 +181,16 @@ pub fn run(
     match (threshold, memory) {
         (Some(x), Some(m)) => return algo::__run__(input, learnt, x, m),
 
-        (Some(x), None) => return algo::__run__(input, learnt, x, default_memory),
+        (Some(x), None) => return algo::__run__(input, learnt, x, DEFAULT_MEMORY),
 
-        (None, Some(m)) => return algo::__run__(input, learnt, default_threshold, m),
+        (None, Some(m)) => return algo::__run__(input, learnt, DEFAULT_THRESHOLD, m),
 
         (None, None) => {
             return algo::__run__(
                 input,
                 learnt,
-                default_threshold,
-                default_memory,
+                DEFAULT_THRESHOLD,
+                DEFAULT_MEMORY,
             )
         }
     }
@@ -256,7 +256,7 @@ pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
         let word = word;
         for word in word.split_whitespace() {
             for c in word.chars() {
-                sum += default_multiplier * c as u32;
+                sum += DEFAULT_MULTIPLIER * c as u32;
             }
             ram.push(sum);
             sum = 0;
