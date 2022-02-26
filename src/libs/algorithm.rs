@@ -98,11 +98,14 @@ pub(crate) fn __run__(
 	
 	let mut vvec_length: usize;
 	let mut vvec_memory: usize;
-    
-	let mut mem: usize;
+	let mut vvec_chunk: &[u32];
+
+	let mut currernt_mvec: Vec<u32>;
+
+	let mut input_memory: usize;
     
     let inputvec_length: usize = inputvec.len() - 1;
-    mem = if memory >= inputvec_length {
+    input_memory = if memory >= inputvec_length {
         inputvec.len()
     } else {
         memory
@@ -127,25 +130,55 @@ from Rust code that's efficient, because that's the point of making this in Rust
 creating a good crate).
 */
 
-	for X in (memory..inputvec_length).step_by(mem) {
+	for X in (input_memory..inputvec_length).step_by(input_memory) {
+		int_chunk = &inputvec[X - input_memory .. X];
 		for vvec in learnt_data
 						.translated_deconstructed
 						.values.iter() {
 
 			vvec_length = vvec.len();
-			if memory >= vvec_length {
-				vvec_memory = vvec_length;
-			} else {
-				vvec_memory = memory;
-			};
+			vvec_memory = if memory >= vvec_length { vvec_length } else { memory };
 
-			for Y in (0..vvec_length).step_by(vvec_memory) {
-				for Z in (0..learnt_data.learn_vec) {
-					//if ((inputvec[X - mem .. X].iter().sum() as f32 / vvec[Y - vvec_memory .. Y]) - 1).abs() <= threshold {
-				}
-				}
+			for Y in (vvec_memory..vvec_length).step_by(vvec_memory) {
+				vvec_chunk = &vvec[Y - vvec_memory .. Y];
+				//currernt_mvec = learnt_data.learn_vec[Y];
+
+
+
+
+
+
+
+
+
+
+if ((int_chunk.iter().sum::<u32>() as f32) / (vvec_chunk.iter().sum::<u32>() as f32) - 1.0).abs() <= threshold { // If the differences are in the threshold
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			};
 		};
 	};
-	return result
+	return result;
 }
