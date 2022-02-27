@@ -8,6 +8,48 @@ pub struct Learnt { // It'sn't meant to be used by the user, just returned by th
 	raw_deconstructed: Deconstructed<String>
 }
 
+#[feature(concat_idents)]
+macro_rules! mainloop {
+	($parent_vec: ident,
+	$namevecstring: expr,
+	$iterator: ident,
+	$next: block) => {
+
+		for $iterator in $parent_vec.iter() {
+
+			length_$namevecstring = $namevec.len();
+			$namevec_memory = if memory >= $namevec_length {
+				memory
+			} else {
+				$namevec_length
+			};
+
+			for $iterator[0] in ($namevec_memory..$parent_vec.iter()).step_by($namevec_memory) {
+				$namevec_chunk = &$namevec[$iterator[0] - $namevec_memory .. $iterator[0]];
+				$next
+			}
+		};
+	};
+
+	($namevec: ident,
+	$namevecstring: expr,
+	$iterator: expr,
+	$next: block) => {
+		let length_$namevecstring = $namevec.len();
+		let $namevec_memory: usize = if memory >= $namevec_length {
+			memory
+		} else {
+			$namevec_length
+		};
+
+		for $iterator[0] in ($namevec_memory .. $namevec_length).step_by($namevec_memory) {
+			$namevec_chunk = &$namevec[$iterator[0] - $namevec_memory .. $iterator[0]];
+
+			$next
+		}
+	}
+}
+
 //
 // ──────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: T R A I N   F U N C T I O N : :  :   :    :     :        :          :
@@ -96,45 +138,42 @@ pub(crate) fn __run__(
 
     // Then, we calculate the distance between the input and the learning data.
 
-    let mut int_chunk: &[u32];
 	
 	let mut vvec_length: usize;
 	let mut vvec_memory: usize;
 	let mut vvec_chunk: &[u32];
 
+	let mut mvec_length: usize;
+	let mut mvec_memory: usize;
+	let mut mvec_chunk: &[f32];
+	
 	let keys_length: usize = learnt_data.translated_deconstructed.keys.len();
-
-	let input_memory: usize;
-    
-    let inputvec_length: usize = inputvec.len() - 1;
-    input_memory = if memory >= inputvec_length {
-        inputvec.len()
-    } else {
-        memory
-    };
-
-	for X in (input_memory..inputvec_length).step_by(input_memory) {
-		int_chunk = &inputvec[X - input_memory .. X];
-		for (IVVEC, vvec) in learnt_data
-						.translated_deconstructed
-						.values.iter().enumerate() {
-
-			vvec_length = vvec.len();
-			vvec_memory = if memory >= vvec_length { vvec_length } else { memory };
-			
-			for Y in (vvec_memory..vvec_length).step_by(vvec_memory) {
-				vvec_chunk = &vvec[Y - vvec_memory .. Y];
-				//[Y * keys_length
-
-				if ((
-					(int_chunk.iter().sum::<u32>() as f32) /
-					(vvec_chunk.iter().sum::<u32>() as f32)) /
-					learnt_data.learn_vec[IVVEC]//[0]
-					- 1.0).abs() <= threshold {
-						//result.push_str()
+	
+	let inputvec_memory: usize; 
+    let mut inputvec_chunk: &[u32];
+	
+	mainloop!(
+		inputvec,
+		inputvec, //namevecstring
+		"X",
+		{
+			mainloop!(
+				vvec,
+				"vvec",
+				learnt_data.translated_deconstructed.values.iter().enumerate(),
+				Y,
+				{
+					mainloop!(
+						"mvec",
+						mvec,
+						Z,
+						{
+							println!("hi")
+						};
+					);
 				};
-			};
-		};
-	};
+			);
+		}
+	);
 	return result;
 }
