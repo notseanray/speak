@@ -80,7 +80,6 @@ pub(crate) fn __run__(
     threshold: f32,              // The threshold (default: 0.4)
     memory: usize,
 ) -> String {
-	
 	let mut result: String = String::new();
     // First, we translate the input into a vector
     let mut inputvec: Vec<u32> = Vec::new();
@@ -130,9 +129,9 @@ pub(crate) fn __run__(
 				if ((
 					(int_chunk.iter().sum::<u32>() as f32) /
 					(vvec_chunk.iter().sum::<u32>() as f32)) /
-					learnt_data.learn_vec[IVVEC]
+					learnt_data.learn_vec[IVVEC]//[0]
 					- 1.0).abs() <= threshold {
-					println!("{}", learnt_data.raw_deconstructed.keys[IVVEC]);
+						//result.push_str()
 				};
 			};
 		};

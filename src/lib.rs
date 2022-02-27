@@ -138,13 +138,13 @@ pub(crate) mod algo;
 /// ```
 /// 
 /// # Warning
-/// This function takes some time, so don't use it too much. Because of that, it's recommended to use it in a thread. But that's on your own. Because I want to keep the code the lightest as possible.
+/// This function is asynchroneous, 
 /// 
 pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
-    if let Some(x) = memory {
+	if let Some(x) = memory {
         return algo::__learn__::<T>(map, x);
     } else {
-        return algo::__learn__::<T>(map, DEFAULT_MEMORY);
+		return algo::__learn__::<T>(map, DEFAULT_MEMORY);
     }
 }
 
@@ -185,14 +185,7 @@ pub fn run(
 
         (None, Some(m)) => return algo::__run__(input, learnt, DEFAULT_THRESHOLD, m),
 
-        (None, None) => {
-            return algo::__run__(
-                input,
-                learnt,
-                DEFAULT_THRESHOLD,
-                DEFAULT_MEMORY,
-            )
-        }
+        (None, None) => return algo::__run__(input, learnt, DEFAULT_THRESHOLD, DEFAULT_MEMORY)
     }
 }
 
