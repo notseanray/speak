@@ -76,7 +76,6 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
 // ──────────────────────────────────────────────────────────────────────────
 //
 
-#[allow(non_snake_case)]
 pub(crate) fn __run__(
 	input: String,               // The input string
     learnt_data: Learnt,        // The learnt data
@@ -136,12 +135,17 @@ pub(crate) fn __run__(
 
 
 key_length = learnt_data.translated_deconstructed.keys.len();
+
+/*
+thinking this part right know, because a key has length X and a value length Y, then how can we know that (iterator) * key length is the way to go?
 key_chunk_raw = learnt_data.learn_vec[IVVEC]
 	.iter()
 	.enumerate()
 	.filter(|(i, _)| i % key_length == 0)
 	.map(|(_, v)| *v)
 	.collect::<Vec<f32>>();
+
+key_chunk = &key_chunk_raw[];*/
 
 if ((
 	(int_chunk.iter().sum::<u32>() as f32) /

@@ -87,7 +87,7 @@ pub struct Map<T: Literal> {
 }
 
 macro_rules! impl_map {
-    ($($T: path),*) => {
+    ($($T: ty),*) => {
         $(
             impl Map<$T> {
                 pub fn new() -> Map<$T> { return __new__::<$T>(); }
