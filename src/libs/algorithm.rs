@@ -2,7 +2,10 @@
 
 use crate::*;
 
-pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function.
+/// # WARNING
+/// Do not use this struct, just use it in with the `run(...)` function.
+
+pub struct Learnt {
 	learn_vec: Vec<Vec<f32>>,
 	translated_deconstructed: Deconstructed<Vec<u32>>,
 	raw_deconstructed: Deconstructed<String>
@@ -102,11 +105,15 @@ pub(crate) fn __run__(
 	let mut vvec_memory: usize;
 	let mut vvec_chunk: &[u32];
 
-	let keys_length: usize = learnt_data.translated_deconstructed.keys.len();
+	let mut key_length: usize;
+	let mut key_memory: usize;
+	let mut key_chunk: &[f32];
+
+	let mut key_chunk_raw: Vec<f32>; // As you can probably notice, I don't like to use Vecs, but I need to do it...
 
 	let input_memory: usize;
-    
     let inputvec_length: usize = inputvec.len() - 1;
+    
     input_memory = if memory >= inputvec_length {
         inputvec.len()
     } else {
@@ -126,13 +133,24 @@ pub(crate) fn __run__(
 				vvec_chunk = &vvec[Y - vvec_memory .. Y];
 				//[Y * keys_length
 
-				if ((
-					(int_chunk.iter().sum::<u32>() as f32) /
-					(vvec_chunk.iter().sum::<u32>() as f32)) /
-					learnt_data.learn_vec[IVVEC]//[0]
-					- 1.0).abs() <= threshold {
-						//result.push_str()
-				};
+
+
+key_length = learnt_data.translated_deconstructed.keys.len();
+key_chunk_raw = learnt_data.learn_vec[IVVEC]
+	.iter()
+	.enumerate()
+	.filter(|(i, _)| i % key_length == 0)
+	.map(|(_, v)| *v)
+	.collect::<Vec<f32>>();
+
+if ((
+	(int_chunk.iter().sum::<u32>() as f32) /
+	(vvec_chunk.iter().sum::<u32>() as f32)) /
+	key_chunk.iter().sum::<f32>()
+	- 1.0).abs() <= threshold {
+		//result.push_str()
+};
+
 			};
 		};
 	};
