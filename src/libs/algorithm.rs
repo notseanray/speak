@@ -1,57 +1,11 @@
 //! Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
 
-use paste::paste;
 use crate::*;
 
 pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function.
 	learn_vec: Vec<Vec<f32>>,
 	translated_deconstructed: Deconstructed<Vec<u32>>,
 	raw_deconstructed: Deconstructed<String>
-}
-
-macro_rules! mainloop {
-	($parent_vec: expr,
-	$namevec: ident,
-	$iterator: ident,
-	$iteratorx: ident,
-	$next: block) => {
-		paste! {
-			for $iterator in $parent_vec.iter() {
-
-				[< length_ $namevec >] = $namevec.len();
-				[< memory_ $namevec >] = if memory >= [< length_ $namevec >] {
-					memory
-				} else {
-					[<length_ $namevec>]
-				};
-
-				for $iteratorx in ([< memory_ $namevec >]..$parent_vec.iter()).step_by([< memory_ $namevec >]) {
-					[<chunk_ $namevec>] = &$namevec[$iterator[0] - $namevec_memory .. $iterator[0]];
-					$next
-				}
-			}
-		};
-	};
-
-	($namevec: ident,
-	$iterator: expr,
-	$next: block) => {
-		paste! {
-			let [< length_ $namevec >] = $namevec.len();
-			let [< memory_ $namevec >]: usize =
-			if memory >= [< length_ $namevec >] {
-				memory
-			} else {
-				[< length_$namevec >]
-			};
-			
-			for $iterator in([< memory_ $namevec >].. [< length_ $namevec >]).step_by([< memory_ $namevec >]) {
-				[< chunk_ $namevec >] = &$namevec[$iterator - [< memory_ $namevec >] .. $iterator];
-				
-				$next
-			}
-		}
-	}
 }
 
 //
@@ -142,37 +96,45 @@ pub(crate) fn __run__(
 
     // Then, we calculate the distance between the input and the learning data.
 
-	let mut length_vvec: usize;
-	let mut memory_vvec: usize;
-	let mut chunk_vvec: &[u32];
+    let mut int_chunk: &[u32];
+	
+	let mut vvec_length: usize;
+	let mut vvec_memory: usize;
+	let mut vvec_chunk: &[u32];
 
-	let mut length_mvec: usize;
-	let mut memory_mvec: usize;
-	let mut chunk_mvec: &[f32];
+	let keys_length: usize = learnt_data.translated_deconstructed.keys.len();
 
-	let mut chunk_inputvec: &[u32];
+	let input_memory: usize;
+    
+    let inputvec_length: usize = inputvec.len() - 1;
+    input_memory = if memory >= inputvec_length {
+        inputvec.len()
+    } else {
+        memory
+    };
 
-	mainloop!(
-		inputvec,
-		X,
-		{
-			mainloop!(
-				vvec,
-				"vvec",
-				vvec,
-				Y,
-				{
-					mainloop!(
-						mvec,
-						"mvec",
-						Z,
-						{
-							println!("hi")
-						};
-					);
-				}
-			);
-		}
-	);
+	for X in (input_memory..inputvec_length).step_by(input_memory) {
+		int_chunk = &inputvec[X - input_memory .. X];
+		for (IVVEC, vvec) in learnt_data
+						.translated_deconstructed
+						.values.iter().enumerate() {
+
+			vvec_length = vvec.len();
+			vvec_memory = if memory >= vvec_length { vvec_length } else { memory };
+			
+			for Y in (vvec_memory..vvec_length).step_by(vvec_memory) {
+				vvec_chunk = &vvec[Y - vvec_memory .. Y];
+				//[Y * keys_length
+
+				if ((
+					(int_chunk.iter().sum::<u32>() as f32) /
+					(vvec_chunk.iter().sum::<u32>() as f32)) /
+					learnt_data.learn_vec[IVVEC]//[0]
+					- 1.0).abs() <= threshold {
+						//result.push_str()
+				};
+			};
+		};
+	};
 	return result;
 }
