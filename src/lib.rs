@@ -137,9 +137,6 @@ pub(crate) mod algo;
 /// let learned = learn(map, None);
 /// ```
 /// 
-/// # Warning
-/// This function is asynchroneous, 
-/// 
 pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
 	if let Some(x) = memory {
         return algo::__learn__::<T>(map, x);
