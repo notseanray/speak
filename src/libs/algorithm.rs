@@ -1,4 +1,4 @@
-//! Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
+// Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
 
 use crate::*;
 
@@ -23,48 +23,50 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
         keys: translate(&dec.keys),
         values: translate(&dec.values),
     };
-	
-    let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
-    for x in 0..decdata.values.len() {
-		data.push((decdata.keys[x].clone(), decdata.values[x].clone()));
-    }
-	
-    let mut mega: Vec<Vec<f32>> = Vec::new();
-    let mut ram: Vec<f32> = Vec::new();
-	
-    // Now, we can start learning the data relations between the keys and values.
-	
-    let mut key_length: usize;
-    let mut value_length: usize;
 
-    let mut mem: usize;
+	println!("{:#?}", decdata.keys);
 
-    for (key, value) in data {
-		key_length = key.len();
-        value_length = value.len();
-		
-        mem = if memory >= key_length {
-			key_length
-        } else {
+	let mut kvec_length: usize;
+	let mut kmem: usize;
+
+	let mut vvec_length: usize;
+	let mut vmem: usize;
+
+	let mut ram: Vec<f32> = Vec::new();
+	let mut learn_vec: Vec<Vec<f32>> = Vec::new();
+
+	for kvec in &decdata.keys {
+		kvec_length = kvec.len();
+		kmem = if memory >= kvec_length {
+			kvec_length
+		} else {
 			memory
-        };
-		
-        for x in (mem..key_length).step_by(mem) {
-			for y in (mem..value_length).step_by(mem) {
-                // We can now learn the relation between the key and value.
-                ram.push(
-					key[x - mem..x].iter().sum::<u32>() as f32 /
-					value[y - mem..y].iter().sum::<u32>() as f32,
-                );
-            }
-        }
-		
-        mega.push(ram.clone());
-        ram.clear();
-    }
-	
+		};
+		for X in (kmem..kvec_length).step_by(kmem) {
+			for vvec in &decdata.values {
+				vvec_length = vvec.len();
+				vmem = if memory >= vvec_length {
+					vvec_length - 1
+				} else {
+					memory
+				};
+
+				for Y in (vmem..vvec_length).step_by(vmem) {
+					ram.push(
+						kvec[(X - kmem)..X].iter().sum::<u32>() as f32 /
+						vvec[(Y - vmem)..Y].iter().sum::<u32>() as f32
+					);
+				}
+			}
+		}
+		learn_vec.push(ram.clone());
+		ram.clear();
+	}
+
+println!("{:#?}", learn_vec);
+
     return Learnt {
-		learn_vec: mega,
+		learn_vec,
         translated_deconstructed: decdata,
         raw_deconstructed: dec,
 	}
@@ -136,12 +138,7 @@ pub(crate) fn __run__(
 
 key_length = learnt_data.translated_deconstructed.keys.len();
 
-key_chunk_raw = learnt_data.learn_vec[IVVEC]
-	.iter()
-	.enumerate()
-	.filter(|(i, _)| i % key_length == 0)
-	.map(|(_, v)| *v)
-	.collect::<Vec<f32>>();
+key_chunk_raw = learnt_data.learn_vec[IVVEC];
 
 if ((
 	(int_chunk.iter().sum::<u32>() as f32) /

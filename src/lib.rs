@@ -1,4 +1,4 @@
-//! Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
+// Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
 
 // Thanks to the Rust community, compiler and creators for making Rust a great language.
 
@@ -15,7 +15,7 @@
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
 //
 
-static DEFAULT_MULTIPLIER: u32 = 3;
+static DEFAULT_MULTIPLIER: u32 = 7;
 static DEFAULT_THRESHOLD: f32 = 0.3;
 static DEFAULT_MEMORY: usize = 2;
 
@@ -180,13 +180,33 @@ pub fn run(
     memory: Option<usize>,
 ) -> String {
     match (threshold, memory) {
-        (Some(x), Some(m)) => return algo::__run__(input, learnt, x, m),
+        (Some(x), Some(m)) => return algo::__run__(
+			input,
+			learnt,
+			x,
+			m
+		),
 
-        (Some(x), None) => return algo::__run__(input, learnt, x, DEFAULT_MEMORY),
+        (Some(x), None) => return algo::__run__(
+			input,
+			learnt,
+			x,
+			DEFAULT_MEMORY
+		),
 
-        (None, Some(m)) => return algo::__run__(input, learnt, DEFAULT_THRESHOLD, m),
+        (None, Some(m)) => return algo::__run__(
+			input,
+			learnt,
+			DEFAULT_THRESHOLD,
+			m
+		),
 
-        (None, None) => return algo::__run__(input, learnt, DEFAULT_THRESHOLD, DEFAULT_MEMORY)
+        (None, None) => return algo::__run__(
+			input,
+			learnt,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MEMORY
+		)
     }
 }
 */
