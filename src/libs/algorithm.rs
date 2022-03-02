@@ -1,11 +1,14 @@
-//! Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
+// Speak algorithm made by Alex G. C. (blyxyas) visit github.com/blyxyas/speak for more information.
 
 use crate::*;
 
-pub struct Learnt { // It'sn't meant to be used by the user, just returned by the learn function and fed into the run function.
-    learn_vec: Vec<Vec<f32>>,
-    translated_deconstructed: Deconstructed<Vec<u32>>,
-    raw_deconstructed: Deconstructed<String>
+/// # WARNING
+/// Do not use this struct, just use it in with the `run(...)` function.
+
+pub struct Learnt {
+	pub learn_vec: Vec<Vec<f32>>,
+	pub translated_deconstructed: Deconstructed<Vec<u32>>,
+	pub raw_deconstructed: Deconstructed<String>
 }
 
 //
@@ -15,60 +18,59 @@ pub struct Learnt { // It'sn't meant to be used by the user, just returned by th
 //
 
 pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
-    let dec: Deconstructed<String> = deconstruct(rawdata);
+    let dec: Deconstructed<String> = deconstruct::<T>(rawdata);
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
         keys: translate(&dec.keys),
         values: translate(&dec.values),
     };
 
-    let mut data: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
-    for x in 0..decdata.values.len() {
-        data.push((decdata.keys[x].clone(), decdata.values[x].clone()));
-    }
+	println!("{:#?}", decdata.keys);
 
-    let mut mega: Vec<Vec<f32>> = Vec::new();
-    let mut ram: Vec<f32> = Vec::new();
+	let mut kvec_length: usize;
+	let mut kmem: usize;
 
-    // Now, we can start learning the data relations between the keys and values.
+	let mut vvec_length: usize;
+	let mut vmem: usize;
 
-    let mut key_length: usize;
-    let mut value_length: usize;
+	let mut ram: Vec<f32> = Vec::new();
+	let mut learn_vec: Vec<Vec<f32>> = Vec::new();
 
-    let mut key_chunk: &[u32]; // ⇐ Slice of the key
-    let mut value_chunk: &[u32]; // ⇐ Slice of the value
+	for kvec in &decdata.keys {
+		kvec_length = kvec.len();
+		kmem = if memory >= kvec_length {
+			kvec_length
+		} else {
+			memory
+		};
 
-    let mut mem: usize;
+		for kchunk in kvec.chunks(kmem) {
+			for vvec in &decdata.values {
+				vvec_length = vvec.len();
+				vmem = if memory >= vvec_length {
+					vvec_length
+				} else {
+					memory
+				};
 
-    for (key, value) in data {
-        key_length = key.len();
-        value_length = value.len();
+				for vchunk in vvec.chunks(vmem) {
+					ram.push(
+						kchunk.iter().sum::<u32>() as f32 /
+						vchunk.iter().sum::<u32>() as f32
+					);
+				};
+			};
+			learn_vec.push(ram.clone());
+			ram.clear();
+		};
+	};
 
-        mem = if memory >= key_length {
-            key_length
-        } else {
-            memory
-        };
+println!("{:#?}", learn_vec);
 
-        for x in (mem..key_length).step_by(mem) {
-            key_chunk = &key[x - mem..x];
-
-            for y in (mem..value_length).step_by(mem) {
-                value_chunk = &value[y - mem..y];
-                // We can now learn the relation between the key and value.
-                ram.push(
-                    key_chunk.iter().sum::<u32>() as f32 / value_chunk.iter().sum::<u32>() as f32,
-                );
-            }
-        }
-
-        mega.push(ram.clone());
-        ram.clear();
-    }
     return Learnt {
-        learn_vec: mega,
+		learn_vec,
         translated_deconstructed: decdata,
         raw_deconstructed: dec,
-    }
+	}
 }
 
 //
@@ -76,18 +78,18 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
 //   :::::: R U N   F U N C T I O N : :  :   :    :     :        :          :
 // ──────────────────────────────────────────────────────────────────────────
 //
-
+/*
 pub(crate) fn __run__(
-    input: String,               // The input string
+	input: String,               // The input string
     learnt_data: Learnt,        // The learnt data
     threshold: f32,              // The threshold (default: 0.4)
     memory: usize,
 ) -> String {
-    let mut result: String = String::new();
+	let mut result: String = String::new();
     // First, we translate the input into a vector
     let mut inputvec: Vec<u32> = Vec::new();
     {
-        let mut sum: u32 = 0;
+		let mut sum: u32 = 0;
         for word in input.split_whitespace() {
             for char in word.chars() {
                 sum += char as u32;
@@ -100,38 +102,54 @@ pub(crate) fn __run__(
     // Then, we calculate the distance between the input and the learning data.
 
     let mut int_chunk: &[u32];
-    let mut mem: usize;
-    
+	
+	let mut vvec_length: usize;
+	let mut vvec_memory: usize;
+	let mut vvec_chunk: &[u32];
+
+	let mut key_length: usize;
+	let mut key_memory: usize;
+	let mut key_chunk: &[f32];
+
+	let mut key_chunk_raw: Vec<f32>; // As you can probably notice, I don't like to use Vecs, but I need to do it...
+
+	let input_memory: usize;
     let inputvec_length: usize = inputvec.len() - 1;
-    mem = if memory >= inputvec_length {
+    
+    input_memory = if memory >= inputvec_length {
         inputvec.len()
     } else {
         memory
     };
 
-/*
-Now we compare:
-Currently we have an input, and we're going to try and relate our learning experiences to this input.
-This works because if A/B = A/C then B = C, so we're seeing if B ≈ C, if that's the case, that means that
-B is probably the same word or derivated from C, and that means that we can use B, because we learned that
-C is a good election when A is in our input.
+	for X in (input_memory..inputvec_length).step_by(input_memory) {
+		int_chunk = &inputvec[X - input_memory .. X];
+		for (IVVEC, vvec) in learnt_data
+						.translated_deconstructed
+						.values.iter().enumerate() {
 
-So, we're finding the relation between the expected input, the expected output and the real input. But we're
-also spliting all this three things in chunks, previously to this change in the algorithm we observed word by word
-but splitting into chunks means that we can observe "I'm fine", that gives more information than "I'm" & "fine".
+			vvec_length = vvec.len();
+			vvec_memory = if memory >= vvec_length { vvec_length } else { memory };
+			
+			for Y in (vvec_memory..vvec_length).step_by(vvec_memory) {
+				vvec_chunk = &vvec[Y - vvec_memory .. Y];
+				//[Y * keys_length
 
-So, if the current input chunk (we're going to call it ichunk) divided by the value chunk (vchunk) is at a close distance from
-a mega array (kchunk / vchunk) that means that ichunk is close to kchunk, that means that we're going to use vchunk.
+key_length = learnt_data.translated_deconstructed.keys.len();
 
-I don't know if that's a good explanation, but that's our process, and that's the thing I'm trying to make from an explanation
-from Rust code that's efficient, because that's the point of making this in Rust instead of Python or talking to a human. (Apart from
-creating a good crate).
-*/
-    for x in (mem..inputvec_length).step_by(mem) {
-        int_chunk = &inputvec[x - mem..x];
-        for y in 0..learnt_data.learn_vec.len() {
-		
-        };
-    };
-    return result;
+key_chunk_raw = learnt_data.learn_vec[IVVEC];
+
+if ((
+	(int_chunk.iter().sum::<u32>() as f32) /
+	(vvec_chunk.iter().sum::<u32>() as f32)) /
+	key_chunk.iter().sum::<f32>()
+	- 1.0).abs() <= threshold {
+		//result.push_str()
+};
+
+			};
+		};
+	};
+	return result;
 }
+*/

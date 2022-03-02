@@ -1,4 +1,4 @@
-//! Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
+// Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
 
 // Thanks to the Rust community, compiler and creators for making Rust a great language.
 
@@ -15,9 +15,9 @@
 // ─── PUBLIC ─────────────────────────────────────────────────────────────────────
 //
 
-static default_multiplier: u32 = 3;
-static default_threshold: f32 = 0.3;
-static default_memory: usize = 2;
+static DEFAULT_MULTIPLIER: u32 = 7;
+static DEFAULT_THRESHOLD: f32 = 0.3;
+static DEFAULT_MEMORY: usize = 2;
 
 //
 // ─── MAPS ───────────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ impl Literal for &str {
 /// The `Map<T>` is the most important struct in the whole crate, it's used to store the expected inputs and outputs of the NLP algorithm. If you used a HashMap before, it's almost the same.
 /// 
 /// # Example
-/// ```rust
+/// ```rust ignore
 /// let map = Map::<&'static str>::from(vec![
 ///     ("Hi", "Hello"),
 ///     ("How are you?", "I'm fine, thank you!")
@@ -61,10 +61,12 @@ impl Literal for &str {
 /// ```
 /// **OR**
 /// 
-/// ```rust
+/// ```rust ignore
 /// let map = Map::<String>::from(vec![
 ///    ("Hi".to_string(), "Hello".to_string()),
 ///    ("How are you?".to_string(), "I'm fine, thank you!".to_string())
+/// ]);
+/// ```
 /// 
 /// # Types
 /// The Map struct only accepts types with the `Literal` trait, those are:
@@ -87,7 +89,7 @@ pub struct Map<T: Literal> {
 }
 
 macro_rules! impl_map {
-    ($($T: path),*) => {
+    ($($T: ty),*) => {
         $(
             impl Map<$T> {
                 pub fn new() -> Map<$T> { return __new__::<$T>(); }
@@ -129,7 +131,7 @@ pub(crate) mod algo;
 /// * `Option<usize>`: The memory of the algortihm, if you don't want to change the default value, use `None`, if you don't know what this is, chech the docs for the `Config` struct.
 /// It will return a `Learnt` struct, which contains all the necessary info about the results. Feed with that struct to the `run(...)` function.
 /// # Example
-/// ```rust
+/// ```rust ignore
 /// let map = Map::<&'static str>::from(vec![
 ///    ("Hi", "Hello"),
 ///    ("How are you?", "I'm fine, thank you!")
@@ -137,14 +139,11 @@ pub(crate) mod algo;
 /// let learned = learn(map, None);
 /// ```
 /// 
-/// # Warning
-/// This function takes some time, so don't use it too much. Because of that, it's recommended to use it in a thread. But that's on your own. Because I want to keep the code the lightest as possible.
-/// 
 pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
-    if let Some(x) = memory {
+	if let Some(x) = memory {
         return algo::__learn__::<T>(map, x);
     } else {
-        return algo::__learn__::<T>(map, default_memory);
+		return algo::__learn__::<T>(map, DEFAULT_MEMORY);
     }
 }
 
@@ -163,7 +162,7 @@ pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
 /// * `Option<f32>` is the threshold, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
 /// * `Option<usize>` is the memory, it's strongly recommended to use the default configuration, use `None` to use the default configuration.
 /// # Example
-/// ```rust
+/// ```rust ignore
 /// let map = Map::<&'static str>::from(vec![
 ///   ("Hi", "Hello"),
 ///  ("How are you?", "I'm fine, thank you!")
@@ -172,6 +171,8 @@ pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
 /// let result = run("Hi", learned, None, None);
 /// ```
 /// In this example the final 2 parameters are empty because I want to use the default configuration.
+
+/*
 pub fn run(
     input: String,
     learnt: algo::Learnt,
@@ -179,23 +180,36 @@ pub fn run(
     memory: Option<usize>,
 ) -> String {
     match (threshold, memory) {
-        (Some(x), Some(m)) => return algo::__run__(input, learnt, x, m),
+        (Some(x), Some(m)) => return algo::__run__(
+			input,
+			learnt,
+			x,
+			m
+		),
 
-        (Some(x), None) => return algo::__run__(input, learnt, x, default_memory),
+        (Some(x), None) => return algo::__run__(
+			input,
+			learnt,
+			x,
+			DEFAULT_MEMORY
+		),
 
-        (None, Some(m)) => return algo::__run__(input, learnt, default_threshold, m),
+        (None, Some(m)) => return algo::__run__(
+			input,
+			learnt,
+			DEFAULT_THRESHOLD,
+			m
+		),
 
-        (None, None) => {
-            return algo::__run__(
-                input,
-                learnt,
-                default_threshold,
-                default_memory,
-            )
-        }
+        (None, None) => return algo::__run__(
+			input,
+			learnt,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MEMORY
+		)
     }
 }
-
+*/
 //
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
 //
@@ -256,7 +270,7 @@ pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
         let word = word;
         for word in word.split_whitespace() {
             for c in word.chars() {
-                sum += default_multiplier * c as u32;
+                sum += DEFAULT_MULTIPLIER * c as u32;
             }
             ram.push(sum);
             sum = 0;
@@ -265,4 +279,24 @@ pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
         ram.clear();
     }
     return result;
+}
+
+// ─── TESTS ───────────────────────────────────────────────────────────────────── Maybe I delete this later?
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	#[test]
+	fn general() {
+		let map: Map<String> = Map::<&'static str>::from(
+			vec![
+				("a", "1"),
+				("b", "2"),
+				("c", "3"),
+			]
+		);
+
+		let x = learn(map, None);
+		println!("\x1b[93m{:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mKeys: {:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mValues: {:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mRaw Keys: {:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mRaw Values: {:#?}\x1b[0m\n", x.learn_vec, x.translated_deconstructed.keys, x.translated_deconstructed.values, x.raw_deconstructed.keys, x.raw_deconstructed.values);
+	}
 }
