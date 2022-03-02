@@ -42,26 +42,27 @@ pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
 		} else {
 			memory
 		};
-		for X in (kmem..kvec_length).step_by(kmem) {
+
+		for kchunk in kvec.chunks(kmem) {
 			for vvec in &decdata.values {
 				vvec_length = vvec.len();
 				vmem = if memory >= vvec_length {
-					vvec_length - 1
+					vvec_length
 				} else {
 					memory
 				};
 
-				for Y in (vmem..vvec_length).step_by(vmem) {
+				for vchunk in vvec.chunks(vmem) {
 					ram.push(
-						kvec[(X - kmem)..X].iter().sum::<u32>() as f32 /
-						vvec[(Y - vmem)..Y].iter().sum::<u32>() as f32
+						kchunk.iter().sum::<u32>() as f32 /
+						vchunk.iter().sum::<u32>() as f32
 					);
-				}
-			}
-		}
-		learn_vec.push(ram.clone());
-		ram.clear();
-	}
+				};
+			};
+			learn_vec.push(ram.clone());
+			ram.clear();
+		};
+	};
 
 println!("{:#?}", learn_vec);
 
@@ -133,8 +134,6 @@ pub(crate) fn __run__(
 			for Y in (vvec_memory..vvec_length).step_by(vvec_memory) {
 				vvec_chunk = &vvec[Y - vvec_memory .. Y];
 				//[Y * keys_length
-
-
 
 key_length = learnt_data.translated_deconstructed.keys.len();
 
