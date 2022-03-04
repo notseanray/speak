@@ -78,16 +78,17 @@ println!("{:#?}", learn_vec);
 //   :::::: R U N   F U N C T I O N : :  :   :    :     :        :          :
 // ──────────────────────────────────────────────────────────────────────────
 //
-/*
+
 pub(crate) fn __run__(
 	input: String,               // The input string
     learnt_data: Learnt,        // The learnt data
     threshold: f32,              // The threshold (default: 0.4)
     memory: usize,
 ) -> String {
+	unimplemented!();
 	let mut result: String = String::new();
     // First, we translate the input into a vector
-    let mut inputvec: Vec<u32> = Vec::new();
+    /*let mut inputvec: Vec<u32> = Vec::new();
     {
 		let mut sum: u32 = 0;
         for word in input.split_whitespace() {
@@ -97,59 +98,5 @@ pub(crate) fn __run__(
             inputvec.push(sum);
             sum = 0;
         }
-    };
-
-    // Then, we calculate the distance between the input and the learning data.
-
-    let mut int_chunk: &[u32];
-	
-	let mut vvec_length: usize;
-	let mut vvec_memory: usize;
-	let mut vvec_chunk: &[u32];
-
-	let mut key_length: usize;
-	let mut key_memory: usize;
-	let mut key_chunk: &[f32];
-
-	let mut key_chunk_raw: Vec<f32>; // As you can probably notice, I don't like to use Vecs, but I need to do it...
-
-	let input_memory: usize;
-    let inputvec_length: usize = inputvec.len() - 1;
-    
-    input_memory = if memory >= inputvec_length {
-        inputvec.len()
-    } else {
-        memory
-    };
-
-	for X in (input_memory..inputvec_length).step_by(input_memory) {
-		int_chunk = &inputvec[X - input_memory .. X];
-		for (IVVEC, vvec) in learnt_data
-						.translated_deconstructed
-						.values.iter().enumerate() {
-
-			vvec_length = vvec.len();
-			vvec_memory = if memory >= vvec_length { vvec_length } else { memory };
-			
-			for Y in (vvec_memory..vvec_length).step_by(vvec_memory) {
-				vvec_chunk = &vvec[Y - vvec_memory .. Y];
-				//[Y * keys_length
-
-key_length = learnt_data.translated_deconstructed.keys.len();
-
-key_chunk_raw = learnt_data.learn_vec[IVVEC];
-
-if ((
-	(int_chunk.iter().sum::<u32>() as f32) /
-	(vvec_chunk.iter().sum::<u32>() as f32)) /
-	key_chunk.iter().sum::<f32>()
-	- 1.0).abs() <= threshold {
-		//result.push_str()
-};
-
-			};
-		};
-	};
-	return result;
+    };*/
 }
-*/
