@@ -1,4 +1,4 @@
-// Speak crate made by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
+// Speak craade by Alex G. C. aka Blyxyas. visit github.com/blyxyas/speak for more information.
 
 // Thanks to the Rust community, compiler and creators for making Rust a great language.
 
@@ -139,12 +139,16 @@ pub(crate) mod algo;
 /// let learned = learn(map, None);
 /// ```
 /// 
-pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
-	if let Some(x) = memory {
-        return algo::__learn__::<T>(map, x);
-    } else {
-		return algo::__learn__::<T>(map, DEFAULT_MEMORY);
-    }
+pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>, multiplier: Option<u32>) -> algo::Learnt {
+	match (memory, multiplier) {
+		(Some(m), Some(x)) => return algo::__learn__::<T>(map, m, x),
+
+		(Some(m), None) => return algo::__learn__::<T>(map, m, DEFAULT_MULTIPLIER),
+
+		(None, Some(x)) => return algo::__learn__::<T>(map, DEFAULT_MEMORY, x),
+
+		(None, None) => return algo::__learn__::<T>(map, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
+	}
 }
 
 // run wrapper
@@ -172,44 +176,81 @@ pub fn learn<T: Literal>(map: Map<T>, memory: Option<usize>) -> algo::Learnt {
 /// ```
 /// In this example the final 2 parameters are empty because I want to use the default configuration.
 
-/*
+
 pub fn run(
     input: String,
     learnt: algo::Learnt,
     threshold: Option<f32>,
     memory: Option<usize>,
+	multiplier: Option<u32>
 ) -> String {
-    match (threshold, memory) {
-        (Some(x), Some(m)) => return algo::__run__(
+    match (threshold, memory, multiplier) {
+        (Some(x), Some(m), Some(a)) => return algo::__run__(
 			input,
 			learnt,
 			x,
-			m
+			m,
+			a
 		),
 
-        (Some(x), None) => return algo::__run__(
+		(Some(x), Some(m), None) => return algo::__run__(
 			input,
 			learnt,
 			x,
-			DEFAULT_MEMORY
+			m,
+			DEFAULT_MULTIPLIER
 		),
 
-        (None, Some(m)) => return algo::__run__(
+		(Some(x), None, Some(a)) => return algo::__run__(
+			input,
+			learnt,
+			x,
+			DEFAULT_MEMORY,
+			a
+		),
+
+		(Some(x), None, None) => return algo::__run__(
+			input,
+			learnt,
+			x,
+			DEFAULT_MEMORY,
+			DEFAULT_MULTIPLIER
+		),
+
+		(None, Some(m), Some(a)) => return algo::__run__(
 			input,
 			learnt,
 			DEFAULT_THRESHOLD,
-			m
+			m,
+			a
 		),
 
-        (None, None) => return algo::__run__(
+		(None, Some(m), None) => return algo::__run__(
 			input,
 			learnt,
 			DEFAULT_THRESHOLD,
-			DEFAULT_MEMORY
-		)
-    }
+			m,
+			DEFAULT_MULTIPLIER
+		),
+
+		(None, None, Some(a)) => return algo::__run__(
+			input,
+			learnt,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MEMORY,
+			a
+		),
+
+		(None, None, None) => return algo::__run__(
+			input,
+			learnt,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MEMORY,
+			DEFAULT_MULTIPLIER
+		),
+	}
 }
-*/
+
 //
 // ─── UTILS ──────────────────────────────────────────────────────────────────────
 //
@@ -224,7 +265,6 @@ pub(crate) fn deconstruct<T: Literal>(map: Map<T>) -> Deconstructed<String> {
         keys.push(key.literal());
         values.push(value.literal());
     }
-
     return Deconstructed { keys, values };
 }
 
@@ -262,15 +302,15 @@ impl<T> Deconstructed<T> {
     }
 }
 
-pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
+pub(crate) fn translate(vec: &Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
     let mut ram: Vec<u32> = Vec::new();
     let mut result: Vec<Vec<u32>> = Vec::new();
     let mut sum: u32 = 0;
-    for word in vec {
-        let word = word;
-        for word in word.split_whitespace() {
+    for phrase in vec {
+
+		for word in phrase.split_whitespace() {
             for c in word.chars() {
-                sum += DEFAULT_MULTIPLIER * c as u32;
+                sum += multiplier * c as u32;
             }
             ram.push(sum);
             sum = 0;
@@ -279,24 +319,4 @@ pub(crate) fn translate(vec: &Vec<String>) -> Vec<Vec<u32>> {
         ram.clear();
     }
     return result;
-}
-
-// ─── TESTS ───────────────────────────────────────────────────────────────────── Maybe I delete this later?
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	#[test]
-	fn general() {
-		let map: Map<String> = Map::<&'static str>::from(
-			vec![
-				("a", "1"),
-				("b", "2"),
-				("c", "3"),
-			]
-		);
-
-		let x = learn(map, None);
-		println!("\x1b[93m{:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mKeys: {:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mValues: {:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mRaw Keys: {:#?}\x1b[0m\n\x1b[1;95m==========\n\x1b[0;93mRaw Values: {:#?}\x1b[0m\n", x.learn_vec, x.translated_deconstructed.keys, x.translated_deconstructed.values, x.raw_deconstructed.keys, x.raw_deconstructed.values);
-	}
 }

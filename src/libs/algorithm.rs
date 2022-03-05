@@ -17,11 +17,11 @@ pub struct Learnt {
 // ──────────────────────────────────────────────────────────────────────────────
 //
 
-pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
+pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize, multiplier: u32) -> Learnt {
     let dec: Deconstructed<String> = deconstruct::<T>(rawdata);
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
-        keys: translate(&dec.keys),
-        values: translate(&dec.values),
+        keys: translate(&dec.keys, multiplier),
+        values: translate(&dec.values, multiplier),
     };
 
 	println!("{:#?}", decdata.keys);
@@ -84,19 +84,73 @@ pub(crate) fn __run__(
     learnt_data: Learnt,        // The learnt data
     threshold: f32,              // The threshold (default: 0.4)
     memory: usize,
+	multiplier: u32
 ) -> String {
-	unimplemented!();
 	let mut result: String = String::new();
     // First, we translate the input into a vector
-    /*let mut inputvec: Vec<u32> = Vec::new();
-    {
+    let mut inputvec: Vec<u32> = Vec::new();
 		let mut sum: u32 = 0;
         for word in input.split_whitespace() {
             for char in word.chars() {
-                sum += char as u32;
+                sum += (char as u32) * multiplier;
             }
             inputvec.push(sum);
             sum = 0;
-        }
-    };*/
+    };
+
+	// Input
+	let input_memory: usize;
+	let input_length: usize = inputvec.len();
+	let mut input_chunk: &[u32];
+
+	input_memory = if memory >= inputvec.len() {
+		inputvec.len()
+	} else {
+		memory
+	};
+
+	// Translated Values
+	let mut values_memory: usize;
+	let mut values_length: usize;
+	let mut values_chunk: &[u32];
+
+	// Mega values
+	let mut mega_memory: usize;
+	let mut mega_length: usize;
+	let mut mega_chunk: &[f32];
+
+	for x in (input_memory .. input_length).step_by(input_memory) {
+		input_chunk = &inputvec[x - input_memory .. x + 1];
+		for vvec in &learnt_data.translated_deconstructed.values {
+			values_length = vvec.len();
+			values_memory = if memory >= values_length {
+				values_length
+			} else {
+				memory
+			};
+			for y in (values_memory .. values_length).step_by(values_memory) {
+				values_chunk = &vvec[y - values_memory .. y + 1];
+				for mega_vec in &learnt_data.learn_vec {
+					mega_length = mega_vec.len();
+					mega_memory = if memory >= mega_length {
+						mega_length
+					} else {
+						memory
+					};
+
+					for float_index in (mega_memory .. mega_length).step_by(mega_memory) {
+						mega_chunk = &mega_vec[float_index - mega_memory .. float_index + 1];
+// Now, let's ask the question
+
+if ((input_chunk.iter().sum::<u32>() as f32 /
+values_chunk.iter().sum::<u32>() as f32) - mega_chunk.iter().sum::<f32>() as f32) < threshold {
+	result.push_str(learnt_data.raw_deconstructed.keys[x - input_memory].as_str());
+	result.push_str(" ");
+}
+					};
+				};
+			};
+		};
+	};
+	return result;
 }
