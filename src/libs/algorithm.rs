@@ -17,11 +17,11 @@ pub struct Learnt {
 // ──────────────────────────────────────────────────────────────────────────────
 //
 
-pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize) -> Learnt {
+pub(crate) fn __learn__<T: Literal>(rawdata: Map<T>, memory: usize, multiplier: u32) -> Learnt {
     let dec: Deconstructed<String> = deconstruct::<T>(rawdata);
     let decdata: Deconstructed<Vec<u32>> = Deconstructed {
-        keys: translate(&dec.keys),
-        values: translate(&dec.values),
+        keys: translate(&dec.keys, multiplier),
+        values: translate(&dec.values, multiplier),
     };
 
 	println!("{:#?}", decdata.keys);
@@ -84,11 +84,12 @@ pub(crate) fn __run__(
     learnt_data: Learnt,        // The learnt data
     threshold: f32,              // The threshold (default: 0.4)
     memory: usize,
+	multiplier: u32
 ) -> String {
 	unimplemented!();
 	let mut result: String = String::new();
     // First, we translate the input into a vector
-    /*let mut inputvec: Vec<u32> = Vec::new();
+    let mut inputvec: Vec<u32> = Vec::new();
     {
 		let mut sum: u32 = 0;
         for word in input.split_whitespace() {
@@ -98,5 +99,21 @@ pub(crate) fn __run__(
             inputvec.push(sum);
             sum = 0;
         }
-    };*/
+    };
+
+	// Input
+	let mut inputmemory: usize;
+	let mut input_length: usize;
+
+	inputmemory = if memory >= inputvec.len() {
+		inputvec.len()
+	} else {
+		memory
+	};
+
+	for X in (inputmemory .. input_length).step_by(inputmemory) {
+		
+	}
+
+	return result;
 }
