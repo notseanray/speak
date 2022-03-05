@@ -86,24 +86,21 @@ pub(crate) fn __run__(
     memory: usize,
 	multiplier: u32
 ) -> String {
-	unimplemented!();
 	let mut result: String = String::new();
     // First, we translate the input into a vector
     let mut inputvec: Vec<u32> = Vec::new();
-    {
 		let mut sum: u32 = 0;
         for word in input.split_whitespace() {
             for char in word.chars() {
-                sum += char as u32;
+                sum += (char as u32) * multiplier;
             }
             inputvec.push(sum);
             sum = 0;
-        }
     };
 
 	// Input
-	let mut input_memory: usize;
-	let mut input_length: usize;
+	let input_memory: usize;
+	let input_length: usize = inputvec.len();
 	let mut input_chunk: &[u32];
 
 	input_memory = if memory >= inputvec.len() {
