@@ -10,4 +10,3 @@ description = "A minimal, fast, machine-learning based chatbot"
 publish = false
 
 [dependencies]
-paste = "1.0"

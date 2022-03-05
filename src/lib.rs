@@ -315,7 +315,6 @@ pub(crate) fn translate(vec: &Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
             ram.push(sum);
             sum = 0;
         }
-
         result.push(ram.clone());
         ram.clear();
     }
