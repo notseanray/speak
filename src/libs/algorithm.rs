@@ -102,18 +102,56 @@ pub(crate) fn __run__(
     };
 
 	// Input
-	let mut inputmemory: usize;
+	let mut input_memory: usize;
 	let mut input_length: usize;
+	let mut input_chunk: &[u32];
 
-	inputmemory = if memory >= inputvec.len() {
+	input_memory = if memory >= inputvec.len() {
 		inputvec.len()
 	} else {
 		memory
 	};
 
-	for X in (inputmemory .. input_length).step_by(inputmemory) {
-		
-	}
+	// Translated Values
+	let mut values_memory: usize;
+	let mut values_length: usize;
+	let mut values_chunk: &[u32];
 
+	// Mega values
+	let mut mega_memory: usize;
+	let mut mega_length: usize;
+	let mut mega_chunk: &[Vec<f32>];
+
+	for x in (input_memory .. input_length).step_by(input_memory) {
+		input_chunk = &inputvec[x - input_memory .. x + 1];
+		for vvec in &learnt_data.translated_deconstructed.values {
+			values_length = vvec.len();
+			values_memory = if memory >= values_length {
+				values_length
+			} else {
+				memory
+			};
+			for y in (values_memory .. values_length).step_by(values_memory) {
+				values_chunk = &vvec[y - values_memory .. y + 1];
+				for mega_vec in &learnt_data.learn_vec {
+					mega_length = mega_vec.len();
+					mega_memory = if memory >= mega_length {
+						mega_length
+					} else {
+						memory
+					};
+
+					for float_index in (mega_memory .. mega_length).step_by(mega_memory) {
+						mega_chunk = &learnt_data.
+						learn_vec[float_index - mega_memory .. float_index + 1];
+// Now, let's ask the question
+/*
+if (input_chunk.iter().sum::<u32>() as f32 /
+values_chunk.iter().sum::<u32>() as f32)*/
+					};
+				};
+			};
+		};
+	};
 	return result;
 }
