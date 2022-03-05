@@ -120,7 +120,7 @@ pub(crate) fn __run__(
 	// Mega values
 	let mut mega_memory: usize;
 	let mut mega_length: usize;
-	let mut mega_chunk: &[Vec<f32>];
+	let mut mega_chunk: &[f32];
 
 	for x in (input_memory .. input_length).step_by(input_memory) {
 		input_chunk = &inputvec[x - input_memory .. x + 1];
@@ -142,12 +142,14 @@ pub(crate) fn __run__(
 					};
 
 					for float_index in (mega_memory .. mega_length).step_by(mega_memory) {
-						mega_chunk = &learnt_data.
-						learn_vec[float_index - mega_memory .. float_index + 1];
+						mega_chunk = &mega_vec[float_index - mega_memory .. float_index + 1];
 // Now, let's ask the question
-/*
-if (input_chunk.iter().sum::<u32>() as f32 /
-values_chunk.iter().sum::<u32>() as f32)*/
+
+if ((input_chunk.iter().sum::<u32>() as f32 /
+values_chunk.iter().sum::<u32>() as f32) - mega_chunk.iter().sum::<f32>() as f32) < threshold {
+	result.push_str(learnt_data.raw_deconstructed.keys[x - input_memory].as_str());
+	result.push_str(" ");
+}
 					};
 				};
 			};
