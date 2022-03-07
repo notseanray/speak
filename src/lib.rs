@@ -16,7 +16,7 @@
 //
 
 static DEFAULT_MULTIPLIER: u32 = 7;
-static DEFAULT_THRESHOLD: f32 = 0.3;
+static DEFAULT_THRESHOLD: f32 = 0.1;
 static DEFAULT_MEMORY: usize = 2;
 
 //
@@ -319,4 +319,8 @@ pub(crate) fn translate(vec: &Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
         ram.clear();
     }
     return result;
+}
+
+pub(crate) fn normalize(x: f32, minx: f32, maxx:f32) -> f32 {
+	return (x - minx)/(maxx - minx);
 }

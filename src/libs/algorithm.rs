@@ -99,7 +99,7 @@ pub(crate) fn __run__(
 	let input_length: usize = inputvec.len() + 1;
 	let mut input_chunk: &[u32];
 
-	input_memory = if memory >= inputvec.len() {
+	input_memory = if memory > inputvec.len() {
 		inputvec.len()
 	} else {
 		memory
@@ -117,40 +117,45 @@ pub(crate) fn __run__(
 
 	for x in (input_memory .. input_length).step_by(input_memory) {
 		input_chunk = &inputvec[x - input_memory .. x];
-		println!("{} | {:#?}", x, input_chunk);
+		println!("IC # {} | {:#?}", x, input_chunk);
 		for vvec in &learnt_data.translated_deconstructed.values {
-			values_length = vvec.len() + 1;
-			values_memory = if memory >= values_length {
+			println!("vvec");
+			values_length = vvec.len();
+			values_memory = if memory > values_length {
 				values_length
 			} else {
 				memory
 			};
-			for y in (values_memory .. values_length).step_by(values_memory) {
+			for y in (values_memory .. values_length + 1).step_by(values_memory) {
 				values_chunk = &vvec[y - values_memory .. y];
-				println!("{} | {:#?}", y, values_chunk);
+				println!("VC # {} | {:#?}", y, values_chunk);
 
 				for mega_vec in &learnt_data.learn_vec {
-					mega_length = mega_vec.len() + 1;
-					mega_memory = if memory >= mega_length {
+					mega_length = mega_vec.len();
+					mega_memory = if memory > mega_length {
 						mega_length
 					} else {
 						memory
 					};
-				println!("-> {:?}", mega_vec);
 
+				println!("MV # {:?}", mega_vec);
 
-					for float_index in (mega_memory .. mega_length).step_by(mega_memory) {
+					for float_index in (mega_memory .. mega_length + 1).step_by(mega_memory) {
 						mega_chunk = &mega_vec[float_index - mega_memory .. float_index];
 // Now, let's ask the question
 
-println!("{} / {}", input_chunk.iter().sum::<u32>(), values_chunk.iter().sum::<u32>());
+println!("@@@@@ {} / {} = {}", input_chunk.iter().sum::<u32>(), values_chunk.iter().sum::<u32>(), input_chunk.iter().sum::<u32>() as f32 / values_chunk.iter().sum::<u32>() as f32);
 
-if ((input_chunk.iter().sum::<u32>() as f32 /
+println!("!!!!!! {} / {} = {} - {} = {}", input_chunk.iter().sum::<u32>(), values_chunk.iter().sum::<u32>(), input_chunk.iter().sum::<u32>() as f32 / values_chunk.iter().sum::<u32>() as f32, mega_chunk.iter().sum::<f32>(), normalize((input_chunk.iter().sum::<u32>() as f32 /
 values_chunk.iter().sum::<u32>() as f32) -
-mega_chunk.iter().sum::<f32>() as f32) < threshold {
-	result.push_str("hola");
-	result.push_str(" ");
+mega_chunk.iter().sum::<f32>() as f32, 0.0, 1.0) + 2.0);
+
+if normalize((input_chunk.iter().sum::<u32>() as f32 /
+values_chunk.iter().sum::<u32>() as f32) -
+mega_chunk.iter().sum::<f32>() as f32, 0.0, 1.0) + 2.0 < threshold {
+	result.push_str("Elected ");
 }
+
 					};
 				};
 			};
