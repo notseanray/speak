@@ -320,7 +320,3 @@ pub(crate) fn translate(vec: &Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
     }
     return result;
 }
-
-pub(crate) fn normalize(x: f32, minx: f32, maxx:f32) -> f32 {
-	return (x - minx)/(maxx - minx);
-}

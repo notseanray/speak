@@ -146,13 +146,13 @@ pub(crate) fn __run__(
 
 println!("@@@@@ {} / {} = {}", input_chunk.iter().sum::<u32>(), values_chunk.iter().sum::<u32>(), input_chunk.iter().sum::<u32>() as f32 / values_chunk.iter().sum::<u32>() as f32);
 
-println!("!!!!!! {} / {} = {} - {} = {}", input_chunk.iter().sum::<u32>(), values_chunk.iter().sum::<u32>(), input_chunk.iter().sum::<u32>() as f32 / values_chunk.iter().sum::<u32>() as f32, mega_chunk.iter().sum::<f32>(), normalize((input_chunk.iter().sum::<u32>() as f32 /
+println!("!!!!!! {} / {} = {} - {} = {}", input_chunk.iter().sum::<u32>(), values_chunk.iter().sum::<u32>(), input_chunk.iter().sum::<u32>() as f32 / values_chunk.iter().sum::<u32>() as f32, mega_chunk.iter().sum::<f32>(), ((input_chunk.iter().sum::<u32>() as f32 /
 values_chunk.iter().sum::<u32>() as f32) -
-mega_chunk.iter().sum::<f32>() as f32, 0.0, 1.0) + 2.0);
+mega_chunk.iter().sum::<f32>()) + 1.0);
 
-if normalize((input_chunk.iter().sum::<u32>() as f32 /
-values_chunk.iter().sum::<u32>() as f32) -
-mega_chunk.iter().sum::<f32>() as f32, 0.0, 1.0) + 2.0 < threshold {
+if ((input_chunk.iter().sum::<u32>() as f32 /
+values_chunk.iter().sum::<u32>() as f32) /
+mega_chunk.iter().sum::<f32>()).abs() - 1.0 <= threshold {
 	result.push_str("Elected ");
 }
 
