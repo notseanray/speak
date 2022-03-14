@@ -1,8 +1,5 @@
 // I coded the run algorithm in C, just because it is easier for me to understand.
 
-#ifndef RUN
-#define RUN
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,7 +27,7 @@ String mpush(String original, String _new) {
 	for (int i = 0; i < _new.length; i++) {
 		_final.body[original.length + i] = _new.body[i];
 	}
-	
+
 	// Now we free the memory of the strings.
 
 	free(original.body);
@@ -42,13 +39,13 @@ String mpush(String original, String _new) {
 
 
 String string() {
-	
+
 	String _string;
 	_string.body = (char *) malloc(1);
 	_string.length = 1;
 
 	_string.push = &mpush;
-	
+
 	return _string;
 };
 
@@ -60,6 +57,7 @@ typedef unsigned int uint;
 	size_t length;\
 \
 } Vec##typex;
+
 
 mvector(uint);
 mvector(Vecuint);
@@ -86,23 +84,53 @@ typedef struct {
 	DecString* raw_deconstructed;
 } Learnt;
 
-Vecuint split_whitespace(String _string) {
-	
-	Vecuint _vec;
-	_vec.length = 1;
-	_vec.body = (uint *) malloc(_string.length);
-	for (int i = 0; i < _string.length; i++) {
-		if (_string.body[i] == ' ') {
-			_vec.length = _vec.length + 1;
-			_vec.body[_vec.length - 1] = i;
+VecVecuint chunks(Vecuint what, uint where) {
+	VecVecuint _final;
+	_final.body = (Vecuint *) malloc(what.length);
+	_final.length = 0;
+
+	for (int i = 0; i < what.length; i++) {
+		if (i % where == 0) {
+			_final.length = _final.length + 1;
+			_final.body[_final.length].length = _final.body[_final.length].length + 1;
+			_final.body[_final.length].body[-1] = what.body[i];
 		};
 	};
-	return _vec;
+
+	free(what.body);
+	free(what.length);
+
+	return _final;
 };
+
+#define create_vec(name, typex) \
+Vec##typex _##name;\
+_##name.length = 0;\
+_##name.body = (##typex *) malloc(1);
 
 Learnt learn(DecString map, uint memory, uint multiplier) {
 	// Here we have an advantage, in C, all characters are numbers, so we don't need to convert them to numbers.
+	
+	create_vec(kvec, uint);
+	create_vec(vvec, uint);
 
-}
+	uint kmem;
+	uint vmem;
 
-#endif
+	for (int i = 0; i < map.keys.length; i++) {
+		
+		if (memory >= _kvec.length) {
+			kmem = _kvec.length;
+		} else {
+			kmem = memory;
+		};
+
+		// Split
+		strtok_r(map.keys.body[i].body, ' ', &map.keys.body[i].body);
+
+		// Translate it
+		for (int j = 0; j < map.keys.body[i].length; j++) {
+			_kvec.body[_kvec.length] = (uint) map.keys.body[i].body[j];
+		};
+	};
+};
