@@ -84,25 +84,6 @@ typedef struct {
 	DecString* raw_deconstructed;
 } Learnt;
 
-VecVecuint chunks(Vecuint what, uint where) {
-	VecVecuint _final;
-	_final.body = (Vecuint *) malloc(what.length);
-	_final.length = 0;
-
-	for (int i = 0; i < what.length; i++) {
-		if (i % where == 0) {
-			_final.length = _final.length + 1;
-			_final.body[_final.length].length = _final.body[_final.length].length + 1;
-			_final.body[_final.length].body[-1] = what.body[i];
-		};
-	};
-
-	free(what.body);
-	free(what.length);
-
-	return _final;
-};
-
 #define create_vec(name, typex) \
 Vec##typex _##name;\
 _##name.length = 0;\
@@ -130,7 +111,13 @@ Learnt learn(DecString map, uint memory, uint multiplier) {
 
 		// Translate it
 		for (int j = 0; j < map.keys.body[i].length; j++) {
-			_kvec.body[_kvec.length] = (uint) map.keys.body[i].body[j];
+			_kvec.body[_kvec.length] = multiplier * (uint) map.keys.body[i].body[j];
 		};
+
+		// We free the original string.
+		free(map.keys.body[i].body);
+		free(map.keys.body[i].length);
+
+		// Chunk it
 	};
 };
