@@ -16,7 +16,7 @@
 //
 
 static DEFAULT_MULTIPLIER: u32 = 7;
-static DEFAULT_THRESHOLD: f32 = 0.3;
+static DEFAULT_THRESHOLD: f32 = 0.1;
 static DEFAULT_MEMORY: usize = 2;
 
 //
