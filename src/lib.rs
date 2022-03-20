@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+#[path = "libs/chunks.rs"]
+mod chunks;
 
 // ─── INTERNAL STUFF ─────────────────────────────────────────────────────────────
 
@@ -7,21 +9,45 @@ use std::collections::HashMap;
 
 static DEFAULT_MULTIPLIER: usize = 7;
 
-trait Literal {
-	fn literal(self) -> String;
+
+pub(crate) trait Literal<T> {
+	fn literal(self) -> T;
 }
 
-impl Literal for String {
+impl Literal<String> for String {
 	fn literal(self) -> String {
 		self
 	}
 }
 
-impl Literal for &str {
+impl Literal<String> for &str {
 	fn literal(self) -> String {
 		self.to_string()
 	}
 }
+
+impl Literal<Vec<String>> for Vec<&str> {
+	fn literal(self) -> Vec<String> {
+		let vec: Vec<String> = Vec::new();
+		for string in self {
+			vec.push(string.to_string());
+		};
+		return vec;
+	}
+}
+
+impl Literal<Vec<String>> for Vec<String> {
+	fn literal(self) -> Vec<String> {
+		self
+	}
+}
+
+// We create a fake trait to just numbers, so we can accept JUST numbers in some where clauses
+trait Numeral {}
+
+impl Numeral for u32 {}
+impl Numeral for u16 {}
+impl Numeral for f32 {}
 
 fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 
@@ -42,26 +68,6 @@ fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 	};
 
 	return result;
-}
-
-fn chunks<'a, T>(vec: Vec<T>, size: usize) -> Vec<Vec<T>> {
-	let fsize: usize;
-
-	if size >= vec.len() {
-		fsize = vec.len();
-	} else {
-		fsize = size;
-	};
-
-	let mut res: Vec<Vec<T>> = Vec::new();
-
-	for i in (fsize..vec.len()).step_by(fsize) {
-		res.push(vec[i - fsize .. fsize].to_vec());
-	}; if fsize % vec.len() != 0 {
-		res.push(vec[vec.len() - fsize .. fsize].to_vec());
-	};
-
-	return res;
 }
 
 struct Map<T> {
