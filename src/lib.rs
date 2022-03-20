@@ -2,7 +2,12 @@ use std::collections::HashMap;
 
 // ─── INTERNAL STUFF ─────────────────────────────────────────────────────────────
 
-pub trait Literal {
+// The default multiplier is 7 because it's really rare that a normal phrase (Without using rare unicode characters) to have more than 85 characters.
+// 85 because, if the avg char haves 110 as value, ⌊ 2^16 / (90 * 7) ⌋ = 85. And there's no word in the English language with more than 45 words (Without being a highly technical word, like the full version of titin or something like that.)
+
+static DEFAULT_MULTIPLIER: usize = 7;
+
+trait Literal {
 	fn literal(self) -> String;
 }
 
@@ -18,7 +23,7 @@ impl Literal for &str {
 	}
 }
 
-fn translate<'a>(vec: Vec<String>, multiplier: u32) -> &'a Vec<Vec<u32>> {
+fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 
 	let mut ram: Vec<u32> = Vec::new();
 	let mut result: Vec<Vec<u32>> = Vec::new();
@@ -35,25 +40,50 @@ fn translate<'a>(vec: Vec<String>, multiplier: u32) -> &'a Vec<Vec<u32>> {
 		result.push(ram.clone());
 		ram.clear();
 	};
-	return &result;
+
+	return result;
 }
 
-fn chunks<'a, T>(vec: Vec<T>, size: usize) -> Vec<&'a [T]> {
+fn chunks<'a, T>(vec: Vec<T>, size: usize) -> Vec<Vec<T>> {
+	let fsize: usize;
+
 	if size >= vec.len() {
-		size = vec.len();
-	}
+		fsize = vec.len();
+	} else {
+		fsize = size;
+	};
 
-	let res: Vec<&[T]> = Vec::new();
+	let mut res: Vec<Vec<T>> = Vec::new();
 
-	for i in (size..vec.len()).step_by(size) {
-		res.push(&vec[i - size .. size]);
-	}; if size % vec.len() != 0 {
-		res.push(&vec[vec.len() - size .. size]);
+	for i in (fsize..vec.len()).step_by(fsize) {
+		res.push(vec[i - fsize .. fsize].to_vec());
+	}; if fsize % vec.len() != 0 {
+		res.push(vec[vec.len() - fsize .. fsize].to_vec());
 	};
 
 	return res;
 }
 
-fn learn<T: Literal>(map: HashMap<T, T>) -> &[f32] {
+struct Map<T> {
+	keys: Vec<T>,
+	values: Vec<T>
+}
 
+// In this case this function is public, because maybe an user would like to translate the HashMap, for some reason idk
+pub trait ToMap<T> {
+	fn to_map(self) -> Map<T>;
+}
+
+impl ToMap<String> for HashMap<String, String> {
+	fn to_map(self) -> Map<String> {
+		return Map::<String> {
+			keys: self.clone().into_keys().collect::<Vec<String>>(),
+			values: self.into_values().collect::<Vec<String>>()
+		};
+	}
+}
+
+// ─── MAIN ALGORITHM THING ───────────────────────────────────────────────────────
+
+fn __learn__<'a, T>(map: HashMap<String, String>, multiplier: usize) {
 }
