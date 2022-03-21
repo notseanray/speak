@@ -1,6 +1,14 @@
 use std::collections::HashMap;
+
 #[path = "libs/chunks.rs"]
+
 mod chunks;
+use chunks::*;
+
+#[path = "libs/mapping.rs"]
+
+mod maps;
+use maps::*;
 
 // ─── INTERNAL STUFF ─────────────────────────────────────────────────────────────
 
@@ -28,7 +36,7 @@ impl Literal<String> for &str {
 
 impl Literal<Vec<String>> for Vec<&str> {
 	fn literal(self) -> Vec<String> {
-		let vec: Vec<String> = Vec::new();
+		let mut vec: Vec<String> = Vec::new();
 		for string in self {
 			vec.push(string.to_string());
 		};
@@ -41,13 +49,6 @@ impl Literal<Vec<String>> for Vec<String> {
 		self
 	}
 }
-
-// We create a fake trait to just numbers, so we can accept JUST numbers in some where clauses
-trait Numeral {}
-
-impl Numeral for u32 {}
-impl Numeral for u16 {}
-impl Numeral for f32 {}
 
 fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 
@@ -68,25 +69,6 @@ fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 	};
 
 	return result;
-}
-
-struct Map<T> {
-	keys: Vec<T>,
-	values: Vec<T>
-}
-
-// In this case this function is public, because maybe an user would like to translate the HashMap, for some reason idk
-pub trait ToMap<T> {
-	fn to_map(self) -> Map<T>;
-}
-
-impl ToMap<String> for HashMap<String, String> {
-	fn to_map(self) -> Map<String> {
-		return Map::<String> {
-			keys: self.clone().into_keys().collect::<Vec<String>>(),
-			values: self.into_values().collect::<Vec<String>>()
-		};
-	}
 }
 
 // ─── MAIN ALGORITHM THING ───────────────────────────────────────────────────────
