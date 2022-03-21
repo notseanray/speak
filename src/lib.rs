@@ -2,21 +2,18 @@ use std::collections::HashMap;
 
 #[path = "libs/chunks.rs"]
 
-mod chunks;
-use chunks::*;
+mod chunksmod;
+use chunksmod::*;
 
 #[path = "libs/mapping.rs"]
 
-mod maps;
-use maps::*;
+mod mapsmod;
+use mapsmod::*;
 
 // ─── INTERNAL STUFF ─────────────────────────────────────────────────────────────
 
 // The default multiplier is 7 because it's really rare that a normal phrase (Without using rare unicode characters) to have more than 85 characters.
 // 85 because, if the avg char haves 110 as value, ⌊ 2^16 / (90 * 7) ⌋ = 85. And there's no word in the English language with more than 45 words (Without being a highly technical word, like the full version of titin or something like that.)
-
-static DEFAULT_MULTIPLIER: usize = 7;
-
 
 pub(crate) trait Literal<T> {
 	fn literal(self) -> T;
@@ -34,19 +31,12 @@ impl Literal<String> for &str {
 	}
 }
 
-impl Literal<Vec<String>> for Vec<&str> {
-	fn literal(self) -> Vec<String> {
-		let mut vec: Vec<String> = Vec::new();
-		for string in self {
-			vec.push(string.to_string());
-		};
-		return vec;
-	}
-}
+// i love rust i love rust so much am gonna set my pc on fire to symbolize how much i love rust
 
-impl Literal<Vec<String>> for Vec<String> {
+// Generic literal implementation
+impl<T> Literal<Vec<String>> for Vec<T> where T: Literal<String> {
 	fn literal(self) -> Vec<String> {
-		self
+		self.iter().map(|s| s.literal()).collect::<Vec<String>>()
 	}
 }
 
@@ -73,5 +63,5 @@ fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 
 // ─── MAIN ALGORITHM THING ───────────────────────────────────────────────────────
 
-fn __learn__<'a, T>(map: HashMap<String, String>, multiplier: usize) {
+fn __learn__<'a, T: Literal<String> + Clone>(dict: HashMap<T, T>, multiplier: usize) where T: Literal<String> + Clone {
 }

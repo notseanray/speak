@@ -11,20 +11,13 @@ pub(crate) trait ToMap<T> {
 	fn to_map(self) -> Map<T>;
 }
 
-impl ToMap<String> for HashMap<String, String> {
-	fn to_map(self) -> Map<String> {
-		return Map::<String> {
-			keys: self.clone().into_keys().collect::<Vec<String>>(),
-			values: self.into_values().collect::<Vec<String>>()
-		};
-	}
-}
+// General HashMap -> Map
 
-impl ToMap<String> for HashMap<&str, &str> {
+impl<T> ToMap<String> for HashMap<T, T> where T: Clone + Literal<String> {
 	fn to_map(self) -> Map<String> {
 		return Map::<String> {
-			keys: self.clone().into_keys().collect::<Vec<&str>>().literal(),
-			values: self.into_values().collect::<Vec<&str>>().literal()
-		};
+			keys: self.clone().into_keys().collect::<Vec<T>>().literal(),
+			values: self.into_values().collect::<Vec<T>>().literal()
+		}
 	}
 }
