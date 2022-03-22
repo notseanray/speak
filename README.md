@@ -1,5 +1,3 @@
-##### Currently Speak.rs is paused, I'm developing Speak.py, because it is much more easy to use dynamic types and don't think about efficiency when you're designing an algorithm. [Link to the new repo:](https://github.com/SpeakML/speak.py)
-
 # Speak
 Speak is a **Chatbot based in machine-learning**, which can be used to **interact with the user**. The philosophy of the project is to **make the user feel like they are talking to a real person**, and the way Speak does that is by being very fast, that's it.
 
