@@ -1,11 +1,11 @@
 pub(crate) struct Chunks<T> {
-	base: std::collections::VecDeque<T>
+	base: Vec<T>
 }
 
 impl<T> Chunks<T> {
 	fn new() -> Chunks<T> {
 		return Chunks::<T> {
-			base: std::collections::VecDeque::new()
+			base: Vec::new()
 		};
 	}
 }
@@ -19,7 +19,7 @@ impl<T> Chunkable<T> for Vec<T> {
 	fn into_chunks(&self, memory: usize) -> Chunks<&[T]> {
 		let mut chunks: Chunks<&[T]> = Chunks::new();
 		for i in (memory .. self.len() + 1).step_by(memory) {
-			chunks.base.push_back(&self[memory - i .. i]);
+			chunks.base.push(&self[memory - i .. i]);
 		}
 		return chunks;
 	}

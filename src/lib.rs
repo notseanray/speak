@@ -31,26 +31,26 @@ impl Literal<String> for &str {
 	}
 }
 
-// i love rust i love rust so much am gonna set my pc on fire to symbolize how much i love rust
+// i love rust i love rust so much am gonna set my pc on fire to symbolize how much i love rust omg omg omg omg omg
 
 // Generic literal implementation
-impl<T> Literal<Vec<String>> for Vec<T> where T: Literal<String> {
+impl<T> Literal<Vec<String>> for Vec<T> where T: Literal<String> + Copy {
 	fn literal(self) -> Vec<String> {
 		self.iter().map(|s| s.literal()).collect::<Vec<String>>()
 	}
 }
 
-fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
+fn translate(vec: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
 
-	let mut ram: Vec<u32> = Vec::new();
-	let mut result: Vec<Vec<u32>> = Vec::new();
-	let mut sum: u32;
+	let mut ram: Vec<u16> = Vec::new();
+	let mut result: Vec<Vec<u16>> = Vec::new();
+	let mut sum: u16;
 
 	for phrase in vec {
 		for word in phrase.split_whitespace() {
 			sum = 0;
 			for c in word.chars() {
-				sum += c as u32 * multiplier;
+				sum += c as u16 * multiplier;
 			};
 			ram.push(sum);
 		};
@@ -63,5 +63,25 @@ fn translate(vec: Vec<String>, multiplier: u32) -> Vec<Vec<u32>> {
 
 // ─── MAIN ALGORITHM THING ───────────────────────────────────────────────────────
 
-fn __learn__<'a, T: Literal<String> + Clone>(dict: HashMap<T, T>, multiplier: usize) where T: Literal<String> + Clone {
+// I use u16, I think, even if you over
+
+fn __learn__<'a, T>(dict: HashMap<T, T>, multiplier: u16) where T: Literal<String> + Clone + Copy {
+	// First, we convet the HashMap<T, T> to map
+	let dictmap: Map<String> = dict.to_map();
+	
+	// Now, we created a chunked map from the translated values of 'dictmap'
+	let x: Map<Vec<u16>> = Map::<Vec<u16>> {
+		keys: translate(dictmap.keys, multiplier),
+		values: translate(dictmap.values, multiplier)
+	};
+
+	
+
+
+
+
+
+
+
+
 }
