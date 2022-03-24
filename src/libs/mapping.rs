@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-pub(crate) struct Map<T> {
+pub struct Map<T> {
 	pub(crate) keys: Vec<T>,
 	pub(crate) values: Vec<T>
 }
 
-trait ToMap<T> {
+pub trait ToMap<T> {
 	fn to_map(self) -> Map<T>;
 }
 
