@@ -2,6 +2,18 @@ pub(crate) struct Chunks<T> {
     pub(crate) base: Vec<T>,
 }
 
+impl<T> Chunks<T> {
+	pub(crate) fn new() -> Chunks::<T> {
+		return Chunks::<T> {
+			base: Vec::new()
+		};
+	}
+
+	pub(crate) fn iterate(self) -> Vec<T> {
+		return self.base; 
+	}
+}
+
 pub(crate) trait Chunkable<'a, T> {
     fn into_chunks(&'a self, memory: usize) -> Chunks<&'a [T]>;
 }
