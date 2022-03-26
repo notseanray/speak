@@ -174,6 +174,7 @@ fn __relearn_direct__<
 	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> Vec<f32> {
 	// First, we merge maps
 	let old_length = data.len();
+	let old_key_length = data.keys().len();
 	let x = merge_hashmaps::<T>(data, new_data).to_map();
 
 	// Now, we translate it.
@@ -193,7 +194,8 @@ fn __relearn_direct__<
 	let mut key_length: usize;
 	let mut value_length: usize;
 
-	for key in map.keys {
+	for i in (0 .. map.keys.len()).step_by(old_key_length) {
+		let key = &map.keys[i];
 		key_length = key.len();
 		krealmem = if memory >= key_length {
 			key_length
