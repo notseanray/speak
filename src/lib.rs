@@ -1,7 +1,5 @@
 #[path = "libs/literal.rs"]
 mod lit;
-use std::collections::{LinkedList, BinaryHeap};
-
 use lit::*;
 
 #[path = "libs/mapping.rs"]
@@ -20,9 +18,9 @@ use std::collections::HashMap;
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
-const DEFAULT_MEMORY: usize = 2;
-const DEFAULT_THRESHOLD: f32 = 0.1;
-const DEFAULT_MULTIPLIER: u16 = 7;
+pub const DEFAULT_MEMORY: usize = 2;
+pub const DEFAULT_THRESHOLD: f32 = 0.1;
+pub const DEFAULT_MULTIPLIER: u16 = 7;
 
 fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
 	
@@ -58,6 +56,8 @@ fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: 
 type Learnt = Vec<u16>;
 
 // __learn__(...) wrapper
+
+#[doc = include_str!("../extra/docs/learn.md")]
 pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Learnt {
 
 	let x: Map<T> = data.to_map();
@@ -144,12 +144,16 @@ The user can obtain new learning data, well, we can add that data to one of two 
 
 
 // __relearn_direct__(...) wrapper
+
+#[doc = include_str!("../extra/docs/relearn.md")]
 pub fn relearn_direct<
+
 T: Literal<String>
 + Clone
 + ToString
 + std::hash::Hash
 + std::cmp::Eq
+
 >(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Vec<f32> {
 	return match (memory, multiplier) {
 		(None, None) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
@@ -167,7 +171,7 @@ fn __relearn_direct__<
 	+ std::hash::Hash
 	+ std::cmp::Eq
 
->(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> Vec<f32> {
+	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> Vec<f32> {
 	// First, we merge maps
 	let old_length = data.len();
 	let x = merge_hashmaps::<T>(data, new_data).to_map();
@@ -212,10 +216,18 @@ fn __relearn_direct__<
 			};
 		};
 	};
+
 	return mega;
 }
 
-pub fn relearn_indirect<T: Literal<String> + std::hash::Hash + std::cmp::Eq>(data: HashMap<T, T>, new_data: HashMap<T, T>) -> HashMap<T, T> {
+#[doc = include_str!("../extra/docs/relearn.md")]
+pub fn relearn_indirect<
+	
+T: Literal<String> +
+std::hash::Hash +
+std::cmp::Eq
+
+>(data: HashMap<T, T>, new_data: HashMap<T, T>) -> HashMap<T, T> {
 	return merge_hashmaps(data, new_data);
 }
 
@@ -225,3 +237,21 @@ pub fn relearn_indirect<T: Literal<String> + std::hash::Hash + std::cmp::Eq>(dat
 // ────────────────────────────────────────────────────────
 //
 
+// __run__(...) wrapper
+
+// pub fn run<'a>(input: &str, learnt: Learnt, multiplier: Option<u16>, memory: Option<usize>, threshold: Option<f32>) -> &'a str {
+// 	return match (memory, multiplier, threshold) {
+// 		(None, None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_MULTIPLIER, DEFAULT_THRESHOLD),
+// 		(None, None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_MULTIPLIER, x),
+// 		(None, Some(x), None) => __run__(input, learnt, DEFAULT_MEMORY, x, DEFAULT_THRESHOLD),
+// 		(None, Some(x), Some(y)) => __run__(input, learnt, DEFAULT_MEMORY, x, y),
+// 		(Some(x), None, None) => __run__(input, learnt, x, DEFAULT_MULTIPLIER, DEFAULT_THRESHOLD),
+// 		(Some(x), None, Some(y)) => __run__(input, learnt, x, DEFAULT_MULTIPLIER, y),
+// 		(Some(x), Some(y), None) => __run__(input, learnt, x, y, DEFAULT_THRESHOLD),
+// 		(Some(x), Some(y), Some(z)) => __run__(input, learnt, x, y, z)
+// 	};
+// }
+
+// fn __run__<'a>(input: &str, learnt: Learnt, memory: usize, multiplier: u16, threshold: f32) -> &'a str {
+
+// }
