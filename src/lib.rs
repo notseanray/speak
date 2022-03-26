@@ -58,7 +58,7 @@ fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: 
 type Learnt = Vec<u16>;
 
 // __learn__(...) wrapper
-pub fn learn<T: Literal<Vec<String>> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Learnt {
+pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Learnt {
 
 	let x: Map<T> = data.to_map();
 	let new_map: Map<String> = Map::<String> {
@@ -144,30 +144,30 @@ The user can obtain new learning data, well, we can add that data to one of two 
 
 
 // __relearn_direct__(...) wrapper
-pub fn relearn_direct<'a,
-T: Literal<Vec<String>>
+pub fn relearn_direct<
+T: Literal<String>
 + Clone
 + ToString
 + std::hash::Hash
 + std::cmp::Eq
->(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> &'a Vec<f32> {
-	match (memory, multiplier) {
+>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Vec<f32> {
+	return match (memory, multiplier) {
 		(None, None) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
 		(None, Some(x)) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, x),
 		(Some(x), None) => __relearn_direct__(data, new_data, x, DEFAULT_MULTIPLIER),
 		(Some(x1), Some(x2)) => __relearn_direct__(data, new_data, x1, x2)
-	}
+	};
 }
 
-fn __relearn_direct__<'a,
+fn __relearn_direct__<
 
-	T: Literal<Vec<String>>
+	T: Literal<String>
 	+ Clone
 	+ ToString
 	+ std::hash::Hash
 	+ std::cmp::Eq
 
->(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> &'a Vec<f32> {
+>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> Vec<f32> {
 	// First, we merge maps
 	let old_length = data.len();
 	let x = merge_hashmaps::<T>(data, new_data).to_map();
@@ -212,7 +212,11 @@ fn __relearn_direct__<'a,
 			};
 		};
 	};
-	return &mega;
+	return mega;
+}
+
+pub fn relearn_indirect<T: Literal<String> + std::hash::Hash + std::cmp::Eq>(data: HashMap<T, T>, new_data: HashMap<T, T>) -> HashMap<T, T> {
+	return merge_hashmaps(data, new_data);
 }
 
 //
