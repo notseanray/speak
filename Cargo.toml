@@ -13,4 +13,4 @@ publish = false
 aquamarine = "0.1.11"
 
 [package.metadata.docs.rs]
-rustdoc-args = [ "--html-in-header", "katex-header.html" ]
+rustdoc-args = [ "--html-in-header", "./docs/katex-header.html" ]

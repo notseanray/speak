@@ -1,3 +1,5 @@
+use aquamarine;
+
 #[path = "libs/literal.rs"]
 mod lit;
 use lit::*;
@@ -96,7 +98,6 @@ type Learnt = Vec<u16>;
 
 // __learn__(...) wrapper
 
-#[doc = include_str!("../docs/learn.md")]
 pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Learnt {
 	
 	let x: Map<T> = data.to_map();
