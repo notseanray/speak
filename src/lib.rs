@@ -20,12 +20,47 @@ use std::collections::HashMap;
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
-#[doc = include_str!("../extra/docs/special-parameters.md")]
+// Explicit docs because it uses fancy graphics
+#[cfg_attr(doc, aquamarine::aquamarine)]
+
+///## Memory
+///
+///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well, ///the `memory` parameter is used to define how many words we take into account into analyzing a phrase.
+///
+///The functions that takes this parameter take into account that maybe the length of the phrase divided ///by the number of words in the phrase is not an integer. So this functions will take into account ///until the last words, and then scan the words between the length of the phrase minus the memory and ///the length of the word.
+///
+///```mermaid
+///graph TD
+///	A("Hi,")
+///	B("my")
+///	C{{"name"}}
+///	D("is")
+///	E("Alex")
+///
+///	F["Not found!"]
+///
+///	style F stroke-dasharray: 5 5
+///
+///	X["Iteration 1"]
+///	Y["Iteration 2"]
+///	Z["Bugged iteration 2"]
+///
+///	X-->A;
+///	X-->B;
+///	X-->C;
+///
+///	Y-->C;
+///	Y-->D;
+///	Y-->E;
+///
+///	Z-->D;
+///	Z-->E;
+///	Z-->F;
+///```
+///
+///###### Honestly, I just wanted to show you how it works, and this graph.
 pub const DEFAULT_MEMORY: usize = 2;
-#[doc = include_str!("../extra/docs/special-parameters.md")]
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
-#[doc = include_str!("../extra/docs/special-parameters.md")]
-pub const DEFAULT_MULTIPLIER: u16 = 7;
 
 fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
 	
@@ -63,8 +98,8 @@ type Learnt = Vec<u16>;
 
 // __learn__(...) wrapper
 
-#[doc = include_str!("../extra/docs/learn.md")]
-pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Learnt {
+#[doc = include_str!("../docs/learn.md")]
+pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Learnt {
 	
 	let x: Map<T> = data.to_map();
 	let new_map: Map<String> = Map::<String> {
@@ -72,16 +107,15 @@ pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::Hash
 		values: x.values.literal()
 	};
 
-	match (memory, multiplier) {
-		(None, None) => __learn__(new_map, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
-		(None, Some(x)) => __learn__(new_map, DEFAULT_MEMORY, x),
-		(Some(x), None) => __learn__(new_map, x, DEFAULT_MULTIPLIER),
-		(Some(x1), Some(x2)) => __learn__(new_map, x1, x2)
+	if let Some(mem) = memory {
+		return __learn__(new_map, mem);
+	} else {
+		return __learn__(new_map, DEFAULT_MEMORY);
 	}
 }
 
 // The main algorithm
-fn __learn__(rawdata: Map<String>, memory: usize, multiplier: u16) -> Learnt {
+fn __learn__(rawdata: Map<String>, memory: usize) -> Learnt {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
 		keys: translate(rawdata.keys),
@@ -151,7 +185,8 @@ The user can obtain new learning data, well, we can add that data to one of two 
 
 // __relearn_direct__(...) wrapper
 
-#[doc = include_str!("../extra/docs/relearn.md")]
+// We use include_str! as this docs doesn't use mermaid
+#[doc = include_str!("../docs/relearn.md")]
 pub fn relearn_direct<
 
 T: Literal<String>
@@ -160,13 +195,13 @@ T: Literal<String>
 + std::hash::Hash
 + std::cmp::Eq
 
->(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Vec<f32> {
-	return match (memory, multiplier) {
-		(None, None) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
-		(None, Some(x)) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, x),
-		(Some(x), None) => __relearn_direct__(data, new_data, x, DEFAULT_MULTIPLIER),
-		(Some(x1), Some(x2)) => __relearn_direct__(data, new_data, x1, x2)
-	};
+>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
+	if let Some(mem) = memory {
+		return __relearn_direct__(data, new_data, mem);
+	} else {
+		return __relearn_direct__(data, new_data, DEFAULT_MEMORY);
+	}
+	
 }
 
 fn __relearn_direct__<
@@ -177,7 +212,7 @@ fn __relearn_direct__<
 	+ std::hash::Hash
 	+ std::cmp::Eq
 
-	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> Vec<f32> {
+	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize) -> Vec<f32> {
 	// First, we merge maps
 	let old_length = data.len();
 	let old_key_length = data.keys().len();
@@ -228,7 +263,6 @@ fn __relearn_direct__<
 	return mega;
 }
 
-#[doc = include_str!("../extra/docs/relearn.md")]
 pub fn relearn_indirect<
 	
 T: Literal<String> +
@@ -272,4 +306,13 @@ std::cmp::Eq
 // 	};
 
 // 	// Now, we see the relations between the input and the learnedt data
+// }
+
+// pub fn run<'a>(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> &'a str {
+// 	return match (memory, threshold) {
+// 		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
+// 		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
+// 		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
+// 		(Some(x), Some(y)) => __run__(input, learnt, x, y)
+// 	};
 // }
