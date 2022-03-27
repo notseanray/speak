@@ -2,6 +2,8 @@
 
 # NPM & Mermaid-cli is required
 
+mkdir built
+
 for filename in *.md; do
 	# We get the filename without the ext
 	# filename_no_ext="${filename%.*}"

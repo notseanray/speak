@@ -10,34 +10,7 @@ Every phrase is made up from words. We make a phrase from adding sequences of wo
 
 The functions that takes this parameter take into account that maybe the length of the phrase divided by the number of words in the phrase is not an integer. So this functions will take into account until the last words, and then scan the words between the length of the phrase minus the memory and the length of the word.
 
-```mermaid
-graph TD
-	A("Hi,")
-	B("my")
-	C{{"name"}}
-	D("is")
-	E("Alex")
-
-	F["Not found!"]
-
-	style F stroke-dasharray: 5 5
-
-	X["Iteration 1"]
-	Y["Iteration 2"]
-	Z["Bugged iteration 2"]
-
-	X-->A;
-	X-->B;
-	X-->C;
-
-	Y-->C;
-	Y-->D;
-	Y-->E;
-
-	Z-->D;
-	Z-->E;
-	Z-->F;
-```
+![diagram](./special-parameters-1.svg)
 
 ###### Honestly, I just wanted to show you how it works, and this graph.
 
