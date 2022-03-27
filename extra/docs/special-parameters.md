@@ -1,15 +1,27 @@
-These parameters are optional, that means that `None` is a valid argument for them, as `None uses the default configuration for that parameter in particular, it's recommended to use the default configuration.
+# Special parameters
+
+* Memory
+* Multplier
+* Threshold
 
 ## Memory
 
-As you know, each phrase is made up of groups of words, each group has a length, for example 3, that length is the memory.
-E. g. The phrase "My name is Alex" is made up from "My name is" & "Alex"
+Every phrase is made up from words. We make a phrase from adding sequences of words together. Well, the `memory` parameter is used to define how many words we take into account into analyzing a phrase.
 
-As you can see, in real communication the length of the words is dynamic, but for the sake of being more efficient, the chunks that the bot analyzes are always the length of `memory`.
+The functions that takes this parameter take into account that maybe the length of the phrase divided by the number of words in the phrase is not an integer. So this functions will take into account until the last words, and then scan the words between the length of the phrase minus the memory and the length of the word.
 
-## Threshold
+![diagram](./special-parameters-1.svg)
 
-Each word differentiates from another with a number, for example the word *"spaghetti"* and the word *"hi"* differentiate for a lot, it wont meat the threshold if the threshold is low, for example *0.2*, because the value of *"spaghetti"* divided by the value of *"hi"* is more than 0.2, so it wont recognize those words as words that mean the "same"
+###### Honestly, I just wanted to show you how it works, and this graph.
 
 ## Multiplier
-The function `translate(...)` converts each word to a number an then multiplies that number, this means that words with, for example, 400 of difference between them, with this multiplication, they'll be at 700, this is another way of demanding that the words are close enough to select.
+
+None of the functions in this library really manipulates the words, every single string in the dataset is "translated" to a number, that number is its value. In other words, a word is the sum of its letters multiplied by a multiplier. The special parameter multiplier is **that** multiplier.
+
+When electing a word it checks for its relations with other words, so if that relation is greater than the threshold, it will be elected. So, if the multiplier is a big number (more than 20 isn't recommended), the word "spaghetti" and the word "spagetti" will seem very different, even if they are the same word (typo).
+
+It works the other way around, if the multiplier is a small number (less than 5 isn't recommended) very different words will seem similar, even if they are very different.
+
+**Example:**
+
+
