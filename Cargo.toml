@@ -10,3 +10,4 @@ description = "A minimal, fast, machine-learning based chatbot"
 publish = false
 
 [dependencies]
+aquamarine = "0.1.11"

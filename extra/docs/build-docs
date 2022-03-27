@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# NPM & Mermaid-cli is required
+
+for filename in *.md; do
+	# We get the filename without the ext
+	# filename_no_ext="${filename%.*}"
+  ../../node_modules/.bin/mmdc -i "$filename" -o "built/${filename%.*}.md"
+done

@@ -18,6 +18,7 @@ use std::collections::HashMap;
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
+#[doc = include_str!("../extra/docs/special-parameters.md")]
 pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_MULTIPLIER: u16 = 7;
@@ -44,7 +45,7 @@ fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
 }
 
 fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
-    map1.into_iter().chain(map2).collect()
+	map1.into_iter().chain(map2).collect()
 }
 
 //
@@ -59,7 +60,7 @@ type Learnt = Vec<u16>;
 
 #[doc = include_str!("../extra/docs/learn.md")]
 pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Learnt {
-
+	
 	let x: Map<T> = data.to_map();
 	let new_map: Map<String> = Map::<String> {
 		keys: x.keys.literal(),
@@ -254,6 +255,16 @@ std::cmp::Eq
 // 	};
 // }
 
-// fn __run__<'a>(input: &str, learnt: Learnt, memory: usize, multiplier: u16, threshold: f32) -> &'a str {
+// fn __run__<'a>(rawinput: &str, learnt: Learnt, memory: usize, multiplier: u16, threshold: f32) -> &'a str {
+// 	// first, we translate the input.
+// 	let input: Vec<u16>;
+// 	{
+// 		for word in rawinput.split_whitespace() {
+// 			for c in word.chars() {
+// 				input.push(c as u16 * multiplier);
+// 			};
+// 		};
+// 	};
 
+// 	// Now, we see the relations between the input and the learnedt data
 // }
