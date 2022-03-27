@@ -1,3 +1,5 @@
+use aquamarine;
+
 #[path = "libs/literal.rs"]
 mod lit;
 use lit::*;

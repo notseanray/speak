@@ -10,7 +10,7 @@ Every phrase is made up from words. We make a phrase from adding sequences of wo
 
 The functions that takes this parameter take into account that maybe the length of the phrase divided by the number of words in the phrase is not an integer. So this functions will take into account until the last words, and then scan the words between the length of the phrase minus the memory and the length of the word.
 
-![diagram](./special-parameters-1.svg)
+<img src="./special-parameters-1.svg" />
 
 ###### Honestly, I just wanted to show you how it works, and this graph.
 

@@ -25,3 +25,4 @@ src/pseudocode.txt
 
 # Ignoring node stuff
 node_modules
+extra/docs

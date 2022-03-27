@@ -48,7 +48,3 @@ None of the functions in this library really manipulates the words, every single
 When electing a word it checks for its relations with other words, so if that relation is greater than the threshold, it will be elected. So, if the multiplier is a big number (more than 20 isn't recommended), the word "spaghetti" and the word "spagetti" will seem very different, even if they are the same word (typo).
 
 It works the other way around, if the multiplier is a small number (less than 5 isn't recommended) very different words will seem similar, even if they are very different.
-
-**Example:**
-
-
