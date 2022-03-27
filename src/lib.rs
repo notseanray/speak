@@ -1,5 +1,3 @@
-use aquamarine;
-
 #[path = "libs/literal.rs"]
 mod lit;
 use lit::*;
@@ -308,11 +306,29 @@ std::cmp::Eq
 // 	// Now, we see the relations between the input and the learnedt data
 // }
 
-// pub fn run<'a>(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> &'a str {
-// 	return match (memory, threshold) {
-// 		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
-// 		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
-// 		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
-// 		(Some(x), Some(y)) => __run__(input, learnt, x, y)
-// 	};
-// }
+pub fn run<'a>(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
+	return match (memory, threshold) {
+		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
+		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
+		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
+		(Some(x), Some(y)) => __run__(input, learnt, x, y)
+	};
+}
+
+fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> String {
+	// First, we translate the input
+	let mut input: Vec<u16> = Vec::new();
+
+	let mut sum: u16 = 0;
+	for word in rawinput.split_whitespace() {
+		for c in word.chars() {
+			sum += c as u16;
+		};
+		// I hope the compiler will optimize this horrible code... I hope.
+		input.push(sum.pow((sum / 3 as u16) as u32));
+	};
+
+	/* Run(...) algorithm */
+
+	return String::new();
+}
