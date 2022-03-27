@@ -22,10 +22,12 @@ use std::collections::HashMap;
 
 #[doc = include_str!("../extra/docs/special-parameters.md")]
 pub const DEFAULT_MEMORY: usize = 2;
+#[doc = include_str!("../extra/docs/special-parameters.md")]
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
+#[doc = include_str!("../extra/docs/special-parameters.md")]
 pub const DEFAULT_MULTIPLIER: u16 = 7;
 
-fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
+fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
 	
 	let mut sum: u16 = 0;
 	let mut phrasevec: Vec<u16> = Vec::new();
@@ -34,9 +36,10 @@ fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
 	for phrase in iter {
 		for word in phrase.split_whitespace() {
 			for c in word.chars() {
-				sum += (c as u16) * multiplier
+				sum += c as u16
 			}
-			phrasevec.push(sum);
+
+			phrasevec.push(sum ^ (3/2));
 			sum = 0;
 		}
 		_final.push(phrasevec.clone());
@@ -81,8 +84,8 @@ pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::Hash
 fn __learn__(rawdata: Map<String>, memory: usize, multiplier: u16) -> Learnt {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
-		keys: translate(rawdata.keys, multiplier),
-		values: translate(rawdata.values, multiplier)
+		keys: translate(rawdata.keys),
+		values: translate(rawdata.values)
 	};
 
 	let mut mega: Vec<u16> = Vec::new();
@@ -183,8 +186,8 @@ fn __relearn_direct__<
 	// Now, we translate it.
 
 	let map: Map<Vec<u16>> = Map::<Vec<u16>> {
-		keys: translate(x.keys.literal(), multiplier),
-		values: translate(x.values.literal(), multiplier)
+		keys: translate(x.keys.literal()),
+		values: translate(x.values.literal())
 	};
 
 	let mut mega: Vec<f32> = Vec::new();
