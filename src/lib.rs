@@ -1,3 +1,5 @@
+use aquamarine;
+
 #[path = "libs/literal.rs"]
 mod lit;
 use lit::*;
@@ -18,11 +20,49 @@ use std::collections::HashMap;
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
+// Explicit docs because it uses fancy graphics
+
+#[cfg_attr(doc, aquamarine::aquamarine)]
+///## Memory
+///
+///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well, ///the `memory` parameter is used to define how many words we take into account into analyzing a phrase.
+///
+///The functions that takes this parameter take into account that maybe the length of the phrase divided ///by the number of words in the phrase is not an integer. So this functions will take into account ///until the last words, and then scan the words between the length of the phrase minus the memory and ///the length of the word.
+///
+///```mermaid
+///graph TD
+///	A("Hi,")
+///	B("my")
+///	C{{"name"}}
+///	D("is")
+///	E("Alex")
+///
+///	F["Not found!"]
+///
+///	style F stroke-dasharray: 5 5
+///
+///	X["Iteration 1"]
+///	Y["Iteration 2"]
+///	Z["Bugged iteration 2"]
+///
+///	X-->A;
+///	X-->B;
+///	X-->C;
+///
+///	Y-->C;
+///	Y-->D;
+///	Y-->E;
+///
+///	Z-->D;
+///	Z-->E;
+///	Z-->F;
+///```
+///
+///###### Honestly, I just wanted to show you how it works, and this graph.
 pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
-pub const DEFAULT_MULTIPLIER: u16 = 7;
 
-fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
+fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
 	
 	let mut sum: u16 = 0;
 	let mut phrasevec: Vec<u16> = Vec::new();
@@ -31,9 +71,10 @@ fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
 	for phrase in iter {
 		for word in phrase.split_whitespace() {
 			for c in word.chars() {
-				sum += (c as u16) * multiplier
+				sum += c as u16
 			}
-			phrasevec.push(sum);
+
+			phrasevec.push(sum.pow((sum / 3 as u16) as u32));
 			sum = 0;
 		}
 		_final.push(phrasevec.clone());
@@ -44,7 +85,7 @@ fn translate(iter: Vec<String>, multiplier: u16) -> Vec<Vec<u16>> {
 }
 
 fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
-    map1.into_iter().chain(map2).collect()
+	map1.into_iter().chain(map2).collect()
 }
 
 //
@@ -57,29 +98,27 @@ type Learnt = Vec<u16>;
 
 // __learn__(...) wrapper
 
-#[doc = include_str!("../extra/docs/learn.md")]
-pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Learnt {
-
+pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Learnt {
+	
 	let x: Map<T> = data.to_map();
 	let new_map: Map<String> = Map::<String> {
 		keys: x.keys.literal(),
 		values: x.values.literal()
 	};
 
-	match (memory, multiplier) {
-		(None, None) => __learn__(new_map, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
-		(None, Some(x)) => __learn__(new_map, DEFAULT_MEMORY, x),
-		(Some(x), None) => __learn__(new_map, x, DEFAULT_MULTIPLIER),
-		(Some(x1), Some(x2)) => __learn__(new_map, x1, x2)
+	if let Some(mem) = memory {
+		return __learn__(new_map, mem);
+	} else {
+		return __learn__(new_map, DEFAULT_MEMORY);
 	}
 }
 
 // The main algorithm
-fn __learn__(rawdata: Map<String>, memory: usize, multiplier: u16) -> Learnt {
+fn __learn__(rawdata: Map<String>, memory: usize) -> Learnt {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
-		keys: translate(rawdata.keys, multiplier),
-		values: translate(rawdata.values, multiplier)
+		keys: translate(rawdata.keys),
+		values: translate(rawdata.values)
 	};
 
 	let mut mega: Vec<u16> = Vec::new();
@@ -145,7 +184,8 @@ The user can obtain new learning data, well, we can add that data to one of two 
 
 // __relearn_direct__(...) wrapper
 
-#[doc = include_str!("../extra/docs/relearn.md")]
+// We use include_str! as this docs doesn't use mermaid
+#[doc = include_str!("../docs/relearn.md")]
 pub fn relearn_direct<
 
 T: Literal<String>
@@ -154,13 +194,13 @@ T: Literal<String>
 + std::hash::Hash
 + std::cmp::Eq
 
->(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>, multiplier: Option<u16>) -> Vec<f32> {
-	return match (memory, multiplier) {
-		(None, None) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, DEFAULT_MULTIPLIER),
-		(None, Some(x)) => __relearn_direct__(data, new_data, DEFAULT_MEMORY, x),
-		(Some(x), None) => __relearn_direct__(data, new_data, x, DEFAULT_MULTIPLIER),
-		(Some(x1), Some(x2)) => __relearn_direct__(data, new_data, x1, x2)
-	};
+>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
+	if let Some(mem) = memory {
+		return __relearn_direct__(data, new_data, mem);
+	} else {
+		return __relearn_direct__(data, new_data, DEFAULT_MEMORY);
+	}
+	
 }
 
 fn __relearn_direct__<
@@ -171,7 +211,7 @@ fn __relearn_direct__<
 	+ std::hash::Hash
 	+ std::cmp::Eq
 
-	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize, multiplier: u16) -> Vec<f32> {
+	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize) -> Vec<f32> {
 	// First, we merge maps
 	let old_length = data.len();
 	let old_key_length = data.keys().len();
@@ -180,8 +220,8 @@ fn __relearn_direct__<
 	// Now, we translate it.
 
 	let map: Map<Vec<u16>> = Map::<Vec<u16>> {
-		keys: translate(x.keys.literal(), multiplier),
-		values: translate(x.values.literal(), multiplier)
+		keys: translate(x.keys.literal()),
+		values: translate(x.values.literal())
 	};
 
 	let mut mega: Vec<f32> = Vec::new();
@@ -222,7 +262,6 @@ fn __relearn_direct__<
 	return mega;
 }
 
-#[doc = include_str!("../extra/docs/relearn.md")]
 pub fn relearn_indirect<
 	
 T: Literal<String> +
@@ -241,19 +280,29 @@ std::cmp::Eq
 
 // __run__(...) wrapper
 
-// pub fn run<'a>(input: &str, learnt: Learnt, multiplier: Option<u16>, memory: Option<usize>, threshold: Option<f32>) -> &'a str {
-// 	return match (memory, multiplier, threshold) {
-// 		(None, None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_MULTIPLIER, DEFAULT_THRESHOLD),
-// 		(None, None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_MULTIPLIER, x),
-// 		(None, Some(x), None) => __run__(input, learnt, DEFAULT_MEMORY, x, DEFAULT_THRESHOLD),
-// 		(None, Some(x), Some(y)) => __run__(input, learnt, DEFAULT_MEMORY, x, y),
-// 		(Some(x), None, None) => __run__(input, learnt, x, DEFAULT_MULTIPLIER, DEFAULT_THRESHOLD),
-// 		(Some(x), None, Some(y)) => __run__(input, learnt, x, DEFAULT_MULTIPLIER, y),
-// 		(Some(x), Some(y), None) => __run__(input, learnt, x, y, DEFAULT_THRESHOLD),
-// 		(Some(x), Some(y), Some(z)) => __run__(input, learnt, x, y, z)
-// 	};
-// }
+pub fn run(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
+	return match (memory, threshold) {
+		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
+		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
+		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
+		(Some(x), Some(y)) => __run__(input, learnt, x, y)
+	};
+}
 
-// fn __run__<'a>(input: &str, learnt: Learnt, memory: usize, multiplier: u16, threshold: f32) -> &'a str {
+fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> String {
+	// First, we translate the input
+	let mut input: Vec<u16> = Vec::new();
 
-// }
+	let mut sum: u16 = 0;
+	for word in rawinput.split_whitespace() {
+		for c in word.chars() {
+			sum += c as u16;
+		};
+		// I hope the compiler will optimize this horrible code... I hope.
+		input.push(sum.pow((sum / 3 as u16) as u32));
+	};
+
+	/* Run(...) algorithm */
+
+	return String::new();
+}
