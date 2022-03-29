@@ -23,6 +23,7 @@ Cargo.lock
 src/main.rs
 src/pseudocode.txt
 
-# Ignoring node stuff
+# Ignoring env stuff
 node_modules
-extra/docs/built
+venv
+how-does-it-works.md

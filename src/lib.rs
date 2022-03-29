@@ -21,8 +21,8 @@ use std::collections::HashMap;
 //
 
 // Explicit docs because it uses fancy graphics
-#[cfg_attr(doc, aquamarine::aquamarine)]
 
+#[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
 ///
 ///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well, ///the `memory` parameter is used to define how many words we take into account into analyzing a phrase.
@@ -74,7 +74,7 @@ fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
 				sum += c as u16
 			}
 
-			phrasevec.push(sum ^ (3/2));
+			phrasevec.push(sum.pow((sum / 3 as u16) as u32));
 			sum = 0;
 		}
 		_final.push(phrasevec.clone());
@@ -280,34 +280,7 @@ std::cmp::Eq
 
 // __run__(...) wrapper
 
-// pub fn run<'a>(input: &str, learnt: Learnt, multiplier: Option<u16>, memory: Option<usize>, threshold: Option<f32>) -> &'a str {
-// 	return match (memory, multiplier, threshold) {
-// 		(None, None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_MULTIPLIER, DEFAULT_THRESHOLD),
-// 		(None, None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_MULTIPLIER, x),
-// 		(None, Some(x), None) => __run__(input, learnt, DEFAULT_MEMORY, x, DEFAULT_THRESHOLD),
-// 		(None, Some(x), Some(y)) => __run__(input, learnt, DEFAULT_MEMORY, x, y),
-// 		(Some(x), None, None) => __run__(input, learnt, x, DEFAULT_MULTIPLIER, DEFAULT_THRESHOLD),
-// 		(Some(x), None, Some(y)) => __run__(input, learnt, x, DEFAULT_MULTIPLIER, y),
-// 		(Some(x), Some(y), None) => __run__(input, learnt, x, y, DEFAULT_THRESHOLD),
-// 		(Some(x), Some(y), Some(z)) => __run__(input, learnt, x, y, z)
-// 	};
-// }
-
-// fn __run__<'a>(rawinput: &str, learnt: Learnt, memory: usize, multiplier: u16, threshold: f32) -> &'a str {
-// 	// first, we translate the input.
-// 	let input: Vec<u16>;
-// 	{
-// 		for word in rawinput.split_whitespace() {
-// 			for c in word.chars() {
-// 				input.push(c as u16 * multiplier);
-// 			};
-// 		};
-// 	};
-
-// 	// Now, we see the relations between the input and the learnedt data
-// }
-
-pub fn run<'a>(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
+pub fn run(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
 	return match (memory, threshold) {
 		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
 		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),

@@ -1,9 +1,11 @@
+**Hey! This isn't an explanation that you need to know, just me talking about the project and all its features and algorithm.**
+
 # How does it works? 🤔
 
 The Speak algorithm is fairly simple, and that's why it's so powerful, yet easy to understand.
-First, you need to understand that $\frac{A}{B} \simeq \frac{A}{C}$ then $B \simeq C$, it's easy, right? Well, understanding that is the 40 percent of the algorithm.
+First, you need to understand that if $\frac{A}{B} \simeq \frac{A}{C}$ then $B \simeq C$, it's easy, right? Well, understanding that is the 40 percent of the algorithm.
 
-$\frac{A}{B} \simeq \frac{A}{C}$ is equal to $\big|\frac{\big(\frac{A}{B}\big)}{C} - 1\big| \leq \mu$, where $\mu$ is the threshold that the users gives to the algorithm.
+$\bigg(\frac{A}{B} \simeq \frac{A}{C}\bigg) = \bigg(\big|\frac{\big(\frac{A}{B}\big)}{C} - 1\big| \leq \mu \bigg)$, where $\mu$ is the threshold that the users gives to the algorithm.
 
 But, what are those generics? Well, they're *the sum of the chunks from the translated values.* What does that mean?
 
@@ -73,7 +75,7 @@ graph TB
 		I22-->N2;
 ```
 
-Mmmmm... That's not good, that's a bug, the size of the phrase, this happens because $C\bmod{\\#P}\neq0$ (being $C$ the memory size and $P$ the phrase size). What's the solution to this catastrophe? Well, it's fairly simple, just add as the final iteration (In this case, the 3rd iteration) the slice between the end of the phrase - the memory size and the end of the phrase.
+Mmmmm... That's not good, that's a bug, the size of the phrase, this happens because $C\bmod{\#P}\neq0$ (being $C$ the memory size and $\#P$ the phrase size). What's the solution to this catastrophe? Well, it's fairly simple, just add as the final iteration (In this case, the 3rd iteration) the slice between the end of the phrase - the memory size and the end of the phrase.
 
 ```mermaid
 graph TB
@@ -88,7 +90,7 @@ graph TB
 		I1[Iteration 1]
 		I2[Iteration 2]
 
-		I22[Bugged iteration 3]
+		I22[Real iteration 3]
 
 		I1-->A;
 		I1-->B;
@@ -103,7 +105,7 @@ graph TB
 		I22-->G;
 ```
 
-That way, all problems are fixed, forever.
+That's it, **all problems are fixed, forever**.
 
 **Oh no! Another problem**
 
@@ -111,3 +113,73 @@ What would happen if the memory size was bigger than the number of words in the 
 
 That's why, before chunking anything, we check if the phrase is long enough to be chunked by the current memory size. If it is: great!, else we modify the memory size to be the length of the phrase.
 
+**Ok, all is ready, but what do chunks do?**
+
+As you know, every phrase is made up of syntactic units, each unit representing a meaning.
+
+Some of the most common units are things like: *I have a ..., my name is ..., I am a ...*, etc.
+
+These units have a meaning, well, those units are called *chunks* in the code.
+
+## The algorithm
+
+The first step is to find the relations between the chunks of the key and the value.
+
+Dividing two numbers is finding the relation between the two, so we need to divide the total value of the two chunks to find their relation.
+$$
+\frac{\sum_{i=0}^{\#K_{chunk}}{K_i}}{\sum_{i=0}^{\#V_{chunk}}{V_i}}
+$$
+
+Ok, now we have that relation, what do we do now?
+
+Well, first of all, let's add all those relations together in a group named $\psi$. That gives us:
+
+$$
+\psi = \bigg\{\sum{\frac{\sum_{i=0}^{\#K_{chunk}}{K_i}}{\sum_{i=0}^{\#V_{chunk}}{V_i}}}\bigg\}
+$$
+
+Ok, right now we have a group of relations, what do we do now? Was that useless?
+
+**Now we can start using the information that I gave at the start!**
+
+---
+
+> First, you need to understand that if $\frac{A}{B} \simeq \frac{A}{C}$ then $B \simeq C$, it's easy, right?
+
+With that, we now have a group of relations (division) between keys and values, and we can find the relation between input and values, so let's do that:
+
+being $i$ the input, already translated to numbers.
+
+---
+
+
+Chunk function:
+
+$$
+C(x = \{\cdots\}, m) =
+\sum_{i=m\ \geq\ \#x}\left\{\begin{array}{ll} i - \#x < m & x_{\#x - m\ ..\ \#x}\\ \text{otherwise} & x_{i - m\ ..\ i}
+\end{array}\right.
+$$
+
+$$
+\newcommand{\macro}[2]{\sum_{#1\ =\ 0}^{\#C(#2_i,\ m)}#1}
+
+E(I,\ K,\ V,\ m,\ t)=\sum_{i\ =\ 0\ \geq\ \#a}
+
+\frac{\macro{kc}{K}}{\macro{vc}{V}} -
+\frac{\macro{Ic}{I}}{\macro{vc}{V}}
+
+\left\{\begin{array}{ll}
+	\leq t & R_{\#r} = V_i\\
+	\text{otherwise} & \text{continue}
+
+\end{array}\right.
+
+$$
+
+Being $R$ the final result.
+
+And I know what you're thinking...
+If both expressions are divided by $\sum_{vc\ =\ 0}^{\#C(V_i,\ m)}vc$, then we could simplify that!
+
+**Well, yes but actually no**, because in the real code we have a variable `mega` (Vector) with already pre-computed learnt values. We're dividing the input by the values because the keys are already divided!
