@@ -291,7 +291,7 @@ pub fn run(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option
 
 fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> String {
 	// First, we translate the input
-	let mut input: Vec<u16> = Vec::new();
+	let mut vecinput: Vec<u16> = Vec::new();
 
 	let mut sum: u16 = 0;
 	for word in rawinput.split_whitespace() {
@@ -299,10 +299,22 @@ fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> Str
 			sum += c as u16;
 		};
 		// I hope the compiler will optimize this horrible code... I hope.
-		input.push(sum.pow((sum / 3 as u16) as u32));
+		vecinput.push(sum.pow((sum / 3 as u16) as u32));
 	};
 
-	/* Run(...) algorithm */
+	let input_chunks: Chunks<u16> = vecinput.into_chunks(memory);
+
+	// Checking Input Real Memory available
+	let mut irm: usize;
+	irm = if memory >= input_chunks.buf_size {
+		input_chunks.buf_size
+	} else {
+		memory
+	};
+
+	for i in 0 .. input_chunks.base.len() { // <- For each chunk
+		
+	}
 
 	return String::new();
 }
