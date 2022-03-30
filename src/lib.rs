@@ -1,3 +1,7 @@
+// Ok I just read that (Except for addition) using floats is faster than ints, eh?
+
+// look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
+
 use aquamarine;
 
 #[path = "libs/literal.rs"]
@@ -128,16 +132,17 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 
 	let mut mega: Vec<f32> = Vec::new();
 
-	let mut krealmem: usize = 0;
-	let mut vrealmem: usize = 0;
+	let mut krealmem: usize;
+	let mut vrealmem: usize;
 
-	let mut key_length: usize = 0;
-	let mut value_length: usize = 0;
+	let mut key_length: usize;
+	let mut value_length: usize;
 
 	for key in &data.keys {
 		// First, we check if the memory is too big.
-		krealmem = if memory >= key.len() {
-			key.len()
+		key_length = key.len();
+		krealmem = if memory >= key_length {
+			key_length
 		} else {
 			memory
 		};
@@ -145,8 +150,8 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 		for key_chunk in key.into_chunks(krealmem).iterate() {
 			for value in &data.values {
 				value_length = value.len();
-				vrealmem = if memory >= value.len() {
-					value.len()
+				vrealmem = if memory >= value_length {
+					value_length
 				} else {
 					memory
 				};
@@ -308,6 +313,8 @@ fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> Str
 	};
 
 	let input_chunks: Chunks<u16> = vecinput.into_chunks(memory);
+	let mut input_chunk: &[u16];
+
 
 	// Checking Input Real Memory available
 	let mut irm: usize;
@@ -319,9 +326,15 @@ fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> Str
 		memory
 	};
 
-	for i in (input_chunks.buf_size..input_chunks.base.len()).step_by(input_chunks.buf_size) {
-		for (kc, vc) in learnt.T.keys.iter().zip(learnt.T.values.iter()) {
-			
+	for input_chunk in input_chunks.base {
+		// for (KC, VC) in learnt.T.keys.iter().zip(learnt.T.values.iter()) {
+		// 	if (
+				
+		// 		) == 3 {}
+		// }
+
+		for VC in learnt.T.values {
+			// algorithm things here
 		}
 	}
 
