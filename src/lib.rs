@@ -74,7 +74,7 @@ fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
 				sum += c as u16
 			}
 
-			phrasevec.push(sum.pow((sum / 3 as u16) as u32));
+			phrasevec.push(sum.pow(11 / 9 as u32));
 			sum = 0;
 		}
 		_final.push(phrasevec.clone());
@@ -94,11 +94,16 @@ fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: 
 // ────────────────────────────────────────────────────────────
 //
 
-type Learnt = Vec<u16>;
+// Honestly I'm tired of writing words, I'm going with a TI-BASIC style.
+pub struct Learnt<'a> {
+	M: Vec<f32>,
+	T: Map<Chunks<'a, u16>>,
+	R: Map<String>
+}
 
 // __learn__(...) wrapper
 
-pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Learnt {
+pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
 	
 	let x: Map<T> = data.to_map();
 	let new_map: Map<String> = Map::<String> {
@@ -114,14 +119,14 @@ pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::Hash
 }
 
 // The main algorithm
-fn __learn__(rawdata: Map<String>, memory: usize) -> Learnt {
+fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
 		keys: translate(rawdata.keys),
 		values: translate(rawdata.values)
 	};
 
-	let mut mega: Vec<u16> = Vec::new();
+	let mut mega: Vec<f32> = Vec::new();
 
 	let mut krealmem: usize = 0;
 	let mut vrealmem: usize = 0;
@@ -147,7 +152,7 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Learnt {
 				};
 
 				for value_chunk in value.into_chunks(vrealmem).iterate() {
-					mega.push(value_chunk.iter().sum::<u16>() / key_chunk.iter().sum::<u16>());
+					mega.push(value_chunk.iter().sum::<u16>() as f32 / key_chunk.iter().sum::<u16>() as f32);
 				};
 			};
 		};
@@ -290,7 +295,7 @@ pub fn run(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option
 }
 
 fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> String {
-	// First, we translate the input
+//* Translating the input
 	let mut vecinput: Vec<u16> = Vec::new();
 
 	let mut sum: u16 = 0;
@@ -299,21 +304,25 @@ fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> Str
 			sum += c as u16;
 		};
 		// I hope the compiler will optimize this horrible code... I hope.
-		vecinput.push(sum.pow((sum / 3 as u16) as u32));
+		vecinput.push(sum.pow(11 / 9 as u32));
 	};
 
 	let input_chunks: Chunks<u16> = vecinput.into_chunks(memory);
 
 	// Checking Input Real Memory available
 	let mut irm: usize;
+	let mut krm: usize;
+	let mut vrm: usize;
 	irm = if memory >= input_chunks.buf_size {
 		input_chunks.buf_size
 	} else {
 		memory
 	};
 
-	for i in 0 .. input_chunks.base.len() { // <- For each chunk
-		
+	for i in (input_chunks.buf_size..input_chunks.base.len()).step_by(input_chunks.buf_size) {
+		for (kc, vc) in learnt.T.keys.iter().zip(learnt.T.values.iter()) {
+			
+		}
 	}
 
 	return String::new();
