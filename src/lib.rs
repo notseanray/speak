@@ -161,13 +161,9 @@ pub struct Learnt<'a> {
 ///
 ///## Details
 ///
-///**Be careful with this function**, its big O is $\KaTeX$ that's pretty big.
+///**Be careful with this function**, because this function takes time.
 ///If you need to create a closed feedback loop (training with newly created data), you can use the `relearn_direct(...)` function. In the case that you want to add data and still hash the dataset, you can use `relearn_indirect(...)`, this will return a `HashMap` and you can serialize and store it somewhere.
 ///
-///### How does it works? 🤔
-///
-///If you want to know how the algorithm works, you can read that in the [**How does it works?**](how-does-it-works.md) file.
-
 pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
 	
 	let x: Map<T> = data.to_map();
@@ -212,122 +208,122 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 	return mega
 }
 
-//
-// ────────────────────────────────────────────────────── I ──────────
-//   :::::: R E L E A R N : :  :   :    :     :        :          :
-// ────────────────────────────────────────────────────────────────
-//
+// //
+// // ────────────────────────────────────────────────────── I ──────────
+// //   :::::: R E L E A R N : :  :   :    :     :        :          :
+// // ────────────────────────────────────────────────────────────────
+// //
 
-/*
+// /*
 
-The user can obtain new learning data, well, we can add that data to one of two things, we can add that to the HashMap / Map or we can that to the `mega` Vec<u16>. These two options are the functions `relearn_indirect(...)` & `relearn_direct(...)`
+// The user can obtain new learning data, well, we can add that data to one of two things, we can add that to the HashMap / Map or we can that to the `mega` Vec<u16>. These two options are the functions `relearn_indirect(...)` & `relearn_direct(...)`
 
-~ `relearn_indirect(...)`:
+// ~ `relearn_indirect(...)`:
 
-* Returns the original HashMap
-* All the original data (being literals) are still legible
-* Doesn't really 'relearn' the stuff, you have to feed it to the `learn(...)` function.
+// * Returns the original HashMap
+// * All the original data (being literals) are still legible
+// * Doesn't really 'relearn' the stuff, you have to feed it to the `learn(...)` function.
 
-* It is meant for the need of writing it in another file, reset the RAM and still have all the data.
+// * It is meant for the need of writing it in another file, reset the RAM and still have all the data.
 
-~ `relearn_direct(...)`:
+// ~ `relearn_direct(...)`:
 
-* Returns a Vec<u16> for feeding directly into the `run(...)` function.
-* Not suited for external writing (just a list of u16 values)
-* Doesn't recompute all the values
+// * Returns a Vec<u16> for feeding directly into the `run(...)` function.
+// * Not suited for external writing (just a list of u16 values)
+// * Doesn't recompute all the values
 
-*/
+// */
 
 
-// __relearn_direct__(...) wrapper
+// // __relearn_direct__(...) wrapper
 
-// We use include_str! as this docs doesn't use mermaid
-#[doc = include_str!("../docs/relearn.md")]
-pub fn relearn_direct<
+// // We use include_str! as this docs doesn't use mermaid
+// #[doc = include_str!("../docs/relearn.md")]
+// pub fn relearn_direct<
 
-T: Literal<String>
-+ Clone
-+ ToString
-+ std::hash::Hash
-+ std::cmp::Eq
+// T: Literal<String>
+// + Clone
+// + ToString
+// + std::hash::Hash
+// + std::cmp::Eq
 
->(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
-	if let Some(mem) = memory {
-		return __relearn_direct__(data, new_data, mem);
-	} else {
-		return __relearn_direct__(data, new_data, DEFAULT_MEMORY);
-	}
+// >(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
+// 	if let Some(mem) = memory {
+// 		return __relearn_direct__(data, new_data, mem);
+// 	} else {
+// 		return __relearn_direct__(data, new_data, DEFAULT_MEMORY);
+// 	}
 	
-}
+// }
 
-fn __relearn_direct__<
+// fn __relearn_direct__<
 
-	T: Literal<String>
-	+ Clone
-	+ ToString
-	+ std::hash::Hash
-	+ std::cmp::Eq
+// 	T: Literal<String>
+// 	+ Clone
+// 	+ ToString
+// 	+ std::hash::Hash
+// 	+ std::cmp::Eq
 
-	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize) -> Vec<f32> {
-	// First, we merge maps
-	let old_length = data.len();
-	let old_key_length = data.keys().len();
-	let x = merge_hashmaps::<T>(data, new_data).to_map();
+// 	>(data: HashMap<T, T>, new_data: HashMap<T, T>, memory: usize) -> Vec<f32> {
+// 	// First, we merge maps
+// 	let old_length = data.len();
+// 	let old_key_length = data.keys().len();
+// 	let x = merge_hashmaps::<T>(data, new_data).to_map();
 
-	// Now, we translate it.
+// 	// Now, we translate it.
 
-	let map: Map<Vec<u16>> = Map::<Vec<u16>> {
-		keys: translate(x.keys.literal()),
-		values: translate(x.values.literal())
-	};
+// 	let map: Map<Vec<u16>> = Map::<Vec<u16>> {
+// 		keys: translate(x.keys.literal()),
+// 		values: translate(x.values.literal())
+// 	};
 
-	let mut mega: Vec<f32> = Vec::new();
+// 	let mut mega: Vec<f32> = Vec::new();
 
-	// Now, we relearn the releations JUST in the unknown section
+// 	// Now, we relearn the releations JUST in the unknown section
 
-	let mut krealmem: usize;
-	let mut vrealmem: usize;
+// 	let mut krealmem: usize;
+// 	let mut vrealmem: usize;
 
-	let mut key_length: usize;
-	let mut value_length: usize;
+// 	let mut key_length: usize;
+// 	let mut value_length: usize;
 
-	for i in (0 .. map.keys.len()).step_by(old_key_length) {
-		let key = &map.keys[i];
-		key_length = key.len();
-		krealmem = if memory >= key_length {
-			key_length
-		} else {
-			memory
-		};
+// 	for i in (0 .. map.keys.len()).step_by(old_key_length) {
+// 		let key = &map.keys[i];
+// 		key_length = key.len();
+// 		krealmem = if memory >= key_length {
+// 			key_length
+// 		} else {
+// 			memory
+// 		};
 
-		for key_chunk in key.into_chunks(krealmem).iterate() {
-			for value in &map.values[old_length ..] {
-				value_length = value.len();
-				vrealmem = if memory >= value_length {
-					value_length
-				} else {
-					memory
-				};
+// 		for key_chunk in key.into_chunks(krealmem).iterate() {
+// 			for value in &map.values[old_length ..] {
+// 				value_length = value.len();
+// 				vrealmem = if memory >= value_length {
+// 					value_length
+// 				} else {
+// 					memory
+// 				};
 
-				for value_chunk in value.into_chunks(vrealmem).iterate() {
-					mega.push(value_chunk.iter().sum::<u16>() as f32 / key_chunk.iter().sum::<u16>() as f32);
-				};
-			};
-		};
-	};
+// 				for value_chunk in value.into_chunks(vrealmem).iterate() {
+// 					mega.push(value_chunk.iter().sum::<u16>() as f32 / key_chunk.iter().sum::<u16>() as f32);
+// 				};
+// 			};
+// 		};
+// 	};
 
-	return mega;
-}
+// 	return mega;
+// }
 
-pub fn relearn_indirect<
+// pub fn relearn_indirect<
 	
-T: Literal<String> +
-std::hash::Hash +
-std::cmp::Eq
+// T: Literal<String> +
+// std::hash::Hash +
+// std::cmp::Eq
 
->(data: HashMap<T, T>, new_data: HashMap<T, T>) -> HashMap<T, T> {
-	return merge_hashmaps(data, new_data);
-}
+// >(data: HashMap<T, T>, new_data: HashMap<T, T>) -> HashMap<T, T> {
+// 	return merge_hashmaps(data, new_data);
+// }
 
 //
 // ────────────────────────────────────────────── I ──────────
@@ -378,11 +374,6 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 		// 	if (
 		// 		) == 3 {}
 		// }
-
-		for VC in &learnt.T.values {
-			
-		}
 	}
-
 	return String::new();
 }
