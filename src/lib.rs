@@ -92,6 +92,18 @@ fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: 
 	map1.into_iter().chain(map2).collect()
 }
 
+macro_rules! checkmem {
+	($mem: expr, $($key: ident, $keyname: ident),*) => {
+		$(
+			$keyname = if $mem > $key.len() {
+				$key.len()
+			} else {
+				$mem
+			};
+		)*
+	};
+}
+
 //
 // ────────────────────────────────────────────────── I ──────────
 //   :::::: L E A R N : :  :   :    :     :        :          :
@@ -100,7 +112,7 @@ fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: 
 
 // Honestly I'm tired of writing words, I'm going with a TI-BASIC style.
 pub struct Learnt<'a> {
-	M: Vec<f32>,
+	M: Vec<Vec<f32>>,
 	T: Map<Chunks<'a, u16>>,
 	R: Map<String>
 }
@@ -138,30 +150,16 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 	let mut key_length: usize;
 	let mut value_length: usize;
 
-	for key in &data.keys {
-		// First, we check if the memory is too big.
-		key_length = key.len();
-		krealmem = if memory >= key_length {
-			key_length
-		} else {
-			memory
-		};
+	for (key, value) in data.keys.iter().zip(data.values) {
+		// Let's check memory
+		checkmem!(memory, key, krealmem, value, vrealmem);
+		for key_chunk in key.into_chunks(krealmem).base {
+			for value_chunk in value.into_chunks(vrealmem).base {
+				mega.push(key_chunk.iter().sum::<u16>() as f32 / value.iter().sum::<u16>() as f32)
+			}
+		}
+	}
 
-		for key_chunk in key.into_chunks(krealmem).iterate() {
-			for value in &data.values {
-				value_length = value.len();
-				vrealmem = if memory >= value_length {
-					value_length
-				} else {
-					memory
-				};
-
-				for value_chunk in value.into_chunks(vrealmem).iterate() {
-					mega.push(value_chunk.iter().sum::<u16>() as f32 / key_chunk.iter().sum::<u16>() as f32);
-				};
-			};
-		};
-	};
 	return mega;
 }
 
@@ -290,7 +288,7 @@ std::cmp::Eq
 
 // __run__(...) wrapper
 
-pub fn run(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
+pub fn run(input: &str, learnt: &Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
 	return match (memory, threshold) {
 		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
 		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
@@ -299,7 +297,7 @@ pub fn run(input: &str, learnt: Learnt, memory: Option<usize>, threshold: Option
 	};
 }
 
-fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> String {
+fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> String {
 //* Translating the input
 	let mut vecinput: Vec<u16> = Vec::new();
 
@@ -333,8 +331,8 @@ fn __run__(rawinput: &str, learnt: Learnt, memory: usize, threshold: f32) -> Str
 		// 		) == 3 {}
 		// }
 
-		for VC in learnt.T.values {
-			// algorithm things here
+		for VC in &learnt.T.values {
+			
 		}
 	}
 
