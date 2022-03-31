@@ -376,7 +376,6 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 	for input_chunk in input_chunks.base {
 		// for (KC, VC) in learnt.T.keys.iter().zip(learnt.T.values.iter()) {
 		// 	if (
-				
 		// 		) == 3 {}
 		// }
 
