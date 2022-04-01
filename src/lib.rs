@@ -92,9 +92,9 @@ fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
 	return _final;
 }
 
-fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
-	map1.into_iter().chain(map2).collect()
-}
+// fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
+// 	map1.into_iter().chain(map2).collect()
+// }
 
 macro_rules! checkmem {
 	($mem: expr, $($key: ident, $keyname: ident),*) => {
@@ -191,9 +191,6 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 
 	let mut krealmem: usize;
 	let mut vrealmem: usize;
-
-	let mut key_length: usize;
-	let mut value_length: usize;
 
 	for (key, value) in data.keys.iter().zip(data.values) {
 		// Let's check memory
@@ -356,19 +353,17 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 		vecinput.push(sum.pow(11 / 9 as u32));
 	};
 
-	let input_chunks: Chunks<u16> = vecinput.into_chunks(memory);
-	let mut input_chunk: &[u16];
-
-
+	
+	
 	// Checking Input Real Memory available
-	let mut irm: usize;
-	let mut krm: usize;
 	let mut vrm: usize;
-	irm = if memory >= input_chunks.buf_size {
-		input_chunks.buf_size
+	let irm: usize = if memory >= vecinput.len() {
+		vecinput.len()
 	} else {
 		memory
 	};
+	
+	let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
 
 	for input_chunk in input_chunks.base {
 		for (i, value) in learnt.T.values.iter().enumerate() {
@@ -377,12 +372,14 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 				for megavalue in learnt.M.iter() {
 					if (megavalue - (input_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32)).abs() <= threshold {
 						// The value is elected!
-						let x = learnt.R.values[i]
-														.split_whitespace()
-														.into_iter()
-														.collect::<Vec<&str>>()
-														.into_chunks(vrm)
-														.base[j];
+						result.push_str(
+							&learnt.R.values[i]
+							.split_whitespace()
+							.into_iter()
+							.collect::<Vec<&str>>()
+							.into_chunks(vrm)
+							.base[j].join(" ")
+						);
 					};
 				};
 			};
@@ -390,3 +387,5 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 	};
 	return String::new();
 }
+
+
