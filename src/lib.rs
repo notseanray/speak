@@ -345,6 +345,7 @@ pub fn run(input: &str, learnt: &Learnt, memory: Option<usize>, threshold: Optio
 fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> String {
 //* Translating the input
 	let mut vecinput: Vec<u16> = Vec::new();
+	let mut result: String = String::new();
 
 	let mut sum: u16 = 0;
 	for word in rawinput.split_whitespace() {
@@ -370,10 +371,22 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 	};
 
 	for input_chunk in input_chunks.base {
-		// for (KC, VC) in learnt.T.keys.iter().zip(learnt.T.values.iter()) {
-		// 	if (
-		// 		) == 3 {}
-		// }
-	}
+		for (i, value) in learnt.T.values.iter().enumerate() {
+			checkmem!(memory, value, vrm);
+			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
+				for megavalue in learnt.M.iter() {
+					if (megavalue - (input_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32)).abs() <= threshold {
+						// The value is elected!
+						let x = learnt.R.values[i]
+														.split_whitespace()
+														.into_iter()
+														.collect::<Vec<&str>>()
+														.into_chunks(vrm)
+														.base[j];
+					};
+				};
+			};
+		};
+	};
 	return String::new();
 }
