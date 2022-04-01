@@ -20,10 +20,13 @@ Cargo.lock
 
 # Source files
 
-src/main.rs
+src/main.txt
 src/pseudocode.txt
 
 # Ignoring env stuff
 node_modules
 venv
 how-does-it-works.md
+
+*.log
+docs/
