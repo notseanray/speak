@@ -70,7 +70,7 @@ pub const DEFAULT_MEMORY: usize = 2;
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 
-fn translate(iter: Vec<String>) -> Vec<Vec<u16>> {
+fn translate(iter: &Vec<String>) -> Vec<Vec<u16>> {
 	
 	let mut sum: u16 = 0;
 	let mut phrasevec: Vec<u16> = Vec::new();
@@ -113,13 +113,6 @@ macro_rules! checkmem {
 //   :::::: L E A R N : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────
 //
-
-// Honestly I'm tired of writing words, I'm going with a TI-BASIC style.
-pub struct Learnt<'a> {
-	M: Vec<f32>,
-	T: &'a Map<Vec<u16>>,
-	R: Map<String>
-}
 
 // __learn__(...) wrapper
 ///# `Learn(...)`
@@ -164,7 +157,7 @@ pub struct Learnt<'a> {
 ///**Be careful with this function**, because this function takes time.
 ///If you need to create a closed feedback loop (training with newly created data), you can use the `relearn_direct(...)` function. In the case that you want to add data and still hash the dataset, you can use `relearn_indirect(...)`, this will return a `HashMap` and you can serialize and store it somewhere.
 ///
-pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> Vec<f32> {
+pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::HashMap<T, T>, memory: Option<usize>) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
 	
 	let x: Map<T> = data.to_map();
 	let new_map: Map<String> = Map::<String> {
@@ -180,11 +173,11 @@ pub fn learn<T: Literal<String> + Clone + ToString>(data: std::collections::Hash
 }
 
 // The main algorithm
-fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
+fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
-		keys: translate(rawdata.keys),
-		values: translate(rawdata.values)
+		keys: translate(&rawdata.keys),
+		values: translate(&rawdata.values)
 	};
 
 	let mut mega: Vec<f32> = Vec::new();
@@ -192,7 +185,7 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 	let mut krealmem: usize;
 	let mut vrealmem: usize;
 
-	for (key, value) in data.keys.iter().zip(data.values) {
+	for (key, value) in data.keys.iter().zip(&data.values) {
 		// Let's check memory
 		checkmem!(memory, key, krealmem, value, vrealmem);
 		for key_chunk in key.into_chunks(krealmem).base {
@@ -202,7 +195,11 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 		}
 	}
 
-	return mega
+	return (
+		mega,
+		data,
+		rawdata
+	);
 }
 
 // //
@@ -330,16 +327,16 @@ fn __learn__(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 
 // __run__(...) wrapper
 
-pub fn run(input: &str, learnt: &Learnt, memory: Option<usize>, threshold: Option<f32>) -> String {
+pub async fn run(input: &str, learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>), memory: Option<usize>, threshold: Option<f32>) -> String {
 	return match (memory, threshold) {
-		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
-		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
-		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
-		(Some(x), Some(y)) => __run__(input, learnt, x, y)
+		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD).await,
+		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x).await,
+		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD).await,
+		(Some(x), Some(y)) => __run__(input, learnt, x, y).await
 	};
 }
 
-fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> String {
+async fn __run__(rawinput: &str, learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>), memory: usize, threshold: f32) -> String {
 //* Translating the input
 	let mut vecinput: Vec<u16> = Vec::new();
 	let mut result: String = String::new();
@@ -352,8 +349,6 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 		// I hope the compiler will optimize this horrible code... I hope.
 		vecinput.push(sum.pow(11 / 9 as u32));
 	};
-
-	
 	
 	// Checking Input Real Memory available
 	let mut vrm: usize;
@@ -366,26 +361,24 @@ fn __run__(rawinput: &str, learnt: &Learnt, memory: usize, threshold: f32) -> St
 	let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
 
 	for input_chunk in input_chunks.base {
-		for (i, value) in learnt.T.values.iter().enumerate() {
+		for (i, value) in learnt.1.values.iter().enumerate() {
 			checkmem!(memory, value, vrm);
 			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
-				for megavalue in learnt.M.iter() {
+				for megavalue in learnt.0.iter() {
 					if (megavalue - (input_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32)).abs() <= threshold {
 						// The value is elected!
 						result.push_str(
-							&learnt.R.values[i]
-							.split_whitespace()
-							.into_iter()
-							.collect::<Vec<&str>>()
-							.into_chunks(vrm)
-							.base[j].join(" ")
+							&learnt.2.values[i]
+									.split_whitespace()
+									.into_iter()
+									.collect::<Vec<&str>>()
+									.into_chunks(vrm)
+									.base[j].join(" ")
 						);
 					};
 				};
 			};
 		};
 	};
-	return String::new();
+	return result;
 }
-
-
