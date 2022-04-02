@@ -1,5 +1,13 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
 
+/*
+
+Translate: 75
+Learn: 160
+Run: 340
+
+*/
+
 // Ok I just read that (Except for addition) using floats is faster than ints, eh?
 // look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
 #[path = "libs/literal.rs"]
