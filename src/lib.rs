@@ -2,9 +2,6 @@
 
 // Ok I just read that (Except for addition) using floats is faster than ints, eh?
 // look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
-
-use aquamarine;
-
 #[path = "libs/literal.rs"]
 mod lit;
 use lit::*;
@@ -16,8 +13,6 @@ use map::*;
 #[path = "libs/chunks.rs"]
 mod chk;
 use chk::*;
-
-use std::collections::HashMap;
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
