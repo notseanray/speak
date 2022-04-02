@@ -75,22 +75,22 @@ pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 
 fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
-    let mut result: Vec<Vec<u16>> = Vec::new();
-    let mut new_phrase: Vec<u16> = Vec::new();
-    let mut sum: u16 = 0;
-    for phrase in vec {
-        for word in phrase.split_whitespace() {
-            for c in word.chars() {
-                sum += c as u16;
-            }
-            new_phrase.push(sum.pow(3 / 2));
-            sum = 0;
-        }
-        result.push(new_phrase.clone());
-        new_phrase.clear()
-    }
+	let mut result: Vec<Vec<u16>> = Vec::new();
+	let mut new_phrase: Vec<u16> = Vec::new();
+	let mut sum: u16 = 0;
+	for phrase in vec {
+		for word in phrase.split_whitespace() {
+			for c in word.chars() {
+				sum += c as u16;
+			}
+			new_phrase.push(sum.pow(3 / 2));
+			sum = 0;
+		}
+		result.push(new_phrase.clone());
+		new_phrase.clear()
+	}
 
-    return result;
+	return result;
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
@@ -159,60 +159,59 @@ macro_rules! checkmem {
 ///If you need to create a closed feedback loop (training with newly created data), you can use the `relearn_direct(...)` function. In the case that you want to add data and still hash the dataset, you can use `relearn_indirect(...)`, this will return a `HashMap` and you can serialize and store it somewhere.
 ///
 pub fn learn<T: Literal<String> + Clone + ToString>(
-    data: &std::collections::HashMap<T, T>,
-    memory: Option<usize>,
+	data: &std::collections::HashMap<T, T>,
+	memory: Option<usize>,
 ) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
-    let x: Map<T> = data.clone().to_map();
-    let new_map: Map<String> = Map::<String> {
-        keys: x.keys.literal(),
-        values: x.values.literal(),
-    };
+	let x: Map<T> = data.clone().to_map();
+	let new_map: Map<String> = Map::<String> {
+		keys: x.keys.literal(),
+		values: x.values.literal(),
+	};
 
-    print!("{:?}", new_map.keys);
-    print!("{:?}", new_map.values);
+	print!("{:?}", new_map.keys);
+	print!("{:?}", new_map.values);
 
-    if let Some(mem) = memory {
-        return __learn__(new_map, mem);
-    } else {
-        return __learn__(new_map, DEFAULT_MEMORY);
-    }
+	if let Some(mem) = memory {
+		return __learn__(new_map, mem);
+	} else {
+		return __learn__(new_map, DEFAULT_MEMORY);
+	}
 }
 
 // The main algorithm
 fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
-    // First, we translate `data`
-    let data: Map<Vec<u16>> = Map::<Vec<u16>> {
-        keys: translate(&rawdata.keys),
-        values: translate(&rawdata.values),
-    };
+	// First, we translate `data`
+	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
+		keys: translate(&rawdata.keys),
+		values: translate(&rawdata.values),
+	};
 
-    println!(
-        "{:?}",
-        translate(&vec!["a".to_owned(), "b".to_owned(), "c".to_owned()])
-    );
+	println!(
+		"{:?}",
+		translate(&vec!["a".to_owned(), "b".to_owned(), "c".to_owned()])
+	);
 
-    println!("{:#?}", data.keys);
-    println!("{:#?}", data.values);
+	println!("{:#?}", data.keys);
+	println!("{:#?}", data.values);
 
-    let mut mega: Vec<f32> = Vec::new();
+	let mut mega: Vec<f32> = Vec::new();
 
-    let mut krealmem: usize;
-    let mut vrealmem: usize;
+	let mut krealmem: usize;
+	let mut vrealmem: usize;
 
-    for (key, value) in data.keys.iter().zip(&data.values) {
-        // Let's check memory
-        checkmem!(memory, key, krealmem, value, vrealmem);
-        for key_chunk in key.into_chunks(krealmem).base {
-            println!("{:?}", key_chunk);
-            for value_chunk in value.into_chunks(vrealmem).base {
-                mega.push(
-                    key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32,
-                )
-            }
-        }
-    }
+	for (key, value) in data.keys.iter().zip(&data.values) {
+		checkmem!(memory, key, krealmem, value, vrealmem);
+		// We divide the keys and the values
+		for key_chunk in key.into_chunks(krealmem).base {
+			for value_chunk in value.into_chunks(vrealmem).base {
+				mega.push(key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32);
+			}
+		};
+	};
 
-    return (mega, data, rawdata);
+	println!("{:?}", mega);
+
+	return (mega, data, rawdata);
 }
 
 // //
@@ -339,73 +338,65 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 // __run__(...) wrapper
 
 pub fn run(
-    input: &str,
-    learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
-    memory: Option<usize>,
-    threshold: Option<f32>,
+	input: &str,
+	learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
+	memory: Option<usize>,
+	threshold: Option<f32>,
 ) -> String {
-    return match (memory, threshold) {
-        (None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
-        (None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
-        (Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
-        (Some(x), Some(y)) => __run__(input, learnt, x, y),
-    };
+	return match (memory, threshold) {
+		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
+		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
+		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
+		(Some(x), Some(y)) => __run__(input, learnt, x, y),
+	};
 }
 
 fn __run__(
-    rawinput: &str,
-    learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
-    memory: usize,
-    threshold: f32,
+	rawinput: &str,
+	learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
+	memory: usize,
+	threshold: f32,
 ) -> String {
-    //* Translating the input
-    let mut vecinput: Vec<u16> = Vec::new();
-    let mut result: String = String::new();
+	//* Translating the input
+	let mut vecinput: Vec<u16> = Vec::new();
+	let mut result: String = String::new();
 
-    let mut sum: u16 = 0;
-    for word in rawinput.split_whitespace() {
-        for c in word.chars() {
-            sum += c as u16;
-        }
-        // I hope the compiler will optimize this horrible code... I hope.
-        vecinput.push(sum.pow(11 / 9 as u32));
-    }
+	let mut sum: u16 = 0;
+	for word in rawinput.split_whitespace() {
+		for c in word.chars() {
+			sum += c as u16;
+		}
+		// I hope the compiler will optimize this horrible code... I hope.
+		vecinput.push(sum.pow(11 / 9 as u32));
+	}
 
-    // Checking Input Real Memory available
-    let mut vrm: usize;
-    let irm: usize = if memory >= vecinput.len() {
-        vecinput.len()
-    } else {
-        memory
-    };
+	// Checking Input Real Memory available
+	let mut vrm: usize;
+	let irm: usize = if memory >= vecinput.len() {
+		vecinput.len()
+	} else {
+		memory
+	};
 
-    let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
+	let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
 
-    for input_chunk in input_chunks.base {
-        for (i, value) in learnt.1.values.iter().enumerate() {
-            checkmem!(memory, value, vrm);
-            for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
-                for megavalue in learnt.0.iter() {
-                    if (megavalue
-                        - (input_chunk.iter().sum::<u16>() as f32
-                            / value_chunk.iter().sum::<u16>() as f32))
-                        .abs()
-                        <= threshold
-                    {
-                        // The value is elected!
-                        result.push_str(
-                            &learnt.2.values[i]
-                                .split_whitespace()
-                                .into_iter()
-                                .collect::<Vec<&str>>()
-                                .into_chunks(vrm)
-                                .base[j]
-                                .join(" "),
-                        );
-                    };
-                }
-            }
-        }
-    }
-    return result;
+	for input_chunk in input_chunks.base {
+		for (i, value) in learnt.1.values.iter().enumerate() {
+			checkmem!(memory, value, vrm);
+			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
+				for megavalue in learnt.0.iter() {
+					if (megavalue
+						- (input_chunk.iter().sum::<u16>() as f32
+							/ value_chunk.iter().sum::<u16>() as f32))
+						.abs()
+						>= threshold
+					{
+						// The value is elected!
+						result.push_str(&String::from("hi"));
+					};
+				}
+			}
+		}
+	}
+	return result;
 }

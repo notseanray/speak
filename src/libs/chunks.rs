@@ -35,7 +35,7 @@ pub(crate) trait Chunkable<'a, T> {
 impl<'a, T> Chunkable<'a, T> for Vec<T> {
     fn into_chunks(&'a self, memory: usize) -> Chunks<T> {
         let mut chunks: Vec<&'a [T]> = Vec::new();
-        for i in (memory..self.len() - memory).step_by(memory) {
+        for i in (memory..self.len() + 1).step_by(memory) {
             chunks.push(&self[memory - i..i]);
         }
         return Chunks { base: chunks, buf_size: memory };
