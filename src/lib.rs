@@ -2,8 +2,8 @@
 
 /*
 
-Translate: 75
-Learn: 160
+Translate: 77
+Learn: 161
 Run: 340
 
 */
@@ -12,6 +12,8 @@ Run: 340
 // look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
 #[path = "libs/literal.rs"]
 mod lit;
+use std::ops::Deref;
+
 use lit::*;
 
 #[path = "libs/mapping.rs"]
@@ -371,7 +373,7 @@ fn __run__(
 	}
 
 	// Checking Input Real Memory available
-	let mut vrm: usize;
+	let mut vrm: usize = memory;
 	let irm: usize = if memory >= vecinput.len() {
 		vecinput.len()
 	} else {
@@ -379,7 +381,6 @@ fn __run__(
 	};
 
 	let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
-
 	for input_chunk in input_chunks.base {
 		for (i, value) in learnt.1.values.iter().enumerate() {
 			checkmem!(memory, value, vrm);
@@ -413,13 +414,22 @@ fn __run__(
 											)
 										) {
 										best_match = Some((i, j, y));
-										}
+										};
 								}
-							}
+							};
 						};
-				}
-			}
-		}
-	}
+				};
+			};
+		};
+
+		result.push_str(&learnt.2.values
+									.into_chunks(vrm)
+									.base[best_match.unwrap().2]
+									.iter()
+									.map(|s| s.deref())
+									.collect::<String>()
+		);
+
+	};
 	return result;
 }
