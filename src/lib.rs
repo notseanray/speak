@@ -83,7 +83,7 @@ fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
 			for c in word.chars() {
 				sum += c as u16;
 			}
-			new_phrase.push(sum.pow(3 / 2));
+			new_phrase.push(sum.pow(10 / 9));
 			sum = 0;
 		}
 		result.push(new_phrase.clone());
@@ -191,9 +191,6 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 		translate(&vec!["a".to_owned(), "b".to_owned(), "c".to_owned()])
 	);
 
-	println!("{:#?}", data.keys);
-	println!("{:#?}", data.values);
-
 	let mut mega: Vec<f32> = Vec::new();
 
 	let mut krealmem: usize;
@@ -204,10 +201,12 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 		// We divide the keys and the values
 		for key_chunk in key.into_chunks(krealmem).base {
 			for value_chunk in value.into_chunks(vrealmem).base {
-				mega.push(key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32);
+				mega.push(
+					key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32,
+				);
 			}
-		};
-	};
+		}
+	}
 
 	println!("{:?}", mega);
 
@@ -360,14 +359,15 @@ fn __run__(
 	//* Translating the input
 	let mut vecinput: Vec<u16> = Vec::new();
 	let mut result: String = String::new();
+	let mut best_match: Option<(usize, usize, usize)> = None;
 
-	let mut sum: u16 = 0;
+	let mut sum: u16 = 00;
 	for word in rawinput.split_whitespace() {
 		for c in word.chars() {
 			sum += c as u16;
 		}
 		// I hope the compiler will optimize this horrible code... I hope.
-		vecinput.push(sum.pow(11 / 9 as u32));
+		vecinput.push(sum.pow(10 / 9 as u32));
 	}
 
 	// Checking Input Real Memory available
@@ -384,16 +384,39 @@ fn __run__(
 		for (i, value) in learnt.1.values.iter().enumerate() {
 			checkmem!(memory, value, vrm);
 			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
-				for megavalue in learnt.0.iter() {
-					if (megavalue
+				for (y, megavalue) in learnt.0.iter().enumerate() {
+					println!("{}", (megavalue
 						- (input_chunk.iter().sum::<u16>() as f32
-							/ value_chunk.iter().sum::<u16>() as f32))
-						.abs()
-						>= threshold
-					{
-						// The value is elected!
-						result.push_str(&String::from("hi"));
-					};
+							/ value_chunk.iter().sum::<u16>() as f32)));
+					
+						if (megavalue
+					- (input_chunk.iter().sum::<u16>() as f32
+						/ value_chunk.iter().sum::<u16>() as f32))
+					<= threshold
+						{
+							match best_match {
+								None => best_match = Some((i, j, y)),
+								Some((i2, j2, y2)) => {
+									// The value is elected!
+									// Let's not touch this, please.
+									if (
+										megavalue - (
+										input_chunk.iter().sum::<u16>() as f32 /
+										value_chunk.iter().sum::<u16>() as f32)
+									) < 
+										
+										(
+											learnt.0[y2] -
+											(
+												input_chunk.iter().sum::<u16>() as f32 /
+												learnt.1.values[i2].into_chunks(vrm).base[j2].iter().sum::<u16>() as f32
+											)
+										) {
+										best_match = Some((i, j, y));
+										}
+								}
+							}
+						};
 				}
 			}
 		}

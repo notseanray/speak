@@ -1,31 +1,29 @@
 pub(crate) struct Chunks<'a, T> {
     pub(crate) base: Vec<&'a [T]>,
-	pub(crate) buf_size: usize
 }
 
 impl<'a, T> Chunks<'a, T> {
-	pub(crate) fn new(buf: usize) -> Chunks::<'a, T> {
-		return Chunks::<T> {
-			base: Vec::new(),
-			buf_size: buf
-		};
-	}
+    pub(crate) fn new() -> Chunks<'a, T> {
+        return Chunks::<T> {
+            base: Vec::new(),
+        };
+    }
 
-	pub(crate) fn iterate(self) -> Vec<&'a[T]> {
-		return self.base; 
-	}
+    pub(crate) fn iterate(self) -> Vec<&'a [T]> {
+        return self.base;
+    }
 }
 
 impl<'a> Chunks<'a, u16> {
-	pub(crate) fn sum(&self) -> u16 {
-		let mut sum: u16 = 0;
-		for &x in &self.base {
-			for &i in x {
-				sum += i;
-			}
-		}
-		return sum;
-	}
+    pub(crate) fn sum(&self) -> u16 {
+        let mut sum: u16 = 0;
+        for &x in &self.base {
+            for &i in x {
+                sum += i;
+            }
+        }
+        return sum;
+    }
 }
 
 pub(crate) trait Chunkable<'a, T> {
@@ -38,6 +36,13 @@ impl<'a, T> Chunkable<'a, T> for Vec<T> {
         for i in (memory..self.len() + 1).step_by(memory) {
             chunks.push(&self[memory - i..i]);
         }
-        return Chunks { base: chunks, buf_size: memory };
+
+        if memory % (self.len() + 1) != 0 {
+            chunks.push(&self[self.len() - memory..self.len()]);
+        };
+
+        return Chunks {
+            base: chunks
+        };
     }
 }
