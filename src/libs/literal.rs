@@ -1,7 +1,3 @@
-#[path = "mapping.rs"]
-mod map;
-use map::*;
-
 pub trait Literal<T> {
 	fn literal(self) -> T;
 }
