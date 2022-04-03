@@ -3,12 +3,11 @@ use speak::{learn, run};
 
 fn main() {
 	let map = HashMap::from([
-		("a", "1"),
-		("b", "2"),
-		("c", "3"),
+		("Hello world", "Hola mundo"),
+		("Hola mundo", "Hello world"),
 	]);
 
-	let learnt = learn(&map, None);
-	let ran = run("a", learnt, None, None);
+	let learnt = learn(&map, Some(1));
+	let ran = run("Hello world", learnt, Some(1), None);
 	println!("-> {}", ran);
 }

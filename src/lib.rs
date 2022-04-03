@@ -1,18 +1,10 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
 
-/*
-
-Translate: 77
-Learn: 161
-Run: 340
-
-*/
-
 // Ok I just read that (Except for addition) using floats is faster than ints, eh?
 // look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
 #[path = "libs/literal.rs"]
 mod lit;
-use std::ops::Deref;
+use std::{ops::Deref, collections::btree_map::OccupiedEntry};
 
 use lit::*;
 
@@ -75,6 +67,7 @@ pub const DEFAULT_MEMORY: usize = 2;
 ///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
+pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
 
 fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
 	let mut result: Vec<Vec<u16>> = Vec::new();
@@ -203,6 +196,8 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 		// We divide the keys and the values
 		for key_chunk in key.into_chunks(krealmem).base {
 			for value_chunk in value.into_chunks(vrealmem).base {
+				println!("%K{:?}", key_chunk);
+				println!("%V{:?}", value_chunk);
 				mega.push(
 					key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32,
 				);
@@ -344,11 +339,12 @@ pub fn run(
 	memory: Option<usize>,
 	threshold: Option<f32>,
 ) -> String {
+	// I tried to do this with binary representation, but being Option<...> instead of 
 	return match (memory, threshold) {
 		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
-		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
-		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
-		(Some(x), Some(y)) => __run__(input, learnt, x, y),
+		(None, Some(thr)) => __run__(input, learnt, DEFAULT_MEMORY, thr),
+		(Some(mem), None) => __run__(input, learnt, mem, DEFAULT_THRESHOLD),
+		(Some(mem), Some(thr)) => __run__(input, learnt, mem, thr),
 	};
 }
 
@@ -363,7 +359,7 @@ fn __run__(
 	let mut result: String = String::new();
 	let mut best_match: Option<(usize, usize, usize)> = None;
 
-	let mut sum: u16 = 00;
+	let mut sum: u16 = 0;
 	for word in rawinput.split_whitespace() {
 		for c in word.chars() {
 			sum += c as u16;
@@ -380,13 +376,12 @@ fn __run__(
 		memory
 	};
 
-	let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
-	for input_chunk in input_chunks.base {
+	for input_chunk in vecinput.into_chunks(irm).base {
 		for (i, value) in learnt.1.values.iter().enumerate() {
 			checkmem!(memory, value, vrm);
 			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
 				for (y, megavalue) in learnt.0.iter().enumerate() {
-					println!("{}", (megavalue
+					println!("x{}", (megavalue
 						- (input_chunk.iter().sum::<u16>() as f32
 							/ value_chunk.iter().sum::<u16>() as f32)));
 					
@@ -398,6 +393,7 @@ fn __run__(
 							match best_match {
 								None => best_match = Some((i, j, y)),
 								Some((i2, j2, y2)) => {
+
 									// The value is elected!
 									// Let's not touch this, please.
 									if (
@@ -405,7 +401,6 @@ fn __run__(
 										input_chunk.iter().sum::<u16>() as f32 /
 										value_chunk.iter().sum::<u16>() as f32)
 									) < 
-										
 										(
 											learnt.0[y2] -
 											(
@@ -421,15 +416,13 @@ fn __run__(
 				};
 			};
 		};
-
 		result.push_str(&learnt.2.values
 									.into_chunks(vrm)
-									.base[best_match.unwrap().2]
+									.base[best_match.unwrap().0]
 									.iter()
 									.map(|s| s.deref())
 									.collect::<String>()
 		);
-
 	};
 	return result;
 }
