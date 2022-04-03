@@ -4,7 +4,7 @@
 // look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
 #[path = "libs/literal.rs"]
 mod lit;
-use std::{ops::Deref, collections::btree_map::OccupiedEntry};
+use std::{ops::Deref, collections::btree_map::OccupiedEntry, ffi::FromVecWithNulError};
 
 use lit::*;
 
@@ -156,7 +156,7 @@ macro_rules! checkmem {
 pub fn learn<T: Literal<String> + Clone + ToString>(
 	data: &std::collections::HashMap<T, T>,
 	memory: Option<usize>,
-) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
+) -> (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>) {
 	let x: Map<T> = data.clone().to_map();
 	let new_map: Map<String> = Map::<String> {
 		keys: x.keys.literal(),
@@ -174,7 +174,7 @@ pub fn learn<T: Literal<String> + Clone + ToString>(
 }
 
 // The main algorithm
-fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
+fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>) {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
 		keys: translate(&rawdata.keys),
@@ -186,7 +186,8 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 		translate(&vec!["a".to_owned(), "b".to_owned(), "c".to_owned()])
 	);
 
-	let mut mega: Vec<f32> = Vec::new();
+	let mut mega: Vec<Vec<f32>> = Vec::new();
+	let mut ram: Vec<f32> = Vec::new();
 
 	let mut krealmem: usize;
 	let mut vrealmem: usize;
@@ -198,12 +199,14 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 			for value_chunk in value.into_chunks(vrealmem).base {
 				println!("%K{:?}", key_chunk);
 				println!("%V{:?}", value_chunk);
-				mega.push(
+				ram.push(
 					key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32,
 				);
-			}
-		}
-	}
+			};
+		};
+		mega.push(ram.clone());
+		ram.clear();
+	};
 
 	println!("{:?}", mega);
 
@@ -335,7 +338,7 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 
 pub fn run(
 	input: &str,
-	learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
+	learnt: (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>),
 	memory: Option<usize>,
 	threshold: Option<f32>,
 ) -> String {
@@ -350,7 +353,7 @@ pub fn run(
 
 fn __run__(
 	rawinput: &str,
-	learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
+	learnt: (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>),
 	memory: usize,
 	threshold: f32,
 ) -> String {
@@ -376,36 +379,85 @@ fn __run__(
 		memory
 	};
 
-	for input_chunk in vecinput.into_chunks(irm).base {
-		for (i, value) in learnt.1.values.iter().enumerate() {
-			checkmem!(memory, value, vrm);
-			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
-				for (y, megavalue) in learnt.0.iter().enumerate() {
-					println!("x{}", (megavalue
-						- (input_chunk.iter().sum::<u16>() as f32
-							/ value_chunk.iter().sum::<u16>() as f32)));
-					
-						if (megavalue
-					- (input_chunk.iter().sum::<u16>() as f32
-						/ value_chunk.iter().sum::<u16>() as f32))
-					<= threshold
-						{
-							match best_match {
-								None => best_match = Some((i, j, y)),
-								Some((i2, j2, y2)) => {
+	let mut mrm: usize;
 
+	// for input_chunk in vecinput.into_chunks(irm).base {
+	// 	for (i, value) in learnt.1.values.iter().enumerate() {
+	// 		checkmem!(memory, value, vrm);
+	// 		for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
+	// 			for (y, megavalue) in learnt.0.iter().enumerate() {
+	// 				println!("x{}", (megavalue
+	// 					- (input_chunk.iter().sum::<u16>() as f32
+	// 						/ value_chunk.iter().sum::<u16>() as f32)));
+					
+	// 					if (megavalue
+	// 				- (input_chunk.iter().sum::<u16>() as f32
+	// 					/ value_chunk.iter().sum::<u16>() as f32))
+	// 				<= threshold
+	// 					{
+	// 						match best_match {
+	// 							None => best_match = Some((i, j, y)),
+	// 							Some((i2, j2, y2)) => {
+
+	// 								// The value is elected!
+	// 								// Let's not touch this, please.
+	// 								if (
+	// 									megavalue - (
+	// 									input_chunk.iter().sum::<u16>() as f32 /
+	// 									value_chunk.iter().sum::<u16>() as f32)
+	// 								) < 
+	// 									(
+	// 										learnt.0[y2] -
+	// 										(
+	// 											input_chunk.iter().sum::<u16>() as f32 /
+	// 											learnt.1.values[i2].into_chunks(vrm).base[j2].iter().sum::<u16>() as f32
+	// 										)
+	// 									) {
+	// 									best_match = Some((i, j, y));
+	// 									};
+	// 							}
+	// 						};
+	// 					};
+	// 			};
+	// 		};
+	// 	};
+	// 	result.push_str(&learnt.2.values
+	// 								.into_chunks(vrm)
+	// 								.base[best_match.unwrap().0]
+	// 								.iter()
+	// 								.map(|s| s.deref())
+	// 								.collect::<String>()
+	// 	);
+	// };
+
+	for value in &learnt.1.values {
+		// For each value
+		checkmem!(memory, value, vrm);
+		for (i, value_chunk) in value.into_chunks(memory).base.iter().enumerate() {
+			for input_chunk in vecinput.into_chunks(irm).base {
+				for (y, mega_vec) in learnt.0.iter().enumerate() {
+					checkmem!(memory, mega_vec, mrm);
+					for mega_chunk in mega_vec.into_chunks(mrm).base {
+						if (mega_chunk.iter().sum::<f32>() - (input_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32)) <= threshold {
+							match best_match {
+								None => best_match = Some((0, 0, 0)),
+								Some((i, j, y)) => {
 									// The value is elected!
 									// Let's not touch this, please.
 									if (
-										megavalue - (
-										input_chunk.iter().sum::<u16>() as f32 /
-										value_chunk.iter().sum::<u16>() as f32)
+										mega_chunk.iter().sum::<f32>() - (
+											input_chunk.iter().sum::<u16>() as f32 /
+											value_chunk.iter().sum::<u16>() as f32 )
 									) < 
 										(
-											learnt.0[y2] -
+											learnt.0[y].into_chunks(if memory > learnt.0[y].len() {
+												learnt.0[y].len()
+											} else {
+												memory
+											}).base.iter().map(|v| v.iter().sum::<f32>()).sum::<f32>() -
 											(
 												input_chunk.iter().sum::<u16>() as f32 /
-												learnt.1.values[i2].into_chunks(vrm).base[j2].iter().sum::<u16>() as f32
+												learnt.1.values[i].into_chunks(vrm).base[j].iter().sum::<u16>() as f32
 											)
 										) {
 										best_match = Some((i, j, y));
@@ -413,16 +465,10 @@ fn __run__(
 								}
 							};
 						};
+					};
 				};
 			};
 		};
-		result.push_str(&learnt.2.values
-									.into_chunks(vrm)
-									.base[best_match.unwrap().0]
-									.iter()
-									.map(|s| s.deref())
-									.collect::<String>()
-		);
 	};
 	return result;
 }
