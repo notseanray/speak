@@ -1,18 +1,10 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
 
-/*
-
-Translate: 77
-Learn: 161
-Run: 340
-
-*/
-
 // Ok I just read that (Except for addition) using floats is faster than ints, eh?
 // look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
 #[path = "libs/literal.rs"]
 mod lit;
-use std::ops::Deref;
+use std::{ops::Deref, collections::btree_map::OccupiedEntry, ffi::FromVecWithNulError};
 
 use lit::*;
 
@@ -75,6 +67,7 @@ pub const DEFAULT_MEMORY: usize = 2;
 ///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
+pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
 
 fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
 	let mut result: Vec<Vec<u16>> = Vec::new();
@@ -163,7 +156,7 @@ macro_rules! checkmem {
 pub fn learn<T: Literal<String> + Clone + ToString>(
 	data: &std::collections::HashMap<T, T>,
 	memory: Option<usize>,
-) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
+) -> (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>) {
 	let x: Map<T> = data.clone().to_map();
 	let new_map: Map<String> = Map::<String> {
 		keys: x.keys.literal(),
@@ -181,7 +174,7 @@ pub fn learn<T: Literal<String> + Clone + ToString>(
 }
 
 // The main algorithm
-fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>>, Map<String>) {
+fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>) {
 	// First, we translate `data`
 	let data: Map<Vec<u16>> = Map::<Vec<u16>> {
 		keys: translate(&rawdata.keys),
@@ -193,7 +186,8 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 		translate(&vec!["a".to_owned(), "b".to_owned(), "c".to_owned()])
 	);
 
-	let mut mega: Vec<f32> = Vec::new();
+	let mut mega: Vec<Vec<f32>> = Vec::new();
+	let mut ram: Vec<f32> = Vec::new();
 
 	let mut krealmem: usize;
 	let mut vrealmem: usize;
@@ -203,12 +197,16 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 		// We divide the keys and the values
 		for key_chunk in key.into_chunks(krealmem).base {
 			for value_chunk in value.into_chunks(vrealmem).base {
-				mega.push(
+				println!("%K{:?}", key_chunk);
+				println!("%V{:?}", value_chunk);
+				ram.push(
 					key_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32,
 				);
-			}
-		}
-	}
+			};
+		};
+		mega.push(ram.clone());
+		ram.clear();
+	};
 
 	println!("{:?}", mega);
 
@@ -340,21 +338,22 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Vec<f32>, Map<Vec<u16>
 
 pub fn run(
 	input: &str,
-	learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
+	learnt: (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>),
 	memory: Option<usize>,
 	threshold: Option<f32>,
 ) -> String {
+	// I tried to do this with binary representation, but being Option<...> instead of 
 	return match (memory, threshold) {
 		(None, None) => __run__(input, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
-		(None, Some(x)) => __run__(input, learnt, DEFAULT_MEMORY, x),
-		(Some(x), None) => __run__(input, learnt, x, DEFAULT_THRESHOLD),
-		(Some(x), Some(y)) => __run__(input, learnt, x, y),
+		(None, Some(thr)) => __run__(input, learnt, DEFAULT_MEMORY, thr),
+		(Some(mem), None) => __run__(input, learnt, mem, DEFAULT_THRESHOLD),
+		(Some(mem), Some(thr)) => __run__(input, learnt, mem, thr),
 	};
 }
 
 fn __run__(
 	rawinput: &str,
-	learnt: (Vec<f32>, Map<Vec<u16>>, Map<String>),
+	learnt: (Vec<Vec<f32>>, Map<Vec<u16>>, Map<String>),
 	memory: usize,
 	threshold: f32,
 ) -> String {
@@ -363,7 +362,7 @@ fn __run__(
 	let mut result: String = String::new();
 	let mut best_match: Option<(usize, usize, usize)> = None;
 
-	let mut sum: u16 = 00;
+	let mut sum: u16 = 0;
 	for word in rawinput.split_whitespace() {
 		for c in word.chars() {
 			sum += c as u16;
@@ -380,56 +379,55 @@ fn __run__(
 		memory
 	};
 
-	let input_chunks: Chunks<u16> = vecinput.into_chunks(irm);
-	for input_chunk in input_chunks.base {
-		for (i, value) in learnt.1.values.iter().enumerate() {
-			checkmem!(memory, value, vrm);
-			for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
-				for (y, megavalue) in learnt.0.iter().enumerate() {
-					println!("{}", (megavalue
-						- (input_chunk.iter().sum::<u16>() as f32
-							/ value_chunk.iter().sum::<u16>() as f32)));
+	let mut mrm: usize;
+
+	// for input_chunk in vecinput.into_chunks(irm).base {
+	// 	for (i, value) in learnt.1.values.iter().enumerate() {
+	// 		checkmem!(memory, value, vrm);
+	// 		for (j, value_chunk) in value.into_chunks(vrm).base.iter().enumerate() {
+	// 			for (y, megavalue) in learnt.0.iter().enumerate() {
+	// 				println!("x{}", (megavalue
+	// 					- (input_chunk.iter().sum::<u16>() as f32
+	// 						/ value_chunk.iter().sum::<u16>() as f32)));
 					
-						if (megavalue
-					- (input_chunk.iter().sum::<u16>() as f32
-						/ value_chunk.iter().sum::<u16>() as f32))
-					<= threshold
-						{
-							match best_match {
-								None => best_match = Some((i, j, y)),
-								Some((i2, j2, y2)) => {
-									// The value is elected!
-									// Let's not touch this, please.
-									if (
-										megavalue - (
-										input_chunk.iter().sum::<u16>() as f32 /
-										value_chunk.iter().sum::<u16>() as f32)
-									) < 
-										
-										(
-											learnt.0[y2] -
-											(
-												input_chunk.iter().sum::<u16>() as f32 /
-												learnt.1.values[i2].into_chunks(vrm).base[j2].iter().sum::<u16>() as f32
-											)
-										) {
-										best_match = Some((i, j, y));
-										};
-								}
-							};
-						};
-				};
-			};
-		};
+	// 					if (megavalue
+	// 				- (input_chunk.iter().sum::<u16>() as f32
+	// 					/ value_chunk.iter().sum::<u16>() as f32))
+	// 				<= threshold
+	// 					{
+	// 						match best_match {
+	// 							None => best_match = Some((i, j, y)),
+	// 							Some((i2, j2, y2)) => {
 
-		result.push_str(&learnt.2.values
-									.into_chunks(vrm)
-									.base[best_match.unwrap().2]
-									.iter()
-									.map(|s| s.deref())
-									.collect::<String>()
-		);
-
-	};
+	// 								// The value is elected!
+	// 								// Let's not touch this, please.
+	// 								if (
+	// 									megavalue - (
+	// 									input_chunk.iter().sum::<u16>() as f32 /
+	// 									value_chunk.iter().sum::<u16>() as f32)
+	// 								) < 
+	// 									(
+	// 										learnt.0[y2] -
+	// 										(
+	// 											input_chunk.iter().sum::<u16>() as f32 /
+	// 											learnt.1.values[i2].into_chunks(vrm).base[j2].iter().sum::<u16>() as f32
+	// 										)
+	// 									) {
+	// 									best_match = Some((i, j, y));
+	// 									};
+	// 							}
+	// 						};
+	// 					};
+	// 			};
+	// 		};
+	// 	};
+	// 	result.push_str(&learnt.2.values
+	// 								.into_chunks(vrm)
+	// 								.base[best_match.unwrap().0]
+	// 								.iter()
+	// 								.map(|s| s.deref())
+	// 								.collect::<String>()
+	// 	);
+	// };
 	return result;
 }

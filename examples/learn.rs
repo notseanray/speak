@@ -3,9 +3,8 @@ use speak::learn;
 
 fn main() {
 	let map = HashMap::from([
-		("a", "1"),
-		("b", "2"),
-		("c", "3"),
+		("Hello world", "Hola mundo"),
+		("Hola mundo", "Hello world"),
 	]);
 
 	let learnt = learn(&map, None);
