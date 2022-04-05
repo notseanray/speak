@@ -430,6 +430,8 @@ fn __run__(
 	// 	);
 	// };
 
+	let mut calculation: f32;
+
 	for value in &learnt.1.values {
 		// For each value
 		checkmem!(memory, value, vrm);
@@ -437,35 +439,52 @@ fn __run__(
 			for input_chunk in vecinput.into_chunks(irm).base {
 				for (y, mega_vec) in learnt.0.iter().enumerate() {
 					checkmem!(memory, mega_vec, mrm);
-					for mega_chunk in mega_vec.into_chunks(mrm).base {
-						if (mega_chunk.iter().sum::<f32>() - (input_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32)) <= threshold {
-							match best_match {
-								None => best_match = Some((0, 0, 0)),
-								Some((i, j, y)) => {
-									// The value is elected!
-									// Let's not touch this, please.
-									if (
-										mega_chunk.iter().sum::<f32>() - (
-											input_chunk.iter().sum::<u16>() as f32 /
-											value_chunk.iter().sum::<u16>() as f32 )
-									) < 
-										(
-											learnt.0[y].into_chunks(if memory > learnt.0[y].len() {
-												learnt.0[y].len()
-											} else {
-												memory
-											}).base.iter().map(|v| v.iter().sum::<f32>()).sum::<f32>() -
-											(
-												input_chunk.iter().sum::<u16>() as f32 /
-												learnt.1.values[i].into_chunks(vrm).base[j].iter().sum::<u16>() as f32
-											)
-										) {
-										best_match = Some((i, j, y));
-										};
+					for (x, mega_chunk) in mega_vec.into_chunks(mrm).base.iter().enumerate() {
+						/* Run algorithm */
+
+
+
+
+
+
+
+
+
+						calculation = mega_chunk.iter().sum::<f32>() - ( input_chunk.iter().sum::<u16>() as f32 / value_chunk.iter().sum::<u16>() as f32 );
+
+						if calculation <= threshold {
+
+
+							if best_match.is_none() {
+								best_match = Some((i, y, x));
+							} else {
+								if calculation < (
+									learnt.0[best_match.unwrap().1].into_chunks(if memory > learnt.0[best_match.unwrap().1].len() {
+										learnt.0[best_match.unwrap().1].len()
+									} else {
+										memory
+									}).base[best_match.unwrap().2].iter().sum::<f32>() - (
+										input_chunk.iter().sum::<u16>() as f32 /
+										learnt.1.values[best_match.unwrap().0].iter().sum::<u16>() as f32
+								)) {
+									best_match = Some((i, y, x));
 								}
 							};
 						};
-					};
+
+
+
+
+
+
+
+
+
+
+
+
+
+					}
 				};
 			};
 		};
