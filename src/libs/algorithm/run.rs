@@ -21,7 +21,7 @@ macro_rules! diffcomparison {
 // 	};
 // }
 
-pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>), memory: usize, threshold: f32) {
+pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec<Vec<String>>), memory: usize, threshold: f32) -> String {
 	// * Input translation
 	let mut input: Vec<u16> = Vec::new();
 
@@ -34,6 +34,7 @@ pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>), memor
 	// Let's alias some things
 	let TMap = learnt.0;
 	let Mega = learnt.1;
+	let RValues = learnt.2;
 
 	// Algorithm fixed (Being
 	
@@ -49,8 +50,9 @@ pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>), memor
 	let mut KRM :usize;
 	let mut VRM :usize;
 	let mut MRM :usize;
+	let mut FRM :usize;
 
-	let mut UBM :(usize, usize, usize, usize);
+	let mut UBM :(usize, usize, usize, usize) = (0, 0, 0, 0);
 
 	let mut KeyChunks: Chunks<u16>;
 	let mut ValueChunks: Chunks<u16>;
@@ -68,9 +70,13 @@ pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>), memor
 	let mut BMCalculation;
 	let mut Calculation: f32;
 
+	let mut ChunkResult: &String;
+	let mut result: String = String::new();
+
 	checkmem!(memory, input, IRM);
 
 	for IChunk in input.into_chunks(IRM).base {
+		BestMatch = None;
 		for (i, (key, value)) in TMap.iter().enumerate() {
 			checkmem!(memory, key, KRM, value, VRM, Mega[i], MRM);
 			KeyChunks = key.into_chunks(KRM);
@@ -98,13 +104,26 @@ pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>), memor
 					};
 				};
 			};
+			// After we analise that pair, we can now pass to the next.
+		};
+		// After we analise all the pairs, we can now decide on one.
+
+		// Let's check if the chunk elected for this is at the end of the elected Key
+		// We do this because maybe the answer to X is shorter than the input.
+
+		if BestMatch == None {
+			continue;
+
+		} else {
+
+			checkmem!(memory, RValues[BestMatch.unwrap().0], FRM);
+
+			ChunkResult = &RValues[UBM.0].into_chunks(FRM).base[UBM.3].join("\\/");
 		};
 
-		// After we analise that pair, we can now pass to the next.
+		// If the chunk elected for this is at the end of the elected Key
 
-		
-
-
-
-	}; 
+		// if TMap.values[UBM.0]
+	};
+	return result
 }
