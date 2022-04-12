@@ -11,5 +11,5 @@ publish = false
 
 [dependencies]
 
-[package.metadata.docs.rs]
-rustdoc-args = [ "--html-in-header", "./extra/docs/katex-header.html" ]
+# [package.metadata.docs.rs]
+# rustdoc-args = [ "--html-in-header", "./extra/docs/katex-header.html" ]
