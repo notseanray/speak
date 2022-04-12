@@ -1,3 +1,6 @@
+// TODOS
+// - .specific_chunk(...): Returns an specific chunk instead of the whole list of chunks (Improve performance multiple times)
+
 pub(crate) struct Chunks<'a, T> {
     pub(crate) base: Vec<&'a [T]>,
 }
@@ -8,26 +11,11 @@ impl<'a, T> Chunks<'a, T> {
             base: Vec::new(),
         };
     }
-
-    pub(crate) fn iterate(self) -> Vec<&'a [T]> {
-        return self.base;
-    }
-}
-
-impl<'a> Chunks<'a, u16> {
-    pub(crate) fn sum(&self) -> u16 {
-        let mut sum: u16 = 0;
-        for &x in &self.base {
-            for &i in x {
-                sum += i;
-            }
-        }
-        return sum;
-    }
 }
 
 pub(crate) trait Chunkable<'a, T> {
     fn into_chunks(&'a self, memory: usize) -> Chunks<'a, T>;
+	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T];
 }
 
 impl<'a, T> Chunkable<'a, T> for Vec<T> {
@@ -45,4 +33,9 @@ impl<'a, T> Chunkable<'a, T> for Vec<T> {
             base: chunks
         };
     }
+
+	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T] {
+	// 	return &self[index * memory .. (index + 1) * memory];
+	// }
 }
+

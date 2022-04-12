@@ -24,12 +24,9 @@ You can contribute to this project with almost anything, it can be code, documen
 
 **Thanks for contributing!**
 
-<div align=center>
-  
 [![Stargazers repo roster for @SpeakML/speak](https://reporoster.com/stars/SpeakML/speak)](https://github.com/SpeakML/speak/stargazers)
-[![Forkers repo roster for @SpeakML/speak](https://reporoster.com/forks/SpeakML/speak)](https://github.com/SpeakML/speak/network/members)
 
-</div>
+[![Forkers repo roster for @SpeakML/speak](https://reporoster.com/forks/SpeakML/speak)](https://github.com/SpeakML/speak/network/members)
 
 ## ⚖️ License & Credits
 
