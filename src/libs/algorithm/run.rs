@@ -14,16 +14,19 @@ macro_rules! diffcomparison {
 	};
 }
 
-// pub fn run(rawinput: String, learnt: (Vec<Vec<u16>>, Vec<Vec<f32>>), memory: Option<usize>, threshold: Option<f32>) {
-// 	match (memory, threshold) {
-// 		(None, None) => __run__(rawinput, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
-// 		(Some(mem), None) => __run__(rawinput, learnt, mem, DEFAULT_THRESHOLD),
-// 		(None, Some(thr)) => __run__(rawinput, learnt, DEFAULT_MEMORY, thr),
-// 		(Some(mem), Some(thr)) => __run__(rawinput, learnt, mem, thr)
-// 	};
-// }
+pub fn run(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>, Vec<Vec<String>>), memory: Option<usize>, threshold: Option<f32>) -> String {
+	match (memory, threshold) {
+		(None, None) => return __run__(rawinput, learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
+		
+		(Some(memory), None) => return __run__(rawinput, learnt, memory, DEFAULT_THRESHOLD),
+		
+		(None, Some(threshold)) => return __run__(rawinput, learnt, DEFAULT_MEMORY, threshold),
 
-pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec<Vec<String>>), memory: usize, threshold: f32) -> String {
+		(Some(memory), Some(threshold)) => return __run__(rawinput, learnt, memory, threshold),
+	};
+}
+
+pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>, Vec<Vec<String>>), memory: usize, threshold: f32) -> String {
 	// * Input translation
 	let mut input: Vec<u16> = Vec::new();
 

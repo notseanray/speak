@@ -52,7 +52,7 @@ use crate::*;
 pub fn learn<T: Literal<String> + Clone + ToString>(
 	data: &std::collections::HashMap<T, T>,
 	memory: Option<usize>,
-) -> Vec<f32> {
+) -> (Map::<Vec<u16>>, Vec<Vec<f32>>, Vec<Vec<String>>) {
 	let x: Map<T> = data.clone().to_map();
 	let new_map: Map<String> = Map::<String> {
 		keys: x.keys.literal(),
@@ -70,9 +70,10 @@ pub fn learn<T: Literal<String> + Clone + ToString>(
 }
 
 // The main algorithm
-fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> Vec<f32> {
+fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> (Map::<Vec<u16>>, Vec<Vec<f32>>, Vec<Vec<String>>) {
 
-	let mut mega: Vec<f32> = Vec::new();
+	let mut mega: Vec<Vec<f32>> = Vec::new();
+	let mut ram: Vec<f32> = Vec::new();
 
 	let mut vrm: usize;
 	let mut krm: usize;
@@ -88,9 +89,11 @@ fn __learn__<'a>(rawdata: Map<String>, memory: usize) -> Vec<f32> {
 		checkmem!(memory, key, krm, value, vrm);
 		for KChunk in key.into_chunks(krm).base {
 			for VChunk in value.into_chunks(vrm).base {
-				mega.push(KChunk.iter().sum::<u16>() as f32 / VChunk.iter().sum::<u16>() as f32);
-			}
-		}
-	}
-	return mega;
+				ram.push(KChunk.iter().sum::<u16>() as f32 / VChunk.iter().sum::<u16>() as f32);
+			};
+		};
+		mega.push(ram.clone());
+		ram.clear();
+	};
+	return (data, mega, rawdata.values.iter().map(|s| s.split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>()).collect::<Vec<Vec<String>>>());
 }
