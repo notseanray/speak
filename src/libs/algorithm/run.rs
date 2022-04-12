@@ -55,7 +55,7 @@ pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec
 	let mut UBM :(usize, usize, usize, usize) = (0, 0, 0, 0);
 
 	let mut KeyChunks: Chunks<u16>;
-	let mut ValueChunks: Chunks<u16>;
+	let mut ValueChunks: Chunks<u16> = Chunks::new();
 
 	let mut BestMatch: Option
 	<(
@@ -72,6 +72,8 @@ pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec
 
 	let mut ChunkResult: &String;
 	let mut result: String = String::new();
+
+	let mut StopIteration: bool = false;
 
 	checkmem!(memory, input, IRM);
 
@@ -117,13 +119,16 @@ pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec
 		} else {
 
 			checkmem!(memory, RValues[BestMatch.unwrap().0], FRM);
-
 			ChunkResult = &RValues[UBM.0].into_chunks(FRM).base[UBM.3].join("\\/");
 		};
 
 		// If the chunk elected for this is at the end of the elected Key
+		// TMap.values[UBM.0].into_chunks(FRM).base[UBM.2]
 
-		// if TMap.values[UBM.0]
+		if UBM.2 == ValueChunks.base.len() - 1 {
+			// Then this was the last chunk, let's iterate one more time and see if we can add more information.
+			StopIteration = true;
+		};
 	};
 	return result
 }
