@@ -4,6 +4,8 @@
 // ────────────────────────────────────────────────────────
 //
 
+// Allowing Camel Case
+#![allow(non_snake_case)]
 use crate::*;
 
 macro_rules! diffcomparison {
@@ -65,15 +67,12 @@ pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec
 		usize,
 		usize
 		
-	)> = None;
+	)>;
 
 	let mut BMCalculation;
 	let mut Calculation: f32;
 
-	let mut ChunkResult: &String;
 	let mut result: String = String::new();
-
-	let mut StopIteration: bool = false;
 
 	checkmem!(memory, input, IRM);
 
@@ -84,10 +83,10 @@ pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec
 			KeyChunks = key.into_chunks(KRM);
 			ValueChunks = value.into_chunks(VRM);
 			for (vi, &VChunk) in ValueChunks.base.iter().enumerate() {
-				for (ki, &KChunk) in KeyChunks.base.iter().enumerate() {
+				for ki in 0..KeyChunks.base.len() {
 					for (m, &MChunk) in Mega[i].into_chunks(MRM).base.iter().enumerate() {
 
-						Calculation = diffcomparison!(MChunk, KChunk, VChunk);
+						Calculation = diffcomparison!(MChunk, IChunk, VChunk);
 
 						if Calculation <= threshold {
 							match BestMatch {
@@ -119,15 +118,14 @@ pub fn __run__(rawinput: String, learnt: (&Map::<Vec<u16>>, &Vec<Vec<f32>>, &Vec
 		} else {
 
 			checkmem!(memory, RValues[BestMatch.unwrap().0], FRM);
-			ChunkResult = &RValues[UBM.0].into_chunks(FRM).base[UBM.3].join("\\/");
+			result.push_str(&RValues[UBM.0].into_chunks(FRM).base[UBM.3].join("\\/"));
 		};
 
-		// If the chunk elected for this is at the end of the elected Key
-		// TMap.values[UBM.0].into_chunks(FRM).base[UBM.2]
+
+		// If the chunk elected for this is at the end of the elected Key we break the loop.
 
 		if UBM.2 == ValueChunks.base.len() - 1 {
-			// Then this was the last chunk, let's iterate one more time and see if we can add more information.
-			StopIteration = true;
+			break;
 		};
 	};
 	return result
