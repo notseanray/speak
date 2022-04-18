@@ -86,8 +86,13 @@ pub fn __run__(rawinput: String, learnt: (Map::<Vec<u16>>, Vec<Vec<f32>>, Vec<Ve
 			KeyChunks = key.into_chunks(KRM);
 			ValueChunks = value.into_chunks(VRM);
 			for (vi, &VChunk) in ValueChunks.base.iter().enumerate() {
+				println!("VI {}: {:?}", vi, VChunk);
 				for ki in 0..KeyChunks.base.len() {
+					println!("KI {}", ki);
+					
 					for (m, &MChunk) in Mega[i].into_chunks(MRM).base.iter().enumerate() {
+
+						println!("M {}: {:?}", m, MChunk);
 
 						Calculation = diffcomparison!(MChunk, IChunk, VChunk);
 

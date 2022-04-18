@@ -9,5 +9,5 @@ fn main() {
 	let learned = learn(&map, None);
 	let ran: String = run(String::from("hello"), learned, None, None);
 	
-	println!("{}", ran);
+	println!("{}", ran.len());
 }
