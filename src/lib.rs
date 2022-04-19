@@ -110,4 +110,4 @@ macro_rules! checkmem {
 
 #[path = "libs/algorithm.rs"]
 mod algo;
-use algo as c;
+use algo as essential;
