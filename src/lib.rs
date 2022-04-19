@@ -108,12 +108,6 @@ macro_rules! checkmem {
 // ────────────────────────────────────────────────────────────────────────────
 //
 
-#[path = "libs/algorithm/learn.rs"]
-mod learn;
-pub use learn::*;
-
-// as this is the most complex file in the whole project, I'll give its own file.
-
-#[path = "libs/algorithm/run.rs"]
-mod run;
-pub use run::*;
+#[path = "libs/algorithm.rs"]
+mod algo;
+use algo as c;
