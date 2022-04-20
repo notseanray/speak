@@ -11,8 +11,5 @@ publish = false
 
 [dependencies]
 
-[build-dependencies]
-bindgen = "0.53.1"
-
 # [package.metadata.docs.rs]
 # rustdoc-args = [ "--html-in-header", "./extra/docs/katex-header.html" ]
