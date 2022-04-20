@@ -1,7 +1,5 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
 
-// Ok I just read that (Except for addition) using floats is faster than ints, eh?
-// look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
 #[path = "libs/literal.rs"]
 mod lit;
 use lit::*;
@@ -67,12 +65,12 @@ pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
 
-fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
+fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u16>> {
 	let mut result: Vec<Vec<u16>> = Vec::new();
 	let mut new_phrase: Vec<u16> = Vec::new();
 	let mut sum: u16 = 0;
 	for phrase in vec {
-		for word in phrase.split_whitespace() {
+		for word in phrase.literal().split_whitespace() {
 			for c in word.chars() {
 				sum += c as u16;
 			}
@@ -91,15 +89,15 @@ fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
 // }
 
 macro_rules! checkmem {
-	($mem: expr, $($key: expr, $keyname: ident),*) => {
-		$(
-			$keyname = if $mem > $key.len() {
-				$key.len()
-			} else {
-				$mem
-			};
-		)*
-	};
+    ($mem: expr, $($key: expr, $keyname: ident),*) => {
+        $(
+            $keyname = if $mem > $key.len() {
+                $key.len()
+            } else {
+                $mem
+            };
+        )*
+    };
 }
 
 //
@@ -108,6 +106,66 @@ macro_rules! checkmem {
 // ────────────────────────────────────────────────────────────────────────────
 //
 
-#[path = "libs/algorithm.rs"]
-mod algo;
-use algo as essential;
+fn _train<'a, T: Literal<String> + Chunkable<'a, String>>(
+	map: &'a Map<T>,
+	memory: usize,
+) -> (Vec<Vec<f32>>, Map<Vec<u16>>) {
+	// Create a translated map
+
+	let translated_map: Map<Vec<u16>> = Map::<Vec<u16>> {
+		keys: translate(&map.keys),
+		values: translate(&map.values),
+	};
+
+	let mut mega: Vec<Vec<f32>> = Vec::new();
+	let mut ram: Vec<f32> = Vec::new();
+	for (key, value) in translated_map.iter() {
+		for keyChunk in key.into_chunks(memory).base {
+			for valueChunk in value.into_chunks(memory).base {
+				ram.push(
+					keyChunk.iter().sum::<u16>() as f32 / valueChunk.iter().sum::<u16>() as f32,
+				);
+			}
+		}
+		mega.push(ram.clone());
+		ram.clear();
+	}
+	return (mega, translated_map);
+}
+
+fn _run<'a, T: Literal<String>>(
+	rawinput: T,
+	learnt: (Vec<Vec<f32>>, Map<Vec<u16>>),
+	memory: usize,
+) -> String {
+	// First, we translate the input.
+
+	let mut input: Vec<f32> = Vec::new();
+	let mut sum: u16;
+
+	for word in rawinput.literal().split_whitespace() {
+		sum = 0;
+		for c in word.chars() {
+			sum += c as u16;
+		}
+		input.push((sum as f32).powf(1.00793650794))
+	}
+
+	let TMap: Map<Vec<u16>> = learnt.1;
+	let Mega: Vec<Vec<f32>> = learnt.0;
+
+	// Real Memory Section: (All ...RM are real memory.)
+
+	// input real mem
+	let mut IRM: usize;
+
+	// key real mem
+	let mut KRM: usize;
+
+	// value real mem
+	let mut VRM: usize;
+
+	checkmem!(memory, input, IRM, KRM, VRM);
+
+	return String::new();
+}
