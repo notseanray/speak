@@ -148,13 +148,13 @@ fn _run<'a, T: Literal<String>>(
 		for c in word.chars() {
 			sum += c as u16;
 		}
-		input.push((sum as f32).powf(1.00793650794))
+		input.push((((sum << 1) + 1) << 1 + 1) as f32);
 	}
 
 	let TMap: Map<Vec<u16>> = learnt.1;
 	let Mega: Vec<Vec<f32>> = learnt.0;
 
-	// Real Memory Section: (All ...RM are real memory.)
+	// Real Memory Section: (All *RM are real memory.)
 
 	// input real mem
 	let mut IRM: usize;
@@ -165,7 +165,14 @@ fn _run<'a, T: Literal<String>>(
 	// value real mem
 	let mut VRM: usize;
 
-	checkmem!(memory, input, IRM, KRM, VRM);
+	checkmem!(memory, input, IRM, TMap.keys, KRM, TMap.values, VRM);
+
+	// For each word
+	for IChunk in input.into_chunks(IRM).base {
+		for (key, value) in TMap.iter() {
+			for keyChunk in key.into_chunks(KRM).base {}
+		}
+	}
 
 	return String::new();
 }
