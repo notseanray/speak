@@ -1,6 +1,7 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
 
 #![allow(non_snake_case)]
+#![must_use]
 
 include!("libs/chunks.rs");
 include!("libs/literal.rs");
@@ -141,7 +142,7 @@ fn _train<'a, T: Literal<String> + Chunkable<'a, String>>(
 
 fn _run<'a, T: Literal<String>>(
 	rawinput: T,
-	learnt: (Vec<Vec<f32>>, Map<Vec<u16>>),
+	learnt: (Vec<Vec<f32>>, Vec<Vec<u16>>, Vec<String>),
 	MEMORY: usize,
 	THRESHOLD: f32,
 ) -> String {
@@ -158,7 +159,15 @@ fn _run<'a, T: Literal<String>>(
 		input.push(((sum << 1) + 1) << 1 + 1);
 	}
 
-	let TMap: Map<Vec<u16>> = learnt.1;
+	let mut result: String = String::new();
+
+	// Raw Map
+	let RMap: Vec<String> = learnt.2;
+
+	// Translated Map
+	let TMap: Vec<Vec<u16>> = learnt.1;
+
+	// Mega Vec
 	let Mega: Vec<Vec<f32>> = learnt.0;
 
 	// Real Memory Section: (All *RM are real memory.)
@@ -176,24 +185,35 @@ fn _run<'a, T: Literal<String>>(
 	let mut MRM: usize;
 
 	let mut calculation: f32;
+	let mut BestMatch: Option<(f32, usize, usize)> = None;
 
 	checkmem!(MEMORY, input, IRM);
 
 	// For each word
 	for IChunk in input.into_chunks(IRM).base {
-		for value in &TMap.values {
+		for (i, value) in TMap.iter().enumerate() {
 			checkmem!(MEMORY, value, VRM);
-			for VChunk in value.into_chunks(VRM).base {
+			for (j, VChunk) in value.into_chunks(VRM).base.iter().enumerate() {
 				for MVec in &Mega {
 					checkmem!(MEMORY, MVec, MRM);
 					for MChunk in MVec.into_chunks(MRM).base {
 						calculation = calculation!(MChunk, IChunk, VChunk);
-						if calculation < THRESHOLD {}
+						if calculation < THRESHOLD {
+							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
+								BestMatch = Some((calculation, i, j));
+							};
+						};
 					}
 				}
 			}
 		}
+
+		if BestMatch != None {
+			// Ok, i is the vector of the value and j is the vector of the chunk. So we have to recover the value from just two numbers.
+
+			result.push_str("X");
+		}
 	}
 
-	return String::new();
+	return result;
 }

@@ -18,6 +18,20 @@ Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0
 
 I cannot know when Speak will be ready, but I can promise that it will be ready soon. I'm trying to make it the most perfect tool I can, that's why I'm taking a lot of time to make it.
 
+## Features
+
+### Working on:
+
+* `learn` function
+* `run` function
+
+### To do:
+
+* Multithreading
+* Change most `Vec`(s) to arrays (Without runtime inefficiencies)
+* Add `JS` version
+* Make configuration easier
+
 ## Contributions
 
 You can contribute to this project with almost anything, it can be code, documentation, bug reports, feature requests... etc. You can do it opening an [issue](https://github.com/SpeakML/speak/issues/new) or a [pull request](https://github.com/SpeakML/speak/pulls/new), or you can contact me on social media.
