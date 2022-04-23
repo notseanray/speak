@@ -1,18 +1,11 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
 
-// Ok I just read that (Except for addition) using floats is faster than ints, eh?
-// look http://www.phys.ufl.edu/~coldwell/MultiplePrecision/fpvsintmult.htm is this real
-#[path = "libs/literal.rs"]
-mod lit;
-use lit::*;
+#![allow(non_snake_case)]
+#![must_use]
 
-#[path = "libs/mapping.rs"]
-mod map;
-use map::*;
-
-#[path = "libs/chunks.rs"]
-mod chk;
-use chk::*;
+include!("libs/chunks.rs");
+include!("libs/literal.rs");
+include!("libs/mapping.rs");
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -25,9 +18,13 @@ use chk::*;
 #[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
 ///
-///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well, ///the `memory` parameter is used to define how many words we take into account into analyzing a phrase.
+///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well,
+///the `MEMORY` parameter is used to define how many words we take into account into analyzing a phrase.
 ///
-///The functions that takes this parameter take into account that maybe the length of the phrase divided ///by the number of words in the phrase is not an integer. So this functions will take into account ///until the last words, and then scan the words between the length of the phrase minus the memory and ///the length of the word.
+///The functions that takes this parameter take into account that maybe the length of the phrase divided
+///by the number of words in the phrase is not an integer. So this functions will take into account
+/// until the last words, and then scan the words between the length of the phrase minus the memory and
+/// the length of the word.
 ///
 ///```mermaid
 ///graph TD
@@ -67,12 +64,12 @@ pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
 
-fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
+fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u16>> {
 	let mut result: Vec<Vec<u16>> = Vec::new();
 	let mut new_phrase: Vec<u16> = Vec::new();
 	let mut sum: u16 = 0;
 	for phrase in vec {
-		for word in phrase.split_whitespace() {
+		for word in phrase.literal().split_whitespace() {
 			for c in word.chars() {
 				sum += c as u16;
 			}
@@ -91,14 +88,22 @@ fn translate(vec: &Vec<String>) -> Vec<Vec<u16>> {
 // }
 
 macro_rules! checkmem {
-	($mem: expr, $($key: expr, $keyname: ident),*) => {
-		$(
-			$keyname = if $mem > $key.len() {
-				$key.len()
-			} else {
-				$mem
-			};
-		)*
+    ($mem: expr, $($key: expr, $keyname: ident),*) => {
+        $(
+            $keyname = if $mem > $key.len() {
+                $key.len()
+            } else {
+                $mem
+            };
+        )*
+    };
+}
+
+// Long calculation I don't want to explain.
+macro_rules! calculation {
+	($MChunk: expr, $IChunk: expr, $VChunk: expr) => {
+		$MChunk.iter().sum::<f32>()
+			- ($IChunk.iter().sum::<u16>() as f32 / $VChunk.iter().sum::<u16>() as f32)
 	};
 }
 
@@ -108,12 +113,112 @@ macro_rules! checkmem {
 // ────────────────────────────────────────────────────────────────────────────
 //
 
-#[path = "libs/algorithm/learn.rs"]
-mod learn;
-pub use learn::*;
+fn _train<'a, T: Literal<String> + Chunkable<'a, String>>(
+	map: &'a Map<T>,
+	MEMORY: usize,
+) -> (Vec<Vec<f32>>, Map<Vec<u16>>) {
+	// Create a translated map
 
-// as this is the most complex file in the whole project, I'll give its own file.
+	let translated_map: Map<Vec<u16>> = Map::<Vec<u16>> {
+		keys: translate(&map.keys),
+		values: translate(&map.values),
+	};
 
-#[path = "libs/algorithm/run.rs"]
-mod run;
-pub use run::*;
+	let mut mega: Vec<Vec<f32>> = Vec::new();
+	let mut ram: Vec<f32> = Vec::new();
+	for (key, value) in translated_map.iter() {
+		for keyChunk in key.into_chunks(MEMORY).base {
+			for valueChunk in value.into_chunks(MEMORY).base {
+				ram.push(
+					keyChunk.iter().sum::<u16>() as f32 / valueChunk.iter().sum::<u16>() as f32,
+				);
+			}
+		}
+		mega.push(ram.clone());
+		ram.clear();
+	}
+	return (mega, translated_map);
+}
+
+fn _run<'a, T: Literal<String>>(
+	rawinput: T,
+	learnt: (Vec<Vec<f32>>, Vec<Vec<u16>>, Vec<String>),
+	MEMORY: usize,
+	THRESHOLD: f32,
+) -> String {
+	// First, we translate the input.
+
+	let mut input: Vec<u16> = Vec::new();
+	let mut sum: u16;
+
+	for word in rawinput.literal().split_whitespace() {
+		sum = 0;
+		for c in word.chars() {
+			sum += c as u16;
+		}
+		input.push(((sum << 1) + 1) << 1 + 1);
+	}
+
+	let mut result: String = String::new();
+
+	// Raw Map
+	let RMap: Vec<String> = learnt.2;
+
+	// Translated Map
+	let TMap: Vec<Vec<u16>> = learnt.1;
+
+	// Mega Vec
+	let Mega: Vec<Vec<f32>> = learnt.0;
+
+	// Real Memory Section: (All *RM are real memory.)
+
+	// input real mem
+	let mut IRM: usize = MEMORY;
+
+	// value real mem
+	let mut VRM: usize = MEMORY;
+
+	// Mega real mem
+	let mut MRM: usize = MEMORY;
+
+	let mut calculation: f32;
+	let mut BestMatch: Option<(f32, usize, usize)> = None;
+	let mut BestMatch_unwrap: (f32, usize, usize);
+
+	checkmem!(MEMORY, input, IRM);
+
+	// For each word
+	for IChunk in input.into_chunks(IRM).base {
+		for (i, value) in TMap.iter().enumerate() {
+			checkmem!(MEMORY, value, VRM);
+			for (j, VChunk) in value.into_chunks(VRM).base.iter().enumerate() {
+				for MVec in &Mega {
+					checkmem!(MEMORY, MVec, MRM);
+					for MChunk in MVec.into_chunks(MRM).base {
+						calculation = calculation!(MChunk, IChunk, VChunk);
+						if calculation < THRESHOLD {
+							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
+								BestMatch = Some((calculation, i, j));
+							};
+						};
+					}
+				}
+			}
+		}
+
+		if BestMatch != None {
+			// Ok, i is the vector of the value and j is the vector of the chunk. So we have to recover the value from just two numbers.
+
+			BestMatch_unwrap = BestMatch.unwrap();
+			result.push_str(
+				&RMap[BestMatch_unwrap.1]
+					.split_whitespace()
+					.collect::<Vec<&str>>()
+					.specific_chunk(VRM, BestMatch_unwrap.2)
+					.join(""),
+			);
+		};
+	}
+
+	return result;
+}
