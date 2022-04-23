@@ -1,0 +1,4 @@
+# This is the formatting for the output of the program. Using the rust-analyzer extension.
+# Please, before submitting any pull request format the output of the program with the rust-analyzer formatter 'rustfmt'
+
+hard_tabs = true
