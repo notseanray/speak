@@ -15,7 +15,7 @@ impl<'a, T> Chunks<'a, T> {
 pub(crate) trait Chunkable<'a, T> {
 	#[must_use]
 	fn into_chunks(&'a self, memory: usize) -> Chunks<'a, T>;
-	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T];
+	fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T];
 }
 
 impl<'a, T> Chunkable<'a, T> for Vec<T> {
@@ -33,7 +33,10 @@ impl<'a, T> Chunkable<'a, T> for Vec<T> {
 		return Chunks::<T> { base: chunks };
 	}
 
-	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T] {
-	// 	return &self[index * memory .. (index + 1) * memory];
-	// }
+	fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T] {
+		if (self.len() % memory != 0) && (index > self.len() - memory) {
+				return &self[self.len() - memory ..];
+		};
+		return &self[index * memory .. (index + 1) * memory];
+	}
 }

@@ -173,19 +173,17 @@ fn _run<'a, T: Literal<String>>(
 	// Real Memory Section: (All *RM are real memory.)
 
 	// input real mem
-	let mut IRM: usize;
-
-	// key real mem
-	let mut KRM: usize;
+	let mut IRM: usize = MEMORY;
 
 	// value real mem
-	let mut VRM: usize;
+	let mut VRM: usize = MEMORY;
 
 	// Mega real mem
-	let mut MRM: usize;
+	let mut MRM: usize = MEMORY;
 
 	let mut calculation: f32;
 	let mut BestMatch: Option<(f32, usize, usize)> = None;
+	let mut BestMatch_unwrap: (f32, usize, usize);
 
 	checkmem!(MEMORY, input, IRM);
 
@@ -211,8 +209,15 @@ fn _run<'a, T: Literal<String>>(
 		if BestMatch != None {
 			// Ok, i is the vector of the value and j is the vector of the chunk. So we have to recover the value from just two numbers.
 
-			result.push_str("X");
-		}
+			BestMatch_unwrap = BestMatch.unwrap();
+			result.push_str(
+				&RMap[BestMatch_unwrap.1]
+					.split_whitespace()
+					.collect::<Vec<&str>>()
+					.specific_chunk(VRM, BestMatch_unwrap.2)
+					.join(""),
+			);
+		};
 	}
 
 	return result;
