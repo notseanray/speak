@@ -149,7 +149,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 		mega.push(ram.clone());
 		ram.clear();
 	}
-	return (mega, translated_map.values, map.keys.literal());
+	return (mega, translated_map.values, map.values.literal());
 }
 
 pub fn run<'a, T: Literal<String>>(
