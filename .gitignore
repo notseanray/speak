@@ -17,6 +17,7 @@ Cargo.lock
 # System + IDE
 
 .vscode
+.git-old
 
 # Source files
 
@@ -27,7 +28,7 @@ src/pseudocode
 node_modules
 venv
 how-does-it-works.md
-.vscode
+
 
 
 *.log
