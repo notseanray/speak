@@ -17,6 +17,12 @@ pub trait Chunkable<'a, T> {
 impl<'a, T> Chunkable<'a, T> for Vec<T> {
 	#[must_use]
 	fn into_chunks(&'a self, memory: usize) -> Chunks<T> {
+		if memory >= self.len() {
+			return Chunks {
+				base: vec![&self[..]]
+			}
+		}
+		
 		let mut chunks: Vec<&'a [T]> = Vec::new();
 		for i in (memory..self.len() + 1).step_by(memory) {
 			chunks.push(&self[i - memory..i]);

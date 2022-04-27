@@ -1,10 +1,12 @@
+//! This little example translates a Spanish "Hola mundo" to English "Hello world" in the variable EN and viceversa in ES.
+
 use colored::Colorize;
 use speak::{learn, run, Map};
 
 macro_rules! test_result {
 	($name: expr, $x: ident, $supposed: expr) => {
 		if $x == $supposed {
-			println!("{} {}", $name.bold(), "OK".italic().on_bright_green());
+			println!("{} {}", $name.bold(), "OK".black().italic().on_bright_green());
 		} else {
 			println!(
 				"{} {}{} \"{}\"{}{}",
@@ -23,6 +25,7 @@ fn main() {
 	let map = Map::<&str>::from(vec![
 		("Hello world", "Hola mundo"),
 		("Hola mundo", "Hello world"),
+		("a", "b")
 	]);
 
 	let learnt = learn(&map, None);
