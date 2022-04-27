@@ -4,7 +4,7 @@ use speak::{learn, run, Map};
 macro_rules! test_result {
 	($name: expr, $x: ident, $supposed: expr) => {
 		if $x == $supposed {
-			println!("{} {}", $name.bold(), "OK".italic().on_bright_green());
+			println!("{} {}", $name.bold(), "OK".black().italic().on_bright_green());
 		} else {
 			println!(
 				"{} {}{} \"{}\"{}{}",
@@ -28,12 +28,12 @@ fn main() {
 	let learnt = learn(&map, None);
 	println!("!{:?}", learnt.0);
 
-	// * This output should be "Hola mundo"
+	// * This output should be "Hello world"
 	let es: String = run("Hello world", &learnt, None, None);
 
-	// * This output should be "Hello world"
+	// * This output should be "Hola mundo"
 	let en: String = run("Hola mundo", &learnt, None, None);
 
-	test_result!("ES", es, "Hola mundo");
-	test_result!("EN", en, "Hello world");
+	test_result!("ES", es, "Hello world");
+	test_result!("EN", en, "Hola mundo");
 }

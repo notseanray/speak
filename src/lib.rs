@@ -95,18 +95,6 @@ fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 // 	map1.into_iter().chain(map2).collect()
 // }
 
-macro_rules! checkmem {
-    ($mem: expr, $($key: expr, $keyname: ident),*) => {
-        $(
-            $keyname = if $mem > $key.len() {
-                $key.len()
-            } else {
-                $mem
-            };
-        )*
-    };
-}
-
 // Long calculation I don't want to explain.
 macro_rules! calculation {
 	($MChunk: expr, $IChunk: expr, $VChunk: expr) => {
@@ -208,35 +196,20 @@ fn _run<'a>(
 	// Mega Vec
 	let Mega: &Vec<Vec<f32>> = &learnt.0;
 
-	// Real Memory Section: (All *RM are real memory.)
-
-	// input real mem
-	let IRM: usize;
-
-	// value real mem
-	let mut VRM: usize = MEMORY;
-
-	// Mega real mem
-	let mut MRM: usize;
-
 	let mut calculation: f32;
 	let mut BestMatch: Option<(f32, usize, usize)> = None;
 	let mut BestMatch_unwrap: (f32, usize, usize);
 
-	checkmem!(MEMORY, input, IRM);
-
 	// For each word
-	for IChunk in input.into_chunks(IRM).base {
+	for IChunk in input.into_chunks(MEMORY).base {
 		println!("\n##################\n\nIC -> {:?}", IChunk);
 		for (i, value) in TMap.iter().enumerate() {
 			println!("I = {}: V = {:?}", i, value);
-			checkmem!(MEMORY, value, VRM);
-			for (j, VChunk) in value.into_chunks(VRM).base.iter().enumerate() {
+			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
 				println!("{}: VC -> {:?}", j, VChunk);
 				for MVec in Mega {
 					println!("MV -> {:?}", MVec);
-					checkmem!(MEMORY, MVec, MRM);
-					for MChunk in MVec.into_chunks(MRM).base {
+					for MChunk in MVec.into_chunks(MEMORY).base {
 						calculation = calculation!(MChunk, IChunk, VChunk);
 						if calculation < THRESHOLD {
 							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
@@ -259,7 +232,7 @@ fn _run<'a>(
 				&RMap[BestMatch_unwrap.1]
 					.split_whitespace()
 					.collect::<Vec<&str>>()
-					.into_chunks(VRM)
+					.into_chunks(MEMORY)
 					.base[BestMatch_unwrap.2]
 					.join(" "),
 			);
