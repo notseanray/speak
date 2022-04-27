@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-use speak::learn;
+use speak::{learn, Map};
 
 fn main() {
-	let map = HashMap::from([
+	let map = Map::<&str>::from(vec![
 		("Hello world", "Hola mundo"),
 		("Hola mundo", "Hello world"),
 	]);

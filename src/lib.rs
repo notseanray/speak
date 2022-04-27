@@ -3,9 +3,17 @@
 #![allow(non_snake_case)]
 #![must_use]
 
-include!("libs/chunks.rs");
-include!("libs/literal.rs");
-include!("libs/mapping.rs");
+#[path = "libs/chunks.rs"]
+mod chunks;
+pub use chunks::*;
+
+#[path = "libs/literal.rs"]
+mod literal;
+pub use literal::*;
+
+#[path = "libs/mapping.rs"]
+mod mapping;
+pub use mapping::*;
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -64,16 +72,16 @@ pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
 
-fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u16>> {
-	let mut result: Vec<Vec<u16>> = Vec::new();
-	let mut new_phrase: Vec<u16> = Vec::new();
-	let mut sum: u16 = 0;
+fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
+	let mut result: Vec<Vec<u32>> = Vec::new();
+	let mut new_phrase: Vec<u32> = Vec::new();
+	let mut sum: u32 = 0;
 	for phrase in vec {
 		for word in phrase.literal().split_whitespace() {
 			for c in word.chars() {
-				sum += c as u16;
+				sum += c as u32;
 			}
-			new_phrase.push(sum.pow(10 / 9));
+			new_phrase.push(((sum << 1) + 1) << 1 + 1);
 			sum = 0;
 		}
 		result.push(new_phrase.clone());
@@ -102,24 +110,40 @@ macro_rules! checkmem {
 // Long calculation I don't want to explain.
 macro_rules! calculation {
 	($MChunk: expr, $IChunk: expr, $VChunk: expr) => {
-		$MChunk.iter().sum::<f32>()
-			- ($IChunk.iter().sum::<u16>() as f32 / $VChunk.iter().sum::<u16>() as f32)
+		($MChunk.iter().sum::<f32>()
+			- ($IChunk.iter().sum::<u32>() as f32 / $VChunk.iter().sum::<u32>() as f32)).abs()
 	};
 }
 
 //
 // ────────────────────────────────────────────────────────────────── I ──────────
-//   :::::: M A I N   F U N C T I O N : :  :   :    :     :        :          :
+//   :::::: M A I N   F U N C T I O N S : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────────
 //
 
-fn _train<'a, T: Literal<String> + Chunkable<'a, String>>(
+//
+// ────────────────────────────────────────────────── I ──────────
+//   :::::: L E A R N : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────
+//
+
+pub fn learn<'a, T: Literal<String> + ToString>(
+	map: &'a Map<T>,
+	memory: Option<usize>,
+) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
+	match memory {
+		Some(mem) => _train(map, mem),
+		None => _train(map, DEFAULT_MEMORY),
+	}
+}
+
+fn _train<'a, T: Literal<String> + ToString>(
 	map: &'a Map<T>,
 	MEMORY: usize,
-) -> (Vec<Vec<f32>>, Map<Vec<u16>>) {
+) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
 	// Create a translated map
 
-	let translated_map: Map<Vec<u16>> = Map::<Vec<u16>> {
+	let translated_map: Map<Vec<u32>> = Map::<Vec<u32>> {
 		keys: translate(&map.keys),
 		values: translate(&map.values),
 	};
@@ -130,31 +154,45 @@ fn _train<'a, T: Literal<String> + Chunkable<'a, String>>(
 		for keyChunk in key.into_chunks(MEMORY).base {
 			for valueChunk in value.into_chunks(MEMORY).base {
 				ram.push(
-					keyChunk.iter().sum::<u16>() as f32 / valueChunk.iter().sum::<u16>() as f32,
+					keyChunk.iter().sum::<u32>() as f32 / valueChunk.iter().sum::<u32>() as f32,
 				);
 			}
 		}
 		mega.push(ram.clone());
 		ram.clear();
 	}
-	return (mega, translated_map);
+	return (mega, translated_map.values, map.keys.literal());
 }
 
-fn _run<'a, T: Literal<String>>(
+pub fn run<'a, T: Literal<String>>(
 	rawinput: T,
-	learnt: (Vec<Vec<f32>>, Vec<Vec<u16>>, Vec<String>),
+	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
+	MEMORY: Option<usize>,
+	THRESHOLD: Option<f32>,
+) -> String {
+	match (MEMORY, THRESHOLD) {
+		(Some(mem), Some(thr)) => _run(rawinput.literal(), learnt, mem, thr),
+		(Some(mem), None) => _run(rawinput.literal(), learnt, mem, DEFAULT_THRESHOLD),
+		(None, Some(thr)) => _run(rawinput.literal(), learnt, DEFAULT_MEMORY, thr),
+		(None, None) => _run(rawinput.literal(), learnt, DEFAULT_MEMORY, DEFAULT_THRESHOLD),
+	}
+}
+
+fn _run<'a>(
+	rawinput: String,
+	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
 	MEMORY: usize,
 	THRESHOLD: f32,
 ) -> String {
 	// First, we translate the input.
 
-	let mut input: Vec<u16> = Vec::new();
-	let mut sum: u16;
+	let mut input: Vec<u32> = Vec::new();
+	let mut sum: u32;
 
-	for word in rawinput.literal().split_whitespace() {
+	for word in rawinput.split_whitespace() {
 		sum = 0;
 		for c in word.chars() {
-			sum += c as u16;
+			sum += c as u32;
 		}
 		input.push(((sum << 1) + 1) << 1 + 1);
 	}
@@ -162,24 +200,24 @@ fn _run<'a, T: Literal<String>>(
 	let mut result: String = String::new();
 
 	// Raw Map
-	let RMap: Vec<String> = learnt.2;
+	let RMap: &Vec<String> = &learnt.2;
 
 	// Translated Map
-	let TMap: Vec<Vec<u16>> = learnt.1;
+	let TMap: &Vec<Vec<u32>> = &learnt.1;
 
 	// Mega Vec
-	let Mega: Vec<Vec<f32>> = learnt.0;
+	let Mega: &Vec<Vec<f32>> = &learnt.0;
 
 	// Real Memory Section: (All *RM are real memory.)
 
 	// input real mem
-	let mut IRM: usize = MEMORY;
+	let IRM: usize;
 
 	// value real mem
 	let mut VRM: usize = MEMORY;
 
 	// Mega real mem
-	let mut MRM: usize = MEMORY;
+	let mut MRM: usize;
 
 	let mut calculation: f32;
 	let mut BestMatch: Option<(f32, usize, usize)> = None;
@@ -189,16 +227,23 @@ fn _run<'a, T: Literal<String>>(
 
 	// For each word
 	for IChunk in input.into_chunks(IRM).base {
+		println!("\n##################\n\nIC -> {:?}", IChunk);
 		for (i, value) in TMap.iter().enumerate() {
+			println!("I = {}: V = {:?}", i, value);
 			checkmem!(MEMORY, value, VRM);
 			for (j, VChunk) in value.into_chunks(VRM).base.iter().enumerate() {
-				for MVec in &Mega {
+				println!("{}: VC -> {:?}", j, VChunk);
+				for MVec in Mega {
+					println!("MV -> {:?}", MVec);
 					checkmem!(MEMORY, MVec, MRM);
 					for MChunk in MVec.into_chunks(MRM).base {
 						calculation = calculation!(MChunk, IChunk, VChunk);
 						if calculation < THRESHOLD {
 							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
 								BestMatch = Some((calculation, i, j));
+								println!("BestMatch Elected!: {:?}", BestMatch.unwrap());
+								println!("@@@@@@@@@@@@@");
+								println!("{} :: {:?}", BestMatch.unwrap().0, RMap[BestMatch.unwrap().1]);
 							};
 						};
 					}
@@ -214,8 +259,9 @@ fn _run<'a, T: Literal<String>>(
 				&RMap[BestMatch_unwrap.1]
 					.split_whitespace()
 					.collect::<Vec<&str>>()
-					.specific_chunk(VRM, BestMatch_unwrap.2)
-					.join(""),
+					.into_chunks(VRM)
+					.base[BestMatch_unwrap.2]
+					.join(" "),
 			);
 		};
 	}

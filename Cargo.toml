@@ -11,5 +11,18 @@ publish = false
 
 [dependencies]
 
+# Now, we add the lib section just for the testing
+
+# Dev dependencies
+[dev-dependencies]
+colored = "2.0.0"
+
+[lib]
+name = "speak"
+bench = true
+doc = true
+edition = "2021"
+crate-type = ["lib"]
+
 [package.metadata.docs.rs]
 rustdoc-args = [ "--html-in-header", "./extra/docs/katex-header.html" ]

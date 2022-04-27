@@ -2,20 +2,16 @@
 // - .specific_chunk(...): Returns an specific chunk instead of the whole list of chunks (Improve performance multiple times)
 
 #[must_use]
-pub(crate) struct Chunks<'a, T> {
+#[doc(hidden)]
+pub struct Chunks<'a, T> {
 	pub(crate) base: Vec<&'a [T]>,
 }
 
-impl<'a, T> Chunks<'a, T> {
-	pub(crate) fn new() -> Chunks<'a, T> {
-		return Chunks::<T> { base: Vec::new() };
-	}
-}
-
-pub(crate) trait Chunkable<'a, T> {
+#[doc(hidden)]
+pub trait Chunkable<'a, T> {
 	#[must_use]
 	fn into_chunks(&'a self, memory: usize) -> Chunks<'a, T>;
-	fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T];
+	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T];
 }
 
 impl<'a, T> Chunkable<'a, T> for Vec<T> {
@@ -33,10 +29,10 @@ impl<'a, T> Chunkable<'a, T> for Vec<T> {
 		return Chunks::<T> { base: chunks };
 	}
 
-	fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T] {
-		if (self.len() % memory != 0) && (index > self.len() - memory) {
-				return &self[self.len() - memory ..];
-		};
-		return &self[index * memory .. (index + 1) * memory];
-	}
+	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T] {
+	// 	if (self.len() % memory != 0) && (index > self.len() - memory) {
+	// 			return &self[self.len() - memory ..];
+	// 	};
+	// 	return &self[index * memory .. (index + 1) * memory];
+	// }
 }
