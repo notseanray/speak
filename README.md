@@ -10,6 +10,30 @@ Speak is very simple to use by design, that's the reason it has only a few publi
 
 **That's it**, you can use Speak with just two functions! These two functions are just normal functions, and you can use them in any way you want. If you want to know more, check the wiki, [clicking this link](https://github.com/blyxyas/speak/wiki) or with your favorite IDE documentation tool. (All docs are integrated in the crate.)
 
+## Configuration
+One of the philosophies of Speak is that the UX is very customizable. That's why Speak has a lot of flexibility when using custom features!
+
+While a lot of custom values are available simply as arguments to the main functions (`learn` & `run`), there also some options that can be set to help the compiler.
+
+### Options
+An option (feature) can be set to `true` or `false`. Writing this in your `Cargo.toml` when importing the crate will activate or deactivate the feature.
+
+```toml
+speak = { version = "*", FEATURE = true }
+```
+
+You can enable any feature by writing `true` or `false`. You can also disable the default features by writing `default-features = false` after the `version` key like this:
+
+```toml
+speak = { version = "*", default-features = false, ...}
+```
+
+The available features that can be set are:
+
+- `fancy_docs`: Enables the fancy documentation (Documentation that uses graphs and equations). This feature is **enabled** by default.
+
+- `debug`: Enables the debug mode. This prints various numbers and messages to the terminal while the program is running. This feature is **enabled** by default.
+
 ## Why is Speak so fast?
 
 Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0 dependencies and just two files (the main library and the utils library.), Secondly, it's written in the (realisticly) most efficient and strict way possible. Also have in mind that Speak **is** designed to be fast in every loop, in every function wrapping there's a lot of thought, because **performance is very important for this project**, we want to be able to even have a **live chat** with the bot.
@@ -17,6 +41,7 @@ Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0
 ## When will Speak be ready?
 
 I cannot know when Speak will be ready, but I can promise that it will be ready soon. I'm trying to make it the most perfect tool I can, that's why I'm taking a lot of time to make it.
+
 
 ## Features
 
