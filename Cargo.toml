@@ -35,6 +35,10 @@ crate-type = ["lib"]
 [package.metadata.docs.rs]
 rustdoc-args = ["--html-in-header", "./extra/docs/katex-header.html"]
 
+# rustdoc dependencies
+[package.metadata.docs.rs.dependencies]
+aquamarine = "0.1.11"
+
 [features]
 default = ["debug"]
 debug = []
