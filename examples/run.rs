@@ -3,23 +3,9 @@
 use colored::Colorize;
 use speak::{learn, run, Map};
 
-macro_rules! test_result {
-	($name: expr, $x: ident, $supposed: expr) => {
-		if $x == $supposed {
-			println!("{} {}", $name.bold(), "OK".black().italic().on_bright_green());
-		} else {
-			println!(
-				"{} {}{} \"{}\"{}{}",
-				$name.bold(),
-				"FAIL".black().italic().on_bright_red(),
-				" ; Result was:".red().bold(),
-				$x.italic(),
-				" ; Supposed to be: ".red().bold(),
-				$supposed.italic()
-			);
-		}
-	};
-}
+#[path = "utils.rs"]
+mod utils;
+use crate::test_result_ as test_result;
 
 fn main() {
 	let map = Map::<&str>::from(vec![
