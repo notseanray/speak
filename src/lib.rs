@@ -15,6 +15,9 @@ pub use literal::*;
 mod mapping;
 pub use mapping::*;
 
+#[cfg(feature = "fancy_docs")]
+use aquamarine;
+
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: C O N F I G U R A T I O N   A N D   U T I L S : :  :   :    :     :        :          :
@@ -23,6 +26,7 @@ pub use mapping::*;
 
 // Explicit docs because it uses fancy graphics
 
+#[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
 ///
@@ -65,6 +69,20 @@ pub use mapping::*;
 ///
 ///###### Honestly, I just wanted to show you how it works, and this graph.
 pub const DEFAULT_MEMORY: usize = 2;
+
+#[cfg(not(feature = "fancy_docs"))]
+///## Memory
+///
+///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well,
+///the `MEMORY` parameter is used to define how many words we take into account into analyzing a phrase.
+///
+///The functions that takes this parameter take into account that maybe the length of the phrase divided
+///by the number of words in the phrase is not an integer. So this functions will take into account
+/// until the last words, and then scan the words between the length of the phrase minus the memory and
+/// the length of the word.
+///
+pub const DEFAULT_MEMORY: usize = 2;
+
 
 ///## Threshold
 ///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.

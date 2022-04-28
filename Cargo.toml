@@ -36,9 +36,10 @@ crate-type = ["lib"]
 rustdoc-args = ["--html-in-header", "./extra/docs/katex-header.html"]
 
 # rustdoc dependencies
-[package.metadata.docs.rs.dependencies]
+[target.'cfg(feature = "fancy_docs")'.dependencies]
 aquamarine = "0.1.11"
 
 [features]
-default = ["debug"]
+default = ["debug", "fancy_docs"]
+fancy_docs = []
 debug = []
