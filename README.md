@@ -15,24 +15,13 @@ One of the philosophies of Speak is that the UX is very customizable. That's why
 
 While a lot of custom values are available simply as arguments to the main functions (`learn` & `run`), there also some options that can be set to help the compiler.
 
-### Options
-An option (feature) can be set to `true` or `false`. Writing this in your `Cargo.toml` when importing the crate will activate or deactivate the feature.
-
-```toml
-speak = { version = "*", FEATURE = true }
-```
-
-You can enable any feature by writing `true` or `false`. You can also disable the default features by writing `default-features = false` after the `version` key like this:
-
-```toml
-speak = { version = "*", default-features = false, ...}
-```
-
-The available features that can be set are:
+The current available features are:
 
 - `fancy_docs`: Enables the fancy documentation (Documentation that uses graphs and equations). This feature is **enabled** by default.
 
 - `debug`: Enables the debug mode. This prints various numbers and messages to the terminal while the program is running. This feature is **enabled** by default.
+
+See also: [Features Documentation](https://doc.rust-lang.org/cargo/reference/features.html)
 
 ## Why is Speak so fast?
 
