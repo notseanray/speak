@@ -16,7 +16,11 @@ mod mapping;
 pub use mapping::*;
 
 #[cfg(feature = "fancy_docs")]
+// Now we can ignore that the import is not being used.
+#[allow(unused_imports)]
 use aquamarine;
+
+use rand::Rng;
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -83,12 +87,12 @@ pub const DEFAULT_MEMORY: usize = 2;
 ///
 pub const DEFAULT_MEMORY: usize = 2;
 
-
 ///## Threshold
 ///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
+pub const DEFAULT_RANGE: usize = 9;
 
 fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	let mut result: Vec<Vec<u32>> = Vec::new();
@@ -107,6 +111,10 @@ fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	}
 
 	return result;
+}
+
+fn random_usize<R: Rng + ?Sized>(rng: &mut R) -> usize {
+	rng.gen()
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
@@ -182,7 +190,10 @@ fn _train<'a, T: Literal<String> + ToString>(
 		mega.push(ram.clone());
 		ram.clear();
 	}
-	debug_mode!(println!("learn::mega -> {:#?}\n---------------------------\n", mega));
+	debug_mode!(println!(
+		"learn::mega -> {:#?}\n---------------------------\n",
+		mega
+	));
 	return (mega, translated_map.values, map.values.literal());
 }
 
@@ -191,16 +202,137 @@ pub fn run<'a, T: Literal<String>>(
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
 	MEMORY: Option<usize>,
 	THRESHOLD: Option<f32>,
+	OUTPUT_LENGTH: Option<usize>,
+	RANGE: Option<usize>,
 ) -> String {
-	match (MEMORY, THRESHOLD) {
-		(Some(mem), Some(thr)) => _run(rawinput.literal(), learnt, mem, thr),
-		(Some(mem), None) => _run(rawinput.literal(), learnt, mem, DEFAULT_THRESHOLD),
-		(None, Some(thr)) => _run(rawinput.literal(), learnt, DEFAULT_MEMORY, thr),
-		(None, None) => _run(
+	match (MEMORY, THRESHOLD, OUTPUT_LENGTH, RANGE) {
+		(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			threshold,
+			output_length,
+			range,
+		),
+		(Some(mem), Some(threshold), Some(output_length), None) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			threshold,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(Some(mem), Some(threshold), None, Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			threshold,
+			DEFAULT_OUTPUT_LENGTH,
+			range,
+		),
+		(Some(mem), Some(threshold), None, None) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			threshold,
+			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+		(Some(mem), None, Some(output_length), Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			output_length,
+			range,
+		),
+		(Some(mem), None, Some(output_length), None) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(Some(mem), None, None, Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			DEFAULT_OUTPUT_LENGTH,
+			range,
+		),
+		(Some(mem), None, None, None) => _run(
+			rawinput.literal(),
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+		(None, Some(threshold), Some(output_length), Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			output_length,
+			range,
+		),
+		(None, Some(threshold), Some(output_length), None) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(None, Some(threshold), None, Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			DEFAULT_OUTPUT_LENGTH,
+			range,
+		),
+		(None, Some(threshold), None, None) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+		(None, None, Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
+			output_length,
+			range,
+		),
+		(None, None, Some(output_length), None) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(None, None, None, Some(range)) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			DEFAULT_OUTPUT_LENGTH,
+			range,
+		),
+		(None, None, None, None) => _run(
+			rawinput.literal(),
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
 		),
 	}
 }
@@ -210,71 +342,100 @@ fn _run<'a>(
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
 	MEMORY: usize,
 	THRESHOLD: f32,
+	OUTPUT_LENGTH: usize,
+	RANGE: usize,
 ) -> String {
-		let mut input: Vec<u32> = Vec::new();
-		let mut sum: u32;
+	let mut input: Vec<u32> = Vec::new();
+	let mut sum: u32;
 
-		for word in rawinput.split_whitespace() {
-			sum = 0;
-			for c in word.chars() {
-				sum += c as u32;
-			}
-			input.push(((sum << 1) + 1) << 1 + 1);
+	for word in rawinput.split_whitespace() {
+		sum = 0;
+		for c in word.chars() {
+			sum += c as u32;
 		}
+		input.push(((sum << 1) + 1) << 1 + 1);
+	}
 
-		let mut result: String = String::new();
+	let mut result: String = String::new();
 
-		// Raw Map
-		let RMap: &Vec<String> = &learnt.2;
+	// Raw Map
+	let RMap: &Vec<String> = &learnt.2;
 
-		// Translated Map
-		let TMap: &Vec<Vec<u32>> = &learnt.1;
+	// Translated Map
+	let TMap: &Vec<Vec<u32>> = &learnt.1;
 
-		// Mega Vec
-		let Mega: &Vec<Vec<f32>> = &learnt.0;
+	// Mega Vec
+	let Mega: &Vec<Vec<f32>> = &learnt.0;
 
-		let mut calculation: f32;
-		let mut BestMatch: Option<(f32, usize, usize)> = None;
-		let mut BestMatch_unwrap: (f32, usize, usize);
-
-		// For each word
-		for IChunk in input.into_chunks(MEMORY).base {
-			debug_mode!(println!("\n##################\n\nIC -> {:?}", IChunk));
-			for (i, value) in TMap.iter().enumerate() {
-				debug_mode!(println!("I = {}: V = {:?}", i, value));
-				for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
-					debug_mode!(println!("{}: VC -> {:?}", j, VChunk));
-					for MVec in Mega {
-						debug_mode!(println!("MV -> {:?}", MVec));
-						for MChunk in MVec.into_chunks(MEMORY).base {
-							calculation = calculation!(MChunk, IChunk, VChunk);
-							if calculation < THRESHOLD {
-								if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
-									BestMatch = Some((calculation, i, j));
-									debug_mode!(println!("BestMatch Elected!: {:?}", BestMatch.unwrap()));
-									debug_mode!(println!("@@@@@@@@@@@@@"));
-									debug_mode!(println!("{} :: {:?}", BestMatch.unwrap().0, RMap[BestMatch.unwrap().1]));
-								};
+	let mut calculation: f32;
+	let mut BestMatch: Option<(f32, usize, usize)> = None;
+	let mut BestMatch_unwrap: (f32, usize, usize);
+	// For each word
+	for IChunk in input.into_chunks(MEMORY).base {
+		debug_mode!(println!("\n##################\n\nIC -> {:?}", IChunk));
+		for (i, value) in TMap.iter().enumerate() {
+			debug_mode!(println!("I = {}: V = {:?}", i, value));
+			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
+				debug_mode!(println!("{}: VC -> {:?}", j, VChunk));
+				for MVec in Mega {
+					debug_mode!(println!("MV -> {:?}", MVec));
+					for MChunk in MVec.into_chunks(MEMORY).base {
+						calculation = calculation!(MChunk, IChunk, VChunk);
+						if calculation < THRESHOLD {
+							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
+								BestMatch = Some((calculation, i, j));
+								debug_mode!(println!(
+									"BestMatch Elected!: {:?}",
+									BestMatch.unwrap()
+								));
+								debug_mode!(println!("@@@@@@@@@@@@@"));
+								debug_mode!(println!(
+									"{} :: {:?}",
+									BestMatch.unwrap().0,
+									RMap[BestMatch.unwrap().1]
+								));
 							};
-						}
+						};
 					}
 				}
 			}
-
-			if BestMatch != None {
-				// Ok, i is the vector of the value and j is the vector of the chunk. So we have to recover the value from just two numbers.
-
-				BestMatch_unwrap = BestMatch.unwrap();
-				result.push_str(
-					&RMap[BestMatch_unwrap.1]
-						.split_whitespace()
-						.collect::<Vec<&str>>()
-						.into_chunks(MEMORY)
-						.base[BestMatch_unwrap.2]
-						.join(" "),
-				);
-			};
 		}
+
+		if BestMatch != None {
+			// Ok, i is the vector of the value and j is the vector of the chunk. So we have to recover the value from just two numbers.
+
+			BestMatch_unwrap = BestMatch.unwrap();
+			result.push_str(
+				&RMap[BestMatch_unwrap.1]
+					.split_whitespace()
+					.collect::<Vec<&str>>()
+					.into_chunks(MEMORY)
+					.base[BestMatch_unwrap.2]
+					.join(" "),
+			);
+
+			/*
+			I cannot convert &RMap[BestMatch_unwrap.1]
+			.split_whitespace()
+			.collect::<Vec<&str>>()
+			.into_chunks(MEMORY)
+			.base
+
+			into a variable, I tried with a lots of things.
+			*/
+			if BestMatch_unwrap.2
+				== &RMap[BestMatch_unwrap.1]
+					.split_whitespace()
+					.collect::<Vec<&str>>()
+					.into_chunks(MEMORY)
+					.base
+					.len() - 1
+			{
+				if result.split('.').collect::<Vec<&str>>().len() > OUTPUT_LENGTH {}
+				result.push('.');
+			}
+		};
+	}
 	return result;
 }
 

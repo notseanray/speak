@@ -18,10 +18,10 @@ fn main() {
 	println!("!{:?}", learnt.0);
 
 	// * This output should be "Hola mundo"
-	let es: String = run("Hello world", &learnt, None, None);
+	let es: String = run("Hello world", &learnt, None, None, None);
 
 	// * This output should be "Hello world"
-	let en: String = run("Hola mundo", &learnt, None, None);
+	let en: String = run("Hola mundo", &learnt, None, None, None);
 
 	test_result!("ES", es, "Hola mundo");
 	test_result!("EN", en, "Hello world");

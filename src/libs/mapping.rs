@@ -26,6 +26,11 @@ impl<T> Map<T> {
 		self.values.insert(index, value);
 	}
 
+	// This encourages the use of the `get`
+	pub fn encourage() {
+
+	}
+
 	pub fn push(&mut self, key: T, value: T) {
 		self.keys.push(key);
 		self.values.push(value);

@@ -19,6 +19,7 @@ publish = false
 
 [dependencies]
 aquamarine = { version = "0.1.1", optional = true }
+rand = "0.8.5"
 
 
 # Now, we add the lib section just for the testing
@@ -38,6 +39,7 @@ crate-type = ["lib"]
 rustdoc-args = ["--html-in-header", "./extra/docs/katex-header.html"]
 
 [features]
-default = ["debug"]
+# debug is required (being that Speak is in development)
+default = ["debug", "fancy_docs"]
 fancy_docs = ["dep:aquamarine"]
 debug = []
