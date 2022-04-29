@@ -4,12 +4,22 @@ version = "0.1.0"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/blyxyas/speak/"
-keywords = ["speak", "machine-learning", "nlp", "natural-language-processing", "conversation", "minimal", "fast"]
+keywords = [
+	"speak",
+	"machine-learning",
+	"nlp",
+	"natural-language-processing",
+	"conversation",
+	"minimal",
+	"fast",
+]
 license = "GNU General Public License v2.0"
 description = "A minimal, fast, machine-learning based chatbot"
 publish = false
 
 [dependencies]
+aquamarine = { version = "0.1.1", optional = true }
+
 
 # Now, we add the lib section just for the testing
 
@@ -25,7 +35,9 @@ edition = "2021"
 crate-type = ["lib"]
 
 [package.metadata.docs.rs]
-rustdoc-args = [ "--html-in-header", "./extra/docs/katex-header.html" ]
+rustdoc-args = ["--html-in-header", "./extra/docs/katex-header.html"]
 
 [features]
+default = ["debug"]
+fancy_docs = ["dep:aquamarine"]
 debug = []
