@@ -1,7 +1,10 @@
-//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright
+//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright.
 
 #![allow(non_snake_case)]
 #![must_use]
+#![doc = document_features::document_features!()]
+
+#![doc(html_favicon_url = "'")]
 
 #[path = "libs/chunks.rs"]
 mod chunks;
@@ -17,9 +20,7 @@ pub use mapping::*;
 
 #[cfg(feature = "fancy_docs")]
 // Now we can ignore that the import is not being used.
-#[allow(unused_imports)]
-use aquamarine;
-
+#[cfg(feature = "randomness")]
 use rand::Rng;
 
 //
@@ -92,7 +93,39 @@ pub const DEFAULT_MEMORY: usize = 2;
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
-pub const DEFAULT_RANGE: usize = 9;
+
+#[cfg(feature = "randomness")]
+#[cfg(feature = "fancy_docs")]
+#[cfg_attr(doc, aquamarine::aquamarine)]
+
+/// ## Randomness
+/// Randomness is an optional (but highly recommended) feature that will pass some randomness to the algorithm.
+///
+/// ### What does this mean?
+/// There's two ways the algorithm works, the first way is **analyzing every single entry**, this method is slow, and doesn't have the ability to *encourage* or *disencourage* some entry.
+///
+/// The second method is **analyzing every single entry until a break point, then aplying a distribution**, this method is more fast, when the break point is reached, the algorithm will start to ignore some cases. The distribution used is very simple just:
+/// ```math
+/// \int_{-\infty}^\infty f(x)\,dx
+/// ```
+/// The distribution is very simple, and just random enough to serve our purpose.
+/// ### Why use a distribution?
+/// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` words, and then will use the distribution. (Note that ) $ d $
+pub const DEFAULT_RANGE: usize = 2;
+
+// ↑
+// $$
+// \bigg\{\begin{array}{ll}
+// 	i \leq X & \dotsi
+// 	\\
+// 	i \geq X & R\big\{\begin{array}{ll}
+
+// 		1 & \dotsi
+// 		\\
+// 		0 & \text{continue}
+// 	\end{array}
+// \end{array}
+// $$
 
 fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	let mut result: Vec<Vec<u32>> = Vec::new();
@@ -111,10 +144,6 @@ fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	}
 
 	return result;
-}
-
-fn random_usize<R: Rng + ?Sized>(rng: &mut R) -> usize {
-	rng.gen()
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
@@ -142,6 +171,29 @@ macro_rules! debug_mode {
 #[cfg(not(feature = "debug"))]
 macro_rules! debug_mode {
 	($block: expr) => {};
+}
+
+#[cfg(feature = "randomness")]
+macro_rules! check_for_random {
+	($i: expr, $range: expr) => {
+		if rand::thread_rng().gen_range(
+			0..{
+				if $i >= $range {
+					$range
+				} else {
+					$i + 1
+				}
+			},
+		) < $range
+		{
+			println!("Passed {}", $i);
+		}
+	};
+}
+
+#[cfg(not(feature = "randomness"))]
+macro_rules! check_for_random {
+	() => {};
 }
 
 //
@@ -367,6 +419,7 @@ fn _run<'a>(
 	// Mega Vec
 	let Mega: &Vec<Vec<f32>> = &learnt.0;
 
+	let mut subphrases: usize = 0;
 	let mut calculation: f32;
 	let mut BestMatch: Option<(f32, usize, usize)> = None;
 	let mut BestMatch_unwrap: (f32, usize, usize);
@@ -374,6 +427,8 @@ fn _run<'a>(
 	for IChunk in input.into_chunks(MEMORY).base {
 		debug_mode!(println!("\n##################\n\nIC -> {:?}", IChunk));
 		for (i, value) in TMap.iter().enumerate() {
+			// Let's see if we are going to use this phrase
+			check_for_random!(i, RANGE);
 			debug_mode!(println!("I = {}: V = {:?}", i, value));
 			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
 				debug_mode!(println!("{}: VC -> {:?}", j, VChunk));
@@ -414,6 +469,8 @@ fn _run<'a>(
 					.join(" "),
 			);
 
+			subphrases += 1;
+
 			/*
 			I cannot convert &RMap[BestMatch_unwrap.1]
 			.split_whitespace()
@@ -431,7 +488,7 @@ fn _run<'a>(
 					.base
 					.len() - 1
 			{
-				if result.split('.').collect::<Vec<&str>>().len() > OUTPUT_LENGTH {}
+				if subphrases > OUTPUT_LENGTH {}
 				result.push('.');
 			}
 		};

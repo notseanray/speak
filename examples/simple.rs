@@ -14,6 +14,6 @@ fn main() {
 		]);
 
 	let learnt = learn(&map, None);
-	let ran = run("Como estas, hoy es un dia muy bonito", &learnt, None, None, None);
+	let ran = run("Como estas, hoy es un dia muy bonito", &learnt, None, None, None, None);
 	println!("!{:?}", ran);
 }
