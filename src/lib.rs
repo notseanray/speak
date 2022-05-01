@@ -3,6 +3,7 @@
 #![allow(non_snake_case)]
 #![must_use]
 #![doc = document_features::document_features!()]
+#![doc(html_favicon_url = "'")]
 
 #[path = "libs/chunks.rs"]
 mod chunks;
@@ -26,15 +27,9 @@ use rand::Rng;
 //   :::::: C O N F I G U R A T I O N   A N D   U T I L S : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
+// REGION
 
-pub struct Settings {
-MEMORY: usize,
-THRESHOLD: f32,
-OUTPUT_LENGTH: usize,
-RANGE: usize,
-}
-
-const DEFAULT_SETTINGS: Settings = Settings {
+// ENDREGION
 #[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
@@ -77,7 +72,7 @@ const DEFAULT_SETTINGS: Settings = Settings {
 ///```
 ///
 ///###### Honestly, I just wanted to show you how it works, and this graph.
-MEMORY: 2,
+pub const DEFAULT_MEMORY: usize = 2;
 
 #[cfg(not(feature = "fancy_docs"))]
 ///## Memory
@@ -90,13 +85,13 @@ MEMORY: 2,
 /// until the last words, and then scan the words between the length of the phrase minus the memory and
 /// the length of the word.
 ///
-MEMORY: 2,
+pub const DEFAULT_MEMORY: usize = 2;
 
 ///## Threshold
 ///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
-THRESHOLD: 0.1,
-OUTPUT_LENGTH: 2,
+pub const DEFAULT_THRESHOLD: f32 = 0.1;
+pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
 
 #[cfg(feature = "randomness")]
 #[cfg(feature = "fancy_docs")]
@@ -113,7 +108,7 @@ OUTPUT_LENGTH: 2,
 /// The distribution is very simple, and just random enough to serve our purpose.
 /// ### Why use a distribution?
 /// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
-RANGE: 2,
+pub const DEFAULT_RANGE: usize = 2;
 
 #[cfg(feature = "randomness")]
 #[cfg(not(feature = "fancy_docs"))]
@@ -128,7 +123,8 @@ RANGE: 2,
 /// The distribution is very simple, and just random enough to serve our purpose.
 /// ### Why use a distribution?
 /// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
-RANGE: 3
+pub const DEFAULT_RANGE: usize = 3;
+
 
 // ↑
 // $$
@@ -143,7 +139,6 @@ RANGE: 3
 // 	\end{array}
 // \end{array}
 // $$
-};
 
 fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	let mut result: Vec<Vec<u32>> = Vec::new();
@@ -214,6 +209,10 @@ macro_rules! check_for_random {
 	($i: expr, $range: expr) => {};
 }
 
+pub struct Settings {
+	pub range: usize
+}
+
 //
 // ────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: M A I N   F U N C T I O N S : :  :   :    :     :        :          :
@@ -232,7 +231,7 @@ pub fn learn<'a, T: Literal<String> + ToString>(
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
 	match memory {
 		Some(mem) => _train(map, mem),
-		None => _train(map, DEFAULT_SETTINGS.MEMORY),
+		None => _train(map, DEFAULT_MEMORY),
 	}
 }
 
@@ -272,10 +271,10 @@ pub fn run<'a, T: Literal<String>>(
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
 	MEMORY: Option<usize>,
 	THRESHOLD: Option<f32>,
-	OUTPUT_LENGTH: Option<usize>,
+	MAX_OUTPUT_LENGTH: Option<usize>,
 	RANGE: Option<usize>,
 ) -> String {
-	match (MEMORY, THRESHOLD, OUTPUT_LENGTH, RANGE) {
+	match (MEMORY, THRESHOLD, MAX_OUTPUT_LENGTH, RANGE) {
 		(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
@@ -290,14 +289,14 @@ pub fn run<'a, T: Literal<String>>(
 			mem,
 			threshold,
 			output_length,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_RANGE,
 		),
 		(Some(mem), Some(threshold), None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
 			threshold,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_MAX_OUTPUT_LENGTH,
 			range,
 		),
 		(Some(mem), Some(threshold), None, None) => _run(
@@ -305,14 +304,14 @@ pub fn run<'a, T: Literal<String>>(
 			learnt,
 			mem,
 			threshold,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
 		),
 		(Some(mem), None, Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_THRESHOLD,
 			output_length,
 			range,
 		),
@@ -320,30 +319,30 @@ pub fn run<'a, T: Literal<String>>(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_THRESHOLD,
 			output_length,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_RANGE,
 		),
 		(Some(mem), None, None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_SETTINGS.THRESHOLD,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
 			range,
 		),
 		(Some(mem), None, None, None) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_SETTINGS.THRESHOLD,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
 		),
 		(None, Some(threshold), Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_MEMORY,
 			threshold,
 			output_length,
 			range,
@@ -351,58 +350,58 @@ pub fn run<'a, T: Literal<String>>(
 		(None, Some(threshold), Some(output_length), None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_MEMORY,
 			threshold,
 			output_length,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_RANGE,
 		),
 		(None, Some(threshold), None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_MEMORY,
 			threshold,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_MAX_OUTPUT_LENGTH,
 			range,
 		),
 		(None, Some(threshold), None, None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_MEMORY,
 			threshold,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
 		),
 		(None, None, Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
-			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
 			output_length,
 			range,
 		),
 		(None, None, Some(output_length), None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
-			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
 			output_length,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_RANGE,
 		),
 		(None, None, None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
-			DEFAULT_SETTINGS.THRESHOLD,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
 			range,
 		),
 		(None, None, None, None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_SETTINGS.MEMORY,
-			DEFAULT_SETTINGS.THRESHOLD,
-			DEFAULT_SETTINGS.OUTPUT_LENGTH,
-			DEFAULT_SETTINGS.RANGE,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
 		),
 	}
 }
@@ -412,7 +411,7 @@ fn _run<'a>(
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
 	MEMORY: usize,
 	THRESHOLD: f32,
-	OUTPUT_LENGTH: usize,
+	MAX_OUTPUT_LENGTH: usize,
 	RANGE: usize,
 ) -> String {
 	let mut input: Vec<u32> = Vec::new();
@@ -506,7 +505,7 @@ fn _run<'a>(
 					.base
 					.len() - 1
 			{
-				if subphrases > OUTPUT_LENGTH {}
+				if subphrases > MAX_OUTPUT_LENGTH {}
 				result.push('.');
 			}
 		};
