@@ -4,8 +4,6 @@
 #![must_use]
 #![doc = document_features::document_features!()]
 
-#![doc(html_favicon_url = "'")]
-
 #[path = "libs/chunks.rs"]
 mod chunks;
 pub use chunks::*;
@@ -29,8 +27,14 @@ use rand::Rng;
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
-// Explicit docs because it uses fancy graphics
+pub struct Settings {
+MEMORY: usize,
+THRESHOLD: f32,
+OUTPUT_LENGTH: usize,
+RANGE: usize,
+}
 
+const DEFAULT_SETTINGS: Settings = Settings {
 #[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
@@ -73,7 +77,7 @@ use rand::Rng;
 ///```
 ///
 ///###### Honestly, I just wanted to show you how it works, and this graph.
-pub const DEFAULT_MEMORY: usize = 2;
+MEMORY: 2,
 
 #[cfg(not(feature = "fancy_docs"))]
 ///## Memory
@@ -86,32 +90,45 @@ pub const DEFAULT_MEMORY: usize = 2;
 /// until the last words, and then scan the words between the length of the phrase minus the memory and
 /// the length of the word.
 ///
-pub const DEFAULT_MEMORY: usize = 2;
+MEMORY: 2,
 
 ///## Threshold
 ///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.
 ///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
-pub const DEFAULT_THRESHOLD: f32 = 0.1;
-pub const DEFAULT_OUTPUT_LENGTH: usize = 2;
+THRESHOLD: 0.1,
+OUTPUT_LENGTH: 2,
 
 #[cfg(feature = "randomness")]
 #[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
-
-/// ## Randomness
+/// <h1>Randomness</h1>
 /// Randomness is an optional (but highly recommended) feature that will pass some randomness to the algorithm.
 ///
 /// ### What does this mean?
 /// There's two ways the algorithm works, the first way is **analyzing every single entry**, this method is slow, and doesn't have the ability to *encourage* or *disencourage* some entry.
 ///
 /// The second method is **analyzing every single entry until a break point, then aplying a distribution**, this method is more fast, when the break point is reached, the algorithm will start to ignore some cases. The distribution used is very simple just:
-/// ```math
-/// \int_{-\infty}^\infty f(x)\,dx
-/// ```
+/// <h3 align="center"><img src="https://render.githubusercontent.com/render/math?math=\bbox[%230d1117]{\color{%23fff}{%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09i%20%5Cleq%20%5Ctext%7Brange%7D%20%26%20%5Cdotsc%09%5C%5C%09i%20%3E%20%5Ctext%7Brange%7D%20%26%20R%5Cin%5C%7B0%2C...%2C%5C%23V%5C%7D%5C%20%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09%09R%20%3C%20i%20%26%20%5Cdotsc%09%09%5C%5C%09%09R%20%5Cgeq%20i%20%26%20%5Ctext%7Bpass%7D%09%5Cend%7Barray%7D%5Cend%7Barray%7D}}" /></h3>
+///
 /// The distribution is very simple, and just random enough to serve our purpose.
 /// ### Why use a distribution?
-/// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` words, and then will use the distribution. (Note that ) $ d $
-pub const DEFAULT_RANGE: usize = 2;
+/// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
+RANGE: 2,
+
+#[cfg(feature = "randomness")]
+#[cfg(not(feature = "fancy_docs"))]
+/// <h1>Randomness</h1>
+/// Randomness is an optional (but highly recommended) feature that will pass some randomness to the algorithm.
+///
+/// ### What does this mean?
+/// There's two ways the algorithm works, the first way is **analyzing every single entry**, this method is slow, and doesn't have the ability to *encourage* or *disencourage* some entry.
+///
+/// The second method is **analyzing every single entry until a break point, then aplying a distribution**, this method is more fast, when the break point is reached, the algorithm will start to ignore some cases. The distribution used is very simple.
+///
+/// The distribution is very simple, and just random enough to serve our purpose.
+/// ### Why use a distribution?
+/// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
+RANGE: 3
 
 // ↑
 // $$
@@ -126,6 +143,7 @@ pub const DEFAULT_RANGE: usize = 2;
 // 	\end{array}
 // \end{array}
 // $$
+};
 
 fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	let mut result: Vec<Vec<u32>> = Vec::new();
@@ -193,7 +211,7 @@ macro_rules! check_for_random {
 
 #[cfg(not(feature = "randomness"))]
 macro_rules! check_for_random {
-	() => {};
+	($i: expr, $range: expr) => {};
 }
 
 //
@@ -214,7 +232,7 @@ pub fn learn<'a, T: Literal<String> + ToString>(
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
 	match memory {
 		Some(mem) => _train(map, mem),
-		None => _train(map, DEFAULT_MEMORY),
+		None => _train(map, DEFAULT_SETTINGS.MEMORY),
 	}
 }
 
@@ -272,14 +290,14 @@ pub fn run<'a, T: Literal<String>>(
 			mem,
 			threshold,
 			output_length,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(Some(mem), Some(threshold), None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
 			threshold,
-			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
 			range,
 		),
 		(Some(mem), Some(threshold), None, None) => _run(
@@ -287,14 +305,14 @@ pub fn run<'a, T: Literal<String>>(
 			learnt,
 			mem,
 			threshold,
-			DEFAULT_OUTPUT_LENGTH,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(Some(mem), None, Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_THRESHOLD,
+			DEFAULT_SETTINGS.THRESHOLD,
 			output_length,
 			range,
 		),
@@ -302,30 +320,30 @@ pub fn run<'a, T: Literal<String>>(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_THRESHOLD,
+			DEFAULT_SETTINGS.THRESHOLD,
 			output_length,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(Some(mem), None, None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_THRESHOLD,
-			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
 			range,
 		),
 		(Some(mem), None, None, None) => _run(
 			rawinput.literal(),
 			learnt,
 			mem,
-			DEFAULT_THRESHOLD,
-			DEFAULT_OUTPUT_LENGTH,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(None, Some(threshold), Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
+			DEFAULT_SETTINGS.MEMORY,
 			threshold,
 			output_length,
 			range,
@@ -333,58 +351,58 @@ pub fn run<'a, T: Literal<String>>(
 		(None, Some(threshold), Some(output_length), None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
+			DEFAULT_SETTINGS.MEMORY,
 			threshold,
 			output_length,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(None, Some(threshold), None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
+			DEFAULT_SETTINGS.MEMORY,
 			threshold,
-			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
 			range,
 		),
 		(None, Some(threshold), None, None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
+			DEFAULT_SETTINGS.MEMORY,
 			threshold,
-			DEFAULT_OUTPUT_LENGTH,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(None, None, Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
-			DEFAULT_THRESHOLD,
+			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_SETTINGS.THRESHOLD,
 			output_length,
 			range,
 		),
 		(None, None, Some(output_length), None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
-			DEFAULT_THRESHOLD,
+			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_SETTINGS.THRESHOLD,
 			output_length,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.RANGE,
 		),
 		(None, None, None, Some(range)) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
-			DEFAULT_THRESHOLD,
-			DEFAULT_OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
 			range,
 		),
 		(None, None, None, None) => _run(
 			rawinput.literal(),
 			learnt,
-			DEFAULT_MEMORY,
-			DEFAULT_THRESHOLD,
-			DEFAULT_OUTPUT_LENGTH,
-			DEFAULT_RANGE,
+			DEFAULT_SETTINGS.MEMORY,
+			DEFAULT_SETTINGS.THRESHOLD,
+			DEFAULT_SETTINGS.OUTPUT_LENGTH,
+			DEFAULT_SETTINGS.RANGE,
 		),
 	}
 }

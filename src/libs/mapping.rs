@@ -26,7 +26,7 @@ impl<T> Map<T> {
 		self.values.insert(index, value);
 	}
 
-	// This encourages the use of the `get`
+	// This encourages the use of the a string
 	pub fn encourage() {
 
 	}
