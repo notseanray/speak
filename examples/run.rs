@@ -23,6 +23,6 @@ fn main() {
 	// * This output should be "Hello world"
 	let en: String = run("Hola mundo", &learnt, None, None, None, None);
 
-	test_result!("ES", es, "Hola mundo");
-	test_result!("EN", en, "Hello world");
+	test_result!("ES", es, "Hola mundo.");
+	test_result!("EN", en, "Hello world.");
 }

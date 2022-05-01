@@ -61,8 +61,5 @@ fancy_docs = ["dep:aquamarine", "dep:document-features"]
 ## The distribution is very simple, and just random enough to serve our purpose.
 ## ### Why use a distribution?
 ## Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` words, and then will use the distribution. This means that, for example the entry 10 will have a probability of being chosen of 
-
-
-
 randomness = ["dep:rand", "dep:document-features"]
 debug = []
