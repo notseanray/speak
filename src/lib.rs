@@ -3,7 +3,6 @@
 #![allow(non_snake_case)]
 #![must_use]
 #![doc = document_features::document_features!()]
-#![doc(html_favicon_url = "'")]
 
 #[path = "libs/chunks.rs"]
 mod chunks;
@@ -405,6 +404,8 @@ pub fn run<'a, T: Literal<String>>(
 		),
 	}
 }
+
+// Please don't try to understand this, it's just pain, I know
 
 fn _run<'a>(
 	rawinput: String,

@@ -1,3 +1,17 @@
+use crate::Literal;
+
+#[cfg(feature = "debug")]
+macro_rules! debug_mode {
+	($command: expr) => {
+		$command
+	};
+}
+
+#[cfg(not(feature = "debug"))]
+macro_rules! debug_mode {
+	($command: expr) => {};
+}
+
 pub struct Map<T> {
 	pub(crate) keys: Vec<T>,
 	pub(crate) values: Vec<T>
@@ -26,9 +40,10 @@ impl<T> Map<T> {
 		self.values.insert(index, value);
 	}
 
-	// This encourages the use of the a string
-	pub fn encourage() {
-
+	pub fn disencourage_by_key(&mut self, to_search: String, how_much: usize) where T: Literal<String> {
+		let idx = self.keys.iter().position(|key| key.literal() == to_search);
+		// match idx {
+		// }
 	}
 
 	pub fn push(&mut self, key: T, value: T) {
