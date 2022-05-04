@@ -1,4 +1,5 @@
 use std::process::exit;
+use colored::Colorize;
 
 #[macro_export]
 macro_rules! test_result_ {
@@ -19,7 +20,8 @@ macro_rules! test_result_ {
 	};
 }
 
+#[allow(dead_code)]
 fn main() {
-	println!("This file was not intended to be used directly. It's just a file containing util functions for other examples.");
+	println!("{}", "⚠ This file was not intended to be used directly. It's just a file containing util functions for other examples.".red().bold().reversed());
 	exit(0);
 }

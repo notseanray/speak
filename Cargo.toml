@@ -19,9 +19,15 @@ publish = false
 
 [dependencies]
 aquamarine = { version = "0.1.1", optional = true }
-
+rand = { version = "0.8.5", optional = true}
+colored = { version = "2.0.0", optional = true }
+document-features = "0.2.1"
 
 # Now, we add the lib section just for the testing
+
+
+[build]
+RUSTDOCFLAGS = ["--html-in-header", "katex-header.html"]
 
 # Dev dependencies
 [dev-dependencies]
@@ -34,10 +40,46 @@ doc = true
 edition = "2021"
 crate-type = ["lib"]
 
-[package.metadata.docs.rs]
-rustdoc-args = ["--html-in-header", "./extra/docs/katex-header.html"]
-
 [features]
-default = ["debug"]
+# debug is required (being that Speak is in development)
+default = ["debug", "fancy_docs", "randomness"]
+
+## <h1>Fancy Docs</h1>
+## Fancy docs is the feature that adds some fancy documentation to the Speak crate.
+## It is not required, but it is recommended. It adds things like **graphs** or **Latex equations** to the more complex documentation.
+## <h2>Dependencies used</h2>
+## <ul><li><code>Aquamarine (0.1.1)</code></ul></li>
 fancy_docs = ["dep:aquamarine"]
-debug = []
+
+## <h1>Randomness</h1>
+## Randomness is an optional (but highly recommended) feature that will pass some randomness to the algorithm.
+## 
+## ### What does this mean?
+## There's two ways the algorithm works, the first way is **analyzing every single entry**, this method is slow, and doesn't have the ability to *encourage* or *disencourage* some entry.
+## 
+## The second method is **analyzing every single entry until a break point, then aplying a distribution**, this method is more fast, when the break point is reached, the algorithm will start to ignore some cases. The distribution used is very simple just:
+## <h3 align="center"><img src="https://render.githubusercontent.com/render/math?math=\bbox[%230d1117]{\color{%23fff}{%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09i%20%5Cleq%20%5Ctext%7Brange%7D%20%26%20%5Cdotsc%09%5C%5C%09i%20%3E%20%5Ctext%7Brange%7D%20%26%20R%5Cin%5C%7B0%2C...%2C%5C%23V%5C%7D%5C%20%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09%09R%20%3C%20i%20%26%20%5Cdotsc%09%09%5C%5C%09%09R%20%5Cgeq%20i%20%26%20%5Ctext%7Bpass%7D%09%5Cend%7Barray%7D%5Cend%7Barray%7D}}" /></h3>
+## 
+## The distribution is very simple, and just random enough to serve our purpose.
+## ### Why use a distribution?
+## Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
+## <h2>Dependencies</h2>
+## <ul><li><code>rand (0.8.5)</code></ul></li>
+randomness = ["dep:rand"]
+
+## <h1>Easy Panic</h1>
+## ***The use of this feature is recommended to pair the use of the `debug` feature, but not obligatory.***
+## This feature is a very optional and easy to understand feature, it will panic if the program haves an error. With this feature disabled the program will return nothing meaningful, but it will not panic, with this feature enabled the program will panic if it has an error.
+
+## <h2>What is an error?</h2>
+## An error is a situation that the utils library can't handle, like encouraging an out-of-bounds index.
+## In the main functions (`run` and `learn`) there isn't posible errors, so, if you're going to manually check the index you're using (Not recommended), you can disable this feature.
+## <h2>Dependencies</h2>
+## No dependencies used.
+easy_panic = []
+
+## <h1>Debug</h1>
+## Enables simple debug messages.
+## <h2>Dependencies</h2>
+## <ul><li><code>colored (2.0.0)</code></li></ul>
+debug = ["dep:colored"]
