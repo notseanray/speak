@@ -1,4 +1,4 @@
-//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright.
+//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright. (GNU General Public License v2.0)
 // If you want to see the utils scroll to the last line of the file.
 
 #![allow(non_snake_case)]
