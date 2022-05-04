@@ -1,6 +1,8 @@
 #[cfg(feature = "debug")]
 use colored::Colorize;
 
+use crate::Literal;
+
 #[cfg(feature = "debug")]
 macro_rules! debug_mode {
 	($command: expr, $($args: expr), *) => {
@@ -35,13 +37,12 @@ pub struct Map<T> {
 	pub(crate) values: Vec<T>,
 }
 
-fn move_index<T>(vec: &mut Vec<&T>, idx: usize, to: usize) {
-	let tmp = vec[idx];
-	vec.remove(idx);
+fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
+	let tmp = vec.remove(idx);
 	vec.insert(to, tmp);
 }
 
-impl<'a, T> Map<&'a T> {
+impl<'a, T> Map<T> where T: Literal<String> {
 	pub fn new() -> Self {
 		Self {
 			keys: Vec::new(),
@@ -49,21 +50,11 @@ impl<'a, T> Map<&'a T> {
 		}
 	}
 
-	pub fn from(from: Vec<(&'a T, &'a T)>) -> Self {
-		let mut map = Self::new();
-		for (key, value) in from {
-			map.keys.push(key);
-			map.values.push(value);
-		}
-
-		return map;
-	}
-
-	pub fn insert(&mut self, key: &'a T, value: &'a T, index: usize) {
+	pub fn insert(&mut self, key: T, value: T, index: usize) {
 		self.keys.insert(index, key);
 		self.values.insert(index, value);
 	}
-	pub fn push(&mut self, key: &'a T, value: &'a T) {
+	pub fn push(&mut self, key: T, value: T) {
 		self.keys.push(key);
 		self.values.push(value);
 	}
@@ -73,7 +64,7 @@ impl<'a, T> Map<&'a T> {
 		self.values.clear();
 	}
 
-	pub fn iter(&self) -> impl Iterator<Item = (&&T, &&T)> {
+	pub fn iter(&self) -> impl Iterator<Item = (&T, &T)> {
 		self.keys.iter().zip(self.values.iter())
 	}
 
@@ -92,8 +83,11 @@ impl<'a, T> Map<&'a T> {
 		move_index(&mut self.values, idx, idx - how_much);
 	}
 
-	pub fn encourage_by_str(&mut self, str_: T, how_much: usize) where T: PartialEq<T> {
-		let idx = self.keys.iter().position(|&x| *x == str_).unwrap();
+	pub fn encourage_by_str(&mut self, str_: T, how_much: usize)
+	where
+		T: PartialEq<T>,
+	{
+		let idx = self.keys.iter().position(|x| *x == str_).unwrap();
 		self.encourage(idx, how_much);
 	}
 
@@ -110,8 +104,22 @@ impl<'a, T> Map<&'a T> {
 		};
 	}
 
-	pub fn disencourage_by_str(&mut self, str_: T, how_much: usize) where T: PartialEq<T> {
-		let idx = self.keys.iter().position(|&x| *x == str_).unwrap();
+	pub fn disencourage_by_str(&mut self, str_: T, how_much: usize)
+	where
+		T: PartialEq<T>,
+	{
+		let idx = self.keys.iter().position(|x| *x == str_).unwrap();
 		self.disencourage(idx, how_much);
+	}
+}
+
+impl<T> From<Vec<(T, T)>> for Map<T> where T: Literal<String> {
+	fn from(what: Vec<(T, T)>) -> Self {
+		let mut map = Self::new();
+		for (key, value) in what {
+			map.keys.push(key);
+			map.values.push(value);
+		}
+		map
 	}
 }

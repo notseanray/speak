@@ -196,10 +196,6 @@ macro_rules! check_for_random {
 	($i: expr, $range: expr) => {};
 }
 
-pub struct Settings {
-	pub range: usize,
-}
-
 //
 // ────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: M A I N   F U N C T I O N S : :  :   :    :     :        :          :
