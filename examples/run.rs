@@ -14,8 +14,6 @@ fn main() {
 		("a", "b"),
 	]);
 
-	let x = Vec::<&str>::from(vec!["Hello world", "Hola mundo"]);
-
 	let learnt = learn(&map, None);
 	println!("!{:?}", learnt.0);
 
