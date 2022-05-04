@@ -1,34 +1,16 @@
 //! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright.
+// If you want to see the utils scroll to the last line of the file.
 
 #![allow(non_snake_case)]
 #![must_use]
 #![doc = document_features::document_features!()]
-
-#[path = "libs/chunks.rs"]
-mod chunks;
-pub use chunks::*;
-
-#[path = "libs/literal.rs"]
-mod literal;
-pub use literal::*;
-
-#[path = "libs/mapping.rs"]
-mod mapping;
-pub use mapping::*;
-
-#[cfg(feature = "fancy_docs")]
-// Now we can ignore that the import is not being used.
-#[cfg(feature = "randomness")]
-use rand::Rng;
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: C O N F I G U R A T I O N   A N D   U T I L S : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
-// REGION
 
-// ENDREGION
 #[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
@@ -124,7 +106,6 @@ pub const DEFAULT_RANGE: usize = 2;
 /// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
 pub const DEFAULT_RANGE: usize = 3;
 
-
 // ↑
 // $$
 // \bigg\{\begin{array}{ll}
@@ -148,6 +129,7 @@ fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 			for c in word.chars() {
 				sum += c as u32;
 			}
+			// I just did this, this implementation is 0.3 ms faster
 			new_phrase.push(((sum << 1) + 1) << 1 + 1);
 			sum = 0;
 		}
@@ -174,15 +156,21 @@ macro_rules! calculation {
 // If the debug mode is enabled, print those statements, else, do nothing.
 
 #[cfg(feature = "debug")]
+use colored::Colorize;
+
+#[cfg(feature = "debug")]
 macro_rules! debug_mode {
-	($block: expr) => {
-		$block
+	($command: expr, $($args: expr), *) => {
+		println!("{}", format!($command, $($args), *).bright_yellow());
+	};
+	($command: expr) => {
+		println!("{}", format!($command).bright_yellow());
 	};
 }
 
 #[cfg(not(feature = "debug"))]
 macro_rules! debug_mode {
-	($block: expr) => {};
+	($command: expr, String) => {};
 }
 
 #[cfg(feature = "randomness")]
@@ -209,7 +197,7 @@ macro_rules! check_for_random {
 }
 
 pub struct Settings {
-	pub range: usize
+	pub range: usize,
 }
 
 //
@@ -247,7 +235,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 
 	let mut mega: Vec<Vec<f32>> = Vec::new();
 	let mut ram: Vec<f32> = Vec::new();
-	for (key, value) in translated_map.iter() {
+	for (key, value) in translated_map.keys.iter().zip(translated_map.values.iter()) {
 		for keyChunk in key.into_chunks(MEMORY).base {
 			for valueChunk in value.into_chunks(MEMORY).base {
 				ram.push(
@@ -258,10 +246,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 		mega.push(ram.clone());
 		ram.clear();
 	}
-	debug_mode!(println!(
-		"learn::mega -> {:#?}\n---------------------------\n",
-		mega
-	));
+	debug_mode!("learn::mega -> {:#?}\n---------------------------\n", mega);
 	return (mega, translated_map.values, map.values.literal());
 }
 
@@ -443,30 +428,27 @@ fn _run<'a>(
 	let mut BestMatch_unwrap: (f32, usize, usize);
 	// For each word
 	for IChunk in input.into_chunks(MEMORY).base {
-		debug_mode!(println!("\n##################\n\nIC -> {:?}", IChunk));
+		debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
 		for (i, value) in TMap.iter().enumerate() {
 			// Let's see if we are going to use this phrase
 			check_for_random!(i, RANGE);
-			debug_mode!(println!("I = {}: V = {:?}", i, value));
+			debug_mode!("I = {}: V = {:?}", i, value);
 			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
-				debug_mode!(println!("{}: VC -> {:?}", j, VChunk));
+				debug_mode!("{}: VC -> {:?}", j, VChunk);
 				for MVec in Mega {
-					debug_mode!(println!("MV -> {:?}", MVec));
+					debug_mode!("MV -> {:?}", MVec);
 					for MChunk in MVec.into_chunks(MEMORY).base {
 						calculation = calculation!(MChunk, IChunk, VChunk);
 						if calculation < THRESHOLD {
 							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
 								BestMatch = Some((calculation, i, j));
-								debug_mode!(println!(
-									"BestMatch Elected!: {:?}",
-									BestMatch.unwrap()
-								));
-								debug_mode!(println!("@@@@@@@@@@@@@"));
-								debug_mode!(println!(
+								debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
+								debug_mode!("@@@@@@@@@@@@@");
+								debug_mode!(
 									"{} :: {:?}",
 									BestMatch.unwrap().0,
 									RMap[BestMatch.unwrap().1]
-								));
+								);
 							};
 						};
 					}
@@ -515,3 +497,20 @@ fn _run<'a>(
 }
 
 // 🦀
+
+#[path = "libs/chunks.rs"]
+mod chunks;
+pub use chunks::*;
+
+#[path = "libs/literal.rs"]
+mod literal;
+pub use literal::*;
+
+#[path = "libs/mapping.rs"]
+mod mapping;
+pub use mapping::*;
+
+#[cfg(feature = "fancy_docs")]
+// Now we can ignore that the import is not being used.
+#[cfg(feature = "randomness")]
+use rand::Rng;
