@@ -24,11 +24,11 @@ Cargo.lock
 src/main.txt
 src/pseudocode
 
+examples/simple.rs
+
 # Ignoring env stuff
 node_modules
 venv
-how-does-it-works.md
-
 
 
 *.log

@@ -2,3 +2,8 @@
 # Please, before submitting any pull request format the output of the program with the rust-analyzer formatter 'rustfmt'
 
 hard_tabs = true
+# We need to enable unstable_features in 
+unstable_features = true
+wrap_comments = true
+array_width = 80
+comment_width = 80
