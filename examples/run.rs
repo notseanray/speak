@@ -8,11 +8,13 @@ mod utils;
 use crate::test_result_ as test_result;
 
 fn main() {
-	let map = Map::<&str>::from(vec![
+	let map: Map<&str> = Map::<&str>::from(vec![
 		("Hello world", "Hola mundo"),
 		("Hola mundo", "Hello world"),
 		("a", "b"),
 	]);
+
+	let x = Vec::<&str>::from(vec!["Hello world", "Hola mundo"]);
 
 	let learnt = learn(&map, None);
 	println!("!{:?}", learnt.0);
