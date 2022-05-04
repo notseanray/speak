@@ -36,8 +36,8 @@ I cannot know when Speak will be ready, but I can promise that it will be ready 
 
 ### Working on:
 
-* ~~`learn` function
-* ~~`run` function
+* ~~`learn` function~~
+* ~~`run` function~~
 * Multithreading
 
 ### To do:
