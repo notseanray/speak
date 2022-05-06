@@ -1,6 +1,8 @@
 use std::process::exit;
 use colored::Colorize;
 
+use std::time::Instant;
+
 #[macro_export]
 macro_rules! test_result_ {
 	($name: expr, $x: ident, $supposed: expr) => {
