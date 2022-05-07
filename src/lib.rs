@@ -203,6 +203,7 @@ macro_rules! debug_mode {
 
 #[cfg(not(feature = "debug"))]
 macro_rules! debug_mode {
+	($command: expr, $($args: expr), *) => {};
 	($command: expr, String) => {};
 }
 
@@ -473,7 +474,7 @@ fn _run<'a>(
 							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
 								BestMatch = Some((calculation, i, j));
 								debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
-								debug_mode!("@@@@@@@@@@@@@");
+								debug_mode!("@@@@@@@@@@@@@",);
 								debug_mode!(
 									"{} :: {:?}",
 									BestMatch.unwrap().0,
@@ -541,7 +542,6 @@ pub use literal::*;
 mod mapping;
 pub use mapping::*;
 
-#[cfg(feature = "fancy_docs")]
 // Now we can ignore that the import is not being used.
 #[cfg(feature = "randomness")]
 use rand::Rng;

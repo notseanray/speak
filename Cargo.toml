@@ -27,12 +27,17 @@ document-features = "0.2.1"
 # Dev dependencies
 [dev-dependencies]
 colored = "2.0.0"
+criterion = { version = "0.3", default-features = true, features = ["html_reports"]}
 
 # Some optimizations for the release, if you want.
 [profile.release]
 codegen-units = 1
 lto = "fat"
 panic = "abort"
+
+[[bench]]
+name = "all"
+harness = false
 
 [lib]
 name = "speak"

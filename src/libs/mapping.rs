@@ -8,10 +8,12 @@ macro_rules! debug_mode {
 	($command: expr, $($args: expr), *) => {
 		println!("{}", format!($command, $($args), *).bright_yellow());
 	};
+	($command: expr, String) => {};
 }
 
 #[cfg(not(feature = "debug"))]
 macro_rules! debug_mode {
+	($command: expr, $($args: expr), *) => {};
 	($command: expr, String) => {};
 }
 
