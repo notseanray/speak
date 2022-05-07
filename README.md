@@ -15,13 +15,13 @@ One of the philosophies of Speak is that the UX is very customizable. That's why
 
 While a lot of custom values are available simply as arguments to the main functions (`learn` & `run`), there also some options that can be set to help the compiler.
 
-The current available features are:
+The current available features are documentated in the main documentation, currently not available, but you can build the documentation with the following command (after cloning the repo):
 
-- `fancy_docs`: Enables the fancy documentation (Documentation that uses graphs and equations). This feature is **enabled** by default.
+```bash
+cargo doc --open
+```
 
-- `debug`: Enables the debug mode. This prints various numbers and messages to the terminal while the program is running. This feature is **enabled** by default.
-
-See also: [Features Documentation](https://doc.rust-lang.org/cargo/reference/features.html)
+See also: [Cargo Features Documentation](https://doc.rust-lang.org/cargo/reference/features.html)
 
 ## Why is Speak so fast?
 
@@ -36,8 +36,8 @@ I cannot know when Speak will be ready, but I can promise that it will be ready 
 
 ### Working on:
 
-* `learn` function
-* `run` function
+* ~~`learn` function~~
+* ~~`run` function~~
 
 ### To do:
 
