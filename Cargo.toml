@@ -1,6 +1,6 @@
 [package]
 name = "speak"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/blyxyas/speak/"
@@ -15,7 +15,7 @@ keywords = [
 ]
 license = "GNU General Public License v2.0"
 description = "A minimal, fast, machine-learning based chatbot"
-publish = false
+publish = true
 
 [dependencies]
 aquamarine = { version = "0.1.1", optional = true }
