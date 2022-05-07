@@ -1,14 +1,13 @@
-//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more
-//! information about the copyright.
+//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more information about the copyright.
 // If you want to see the utils scroll to the last line of the file.
 
 #![allow(non_snake_case)]
+#![must_use]
 #![doc = document_features::document_features!()]
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
-//   :::::: C O N F I G U R A T I O N   A N D   U T I L S : :  :   :    :     :
-// :          :
+//   :::::: C O N F I G U R A T I O N   A N D   U T I L S : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
@@ -16,44 +15,42 @@
 #[cfg_attr(doc, aquamarine::aquamarine)]
 ///## Memory
 ///
-///Every phrase is made up from words. We make a phrase from adding sequences
-/// of words together. Well, the `MEMORY` parameter is used to define how many
-/// words we take into account into analyzing a phrase.
+///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well,
+///the `MEMORY` parameter is used to define how many words we take into account into analyzing a phrase.
 ///
-///The functions that takes this parameter take into account that maybe the
-/// length of the phrase divided by the number of words in the phrase is not an
-/// integer. So this functions will take into account until the last words, and
-/// then scan the words between the length of the phrase minus the memory and
+///The functions that takes this parameter take into account that maybe the length of the phrase divided
+///by the number of words in the phrase is not an integer. So this functions will take into account
+/// until the last words, and then scan the words between the length of the phrase minus the memory and
 /// the length of the word.
 ///
 ///```mermaid
-/// graph TD
-/// 	A("Hi,")
-/// 	B("my")
-/// 	C{{"name"}}
-/// 	D("is")
-/// 	E("Alex")
+///graph TD
+///	A("Hi,")
+///	B("my")
+///	C{{"name"}}
+///	D("is")
+///	E("Alex")
 ///
-/// 	F["Not found!"]
+///	F["Not found!"]
 ///
-/// 	style F stroke-dasharray: 5 5
+///	style F stroke-dasharray: 5 5
 ///
-/// 	X["Iteration 1"]
-/// 	Y["Iteration 2"]
-/// 	Z["Bugged iteration 2"]
+///	X["Iteration 1"]
+///	Y["Iteration 2"]
+///	Z["Bugged iteration 2"]
 ///
-/// 	X-->A;
-/// 	X-->B;
-/// 	X-->C;
+///	X-->A;
+///	X-->B;
+///	X-->C;
 ///
-/// 	Y-->C;
-/// 	Y-->D;
-/// 	Y-->E;
+///	Y-->C;
+///	Y-->D;
+///	Y-->E;
 ///
-/// 	Z-->D;
-/// 	Z-->E;
-/// 	Z-->F;
-/// ```
+///	Z-->D;
+///	Z-->E;
+///	Z-->F;
+///```
 ///
 ///###### Honestly, I just wanted to show you how it works, and this graph.
 pub const DEFAULT_MEMORY: usize = 2;
@@ -61,26 +58,19 @@ pub const DEFAULT_MEMORY: usize = 2;
 #[cfg(not(feature = "fancy_docs"))]
 ///## Memory
 ///
-///Every phrase is made up from words. We make a phrase from adding sequences
-/// of words together. Well, the `MEMORY` parameter is used to define how many
-/// words we take into account into analyzing a phrase.
+///Every phrase is made up from words. We make a phrase from adding sequences of words together. Well,
+///the `MEMORY` parameter is used to define how many words we take into account into analyzing a phrase.
 ///
-///The functions that takes this parameter take into account that maybe the
-/// length of the phrase divided by the number of words in the phrase is not an
-/// integer. So this functions will take into account until the last words, and
-/// then scan the words between the length of the phrase minus the memory and
+///The functions that takes this parameter take into account that maybe the length of the phrase divided
+///by the number of words in the phrase is not an integer. So this functions will take into account
+/// until the last words, and then scan the words between the length of the phrase minus the memory and
 /// the length of the word.
+///
 pub const DEFAULT_MEMORY: usize = 2;
 
 ///## Threshold
-///As you know, we divide two values to find their relations. Well, that
-/// relation is then checked against the threshold, if it doesn't passes the
-/// threshold, the word is not elected. This is the operation to determine if a
-/// word is elected. As you can see, if the threshold is too low (less than 0.1
-/// is not recommended), the word "spaghetti" and the word "spagetti" will not
-/// be relationated. But if the threshold is too high (more than 0.3 is not
-/// recommended), a lot of words, even if they are very different, will be
-/// relationated and the final result will not have sense.
+///As you know, we divide two values to find their relations. Well, that relation is then checked against the threshold, if it doesn't passes the threshold, the word is not elected.
+///This is the operation to determine if a word is elected. As you can see, if the threshold is too low (less than 0.1 is not recommended), the word "spaghetti" and the word "spagetti" will not be relationated. But if the threshold is too high (more than 0.3 is not recommended), a lot of words, even if they are very different, will be relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
 
@@ -88,55 +78,32 @@ pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
 #[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
 /// <h1>Randomness</h1>
-/// Randomness is an optional (but highly recommended) feature that will pass
-/// some randomness to the algorithm.
+/// Randomness is an optional (but highly recommended) feature that will pass some randomness to the algorithm.
 ///
 /// ### What does this mean?
-/// There's two ways the algorithm works, the first way is **analyzing every
-/// single entry**, this method is slow, and doesn't have the ability to
-/// *encourage* or *disencourage* some entry.
+/// There's two ways the algorithm works, the first way is **analyzing every single entry**, this method is slow, and doesn't have the ability to *encourage* or *disencourage* some entry.
 ///
-/// The second method is **analyzing every single entry until a break point,
-/// then aplying a distribution**, this method is more fast, when the break
-/// point is reached, the algorithm will start to ignore some cases. The
-/// distribution used is very simple just: <h3 align="center"><img src="https://render.githubusercontent.com/render/math?math=\bbox[%230d1117]{\color{%23fff}{%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09i%20%5Cleq%20%5Ctext%7Brange%7D%20%26%20%5Cdotsc%09%5C%5C%09i%20%3E%20%5Ctext%7Brange%7D%20%26%20R%5Cin%5C%7B0%2C...%2C%5C%23V%5C%7D%5C%20%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09%09R%20%3C%20i%20%26%20%5Cdotsc%09%09%5C%5C%09%09R%20%5Cgeq%20i%20%26%20%5Ctext%7Bpass%7D%09%5Cend%7Barray%7D%5Cend%7Barray%7D}}" /></h3>
+/// The second method is **analyzing every single entry until a break point, then aplying a distribution**, this method is more fast, when the break point is reached, the algorithm will start to ignore some cases. The distribution used is very simple just:
+/// <h3 align="center"><img src="https://render.githubusercontent.com/render/math?math=\bbox[%230d1117]{\color{%23fff}{%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09i%20%5Cleq%20%5Ctext%7Brange%7D%20%26%20%5Cdotsc%09%5C%5C%09i%20%3E%20%5Ctext%7Brange%7D%20%26%20R%5Cin%5C%7B0%2C...%2C%5C%23V%5C%7D%5C%20%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09%09R%20%3C%20i%20%26%20%5Cdotsc%09%09%5C%5C%09%09R%20%5Cgeq%20i%20%26%20%5Ctext%7Bpass%7D%09%5Cend%7Barray%7D%5Cend%7Barray%7D}}" /></h3>
 ///
-/// The distribution is very simple, and just random enough to serve our
-/// purpose. ### Why use a distribution?
-/// Activating the randomness will change the way that the `run` algorithm
-/// works, adding a new system, the *ranking system*. The ranking system will
-/// take into account just the first `RANGE` entries, and then will use the
-/// distribution, so the last entry is very unlikely to be analyzed, but the
-/// first one after the range is almost guaranteed to be analyzed. We use this
-/// because now we can *rank* the entries, encouraging or disencouraging them by
-/// changing the index.
+/// The distribution is very simple, and just random enough to serve our purpose.
+/// ### Why use a distribution?
+/// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
 pub const DEFAULT_RANGE: usize = 2;
 
 #[cfg(feature = "randomness")]
 #[cfg(not(feature = "fancy_docs"))]
 /// <h1>Randomness</h1>
-/// Randomness is an optional (but highly recommended) feature that will pass
-/// some randomness to the algorithm.
+/// Randomness is an optional (but highly recommended) feature that will pass some randomness to the algorithm.
 ///
 /// ### What does this mean?
-/// There's two ways the algorithm works, the first way is **analyzing every
-/// single entry**, this method is slow, and doesn't have the ability to
-/// *encourage* or *disencourage* some entry.
+/// There's two ways the algorithm works, the first way is **analyzing every single entry**, this method is slow, and doesn't have the ability to *encourage* or *disencourage* some entry.
 ///
-/// The second method is **analyzing every single entry until a break point,
-/// then aplying a distribution**, this method is more fast, when the break
-/// point is reached, the algorithm will start to ignore some cases. The
-/// distribution used is very simple.
+/// The second method is **analyzing every single entry until a break point, then aplying a distribution**, this method is more fast, when the break point is reached, the algorithm will start to ignore some cases. The distribution used is very simple.
 ///
-/// The distribution is very simple, and just random enough to serve our
-/// purpose. ### Why use a distribution?
-/// Activating the randomness will change the way that the `run` algorithm
-/// works, adding a new system, the *ranking system*. The ranking system will
-/// take into account just the first `RANGE` entries, and then will use the
-/// distribution, so the last entry is very unlikely to be analyzed, but the
-/// first one after the range is almost guaranteed to be analyzed. We use this
-/// because now we can *rank* the entries, encouraging or disencouraging them by
-/// changing the index.
+/// The distribution is very simple, and just random enough to serve our purpose.
+/// ### Why use a distribution?
+/// Activating the randomness will change the way that the `run` algorithm works, adding a new system, the *ranking system*. The ranking system will take into account just the first `RANGE` entries, and then will use the distribution, so the last entry is very unlikely to be analyzed, but the first one after the range is almost guaranteed to be analyzed. We use this because now we can *rank* the entries, encouraging or disencouraging them by changing the index.
 pub const DEFAULT_RANGE: usize = 3;
 
 // ↑
@@ -173,9 +140,9 @@ fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	return result;
 }
 
-// fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>,
-// map2: HashMap<T, T>) -> HashMap<T, T> { 	map1.into_iter().chain(map2).
-// collect() }
+// fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>, map2: HashMap<T, T>) -> HashMap<T, T> {
+// 	map1.into_iter().chain(map2).collect()
+// }
 
 // Long calculation I don't want to explain.
 macro_rules! calculation {
@@ -186,31 +153,24 @@ macro_rules! calculation {
 	};
 }
 
-#[cfg(feature = "debug")]
-use colored::Colorize;
-#[cfg(feature = "debug")]
-macro_rules! debug_mode {
-	($time: path, $command: expr, $($args:expr), *) => {
-		println!("[{} ms]{}", (($time.elapsed().as_micros()) as f32 / 100.0f32).to_string().blue(), format!($command, $($args), *).bright_yellow());
-	}
-}
+// If the debug mode is enabled, print those statements, else, do nothing.
 
 #[cfg(feature = "debug")]
-macro_rules! simple_debug_mode {
+use colored::Colorize;
+
+#[cfg(feature = "debug")]
+macro_rules! debug_mode {
+	($command: expr, $($args: expr), *) => {
+		println!("{}", format!($command, $($args), *).bright_yellow());
+	};
 	($command: expr) => {
-		println!("{}", format!($command).red());
-		
+		println!("{}", format!($command).bright_yellow());
 	};
 }
 
 #[cfg(not(feature = "debug"))]
 macro_rules! debug_mode {
-	($time: item, $command: expr, $($args:expr), *) => {};
-}
-
-#[cfg(not(feature = "debug"))]
-macro_rules! simple_debug_mode {
-	($command: expr) => {};
+	($command: expr, String) => {};
 }
 
 #[cfg(feature = "randomness")]
@@ -236,22 +196,9 @@ macro_rules! check_for_random {
 	($i: expr, $range: expr) => {};
 }
 
-#[cfg(not(feature = "not_multithreading"))]
-macro_rules! multi_thread {
-	($command: expr) => {
-		$command
-	};
-}
-
-#[cfg(feature = "not_multithreading")]
-macro_rules! multi_thread {
-	($command: expr) => {};
-}
-
 //
-// ────────────────────────────────────────────────────────────────── I
-// ──────────   :::::: M A I N   F U N C T I O N S : :  :   :    :     :
-// :          :
+// ────────────────────────────────────────────────────────────────── I ──────────
+//   :::::: M A I N   F U N C T I O N S : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────────
 //
 
@@ -295,7 +242,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 		mega.push(ram.clone());
 		ram.clear();
 	}
-	println!("Mega: {:#?}", mega);
+	debug_mode!("learn::mega -> {:#?}\n---------------------------\n", mega);
 	return (mega, translated_map.values, map.values.literal());
 }
 
@@ -449,10 +396,6 @@ fn _run<'a>(
 	MAX_OUTPUT_LENGTH: usize,
 	RANGE: usize,
 ) -> String {
-
-	#[cfg(feature = "debug")]
-	let now = std::time::Instant::now();
-
 	let mut input: Vec<u32> = Vec::new();
 	let mut sum: u32;
 
@@ -481,23 +424,23 @@ fn _run<'a>(
 	let mut BestMatch_unwrap: (f32, usize, usize);
 	// For each word
 	for IChunk in input.into_chunks(MEMORY).base {
-		simple_debug_mode!("#################");
+		debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
 		for (i, value) in TMap.iter().enumerate() {
 			// Let's see if we are going to use this phrase
 			check_for_random!(i, RANGE);
-			debug_mode!(now, "I = {}: V = {:?}", i, value);
+			debug_mode!("I = {}: V = {:?}", i, value);
 			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
-				debug_mode!(now, "{}: VC -> {:?}", j, VChunk);
+				debug_mode!("{}: VC -> {:?}", j, VChunk);
 				for MVec in Mega {
-					debug_mode!(now, "MV -> {:?}", MVec);
+					debug_mode!("MV -> {:?}", MVec);
 					for MChunk in MVec.into_chunks(MEMORY).base {
 						calculation = calculation!(MChunk, IChunk, VChunk);
 						if calculation < THRESHOLD {
 							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
 								BestMatch = Some((calculation, i, j));
-								debug_mode!(now, "BestMatch Elected!: {:?}", BestMatch.unwrap());
-								simple_debug_mode!("@@@@@@@@@@@@@");
-								debug_mode!(now,
+								debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
+								debug_mode!("@@@@@@@@@@@@@");
+								debug_mode!(
 									"{} :: {:?}",
 									BestMatch.unwrap().0,
 									RMap[BestMatch.unwrap().1]
@@ -510,8 +453,7 @@ fn _run<'a>(
 		}
 
 		if BestMatch != None {
-			// Ok, i is the vector of the value and j is the vector of the chunk. So we have
-			// to recover the value from just two numbers.
+			// Ok, i is the vector of the value and j is the vector of the chunk. So we have to recover the value from just two numbers.
 
 			BestMatch_unwrap = BestMatch.unwrap();
 			result.push_str(
@@ -568,9 +510,3 @@ pub use mapping::*;
 // Now we can ignore that the import is not being used.
 #[cfg(feature = "randomness")]
 use rand::Rng;
-
-#[cfg(feature = "debug")]
-use std::time::Instant;
-
-#[cfg(feature = "debug")]
-use chrono::Utc;

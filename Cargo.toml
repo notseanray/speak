@@ -19,9 +19,8 @@ publish = false
 
 [dependencies]
 aquamarine = { version = "0.1.1", optional = true }
-rand = { version = "0.8.5", optional = true }
+rand = { version = "0.8.5", optional = true}
 colored = { version = "2.0.0", optional = true }
-chrono = { version = "0.4.19", optional = true }
 document-features = "0.2.1"
 
 # Now, we add the lib section just for the testing
@@ -80,12 +79,7 @@ randomness = ["dep:rand"]
 easy_panic = []
 
 ## <h1>Debug</h1>
-## Enables simple debug messages, **take into account that this feature is not recommended to use in production, because it will print a lot of information and 
+## Enables simple debug messages.
 ## <h2>Dependencies</h2>
 ## <ul><li><code>colored (2.0.0)</code></li></ul>
-debug = ["dep:colored", "dep:chrono"]
-
-## <h1> Not Multi-Threaded</h1>
-## **Not recommended!**.
-## This feature is simple, it deactivates the multithreading, please, before disabling it, make sure that you fully understand the consequences of this, it will compromise heavily the performance of the program, **this feature is only for machines without multi-threading support**, it's not recommend to use this feature on a normal machine.
-not_multithreading = []
+debug = ["dep:colored"]
