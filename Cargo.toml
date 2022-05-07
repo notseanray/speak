@@ -24,10 +24,6 @@ document-features = "0.2.1"
 
 # Now, we add the lib section just for the testing
 
-
-[build]
-RUSTDOCFLAGS = ["--html-in-header", "katex-header.html"]
-
 # Dev dependencies
 [dev-dependencies]
 colored = "2.0.0"
