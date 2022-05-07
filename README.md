@@ -5,46 +5,47 @@ Speak is a **Chatbot based in machine-learning**, which can be used to **interac
 Speak is very simple to use by design, that's the reason it has only a few public objects and functions. The features you're going to use are:
 
 - `Map<T>` (Struct)
-- `Learn(...)`
-- `Run(...)`
+- `learn(...)`
+- `run(...)`
 
-**That's it**, you can use Speak with just two functions! These two functions are just normal functions, and you can use them in any way you want. If you want to know more, check the wiki, [clicking this link](https://github.com/blyxyas/speak/wiki) or with your favorite IDE documentation tool. (All docs are integrated in the crate.)
+**That's it**, you can use Speak with just two functions! These two functions are just normal functions, and you can use them in any way you want. If you want to know more, check your favorite IDE documentation tool. (All docs are integrated in the crate.)
+
+## Getting started
+
+This is a simple example of how to use Speak:
+```rust
+fn main() {
+	let mut map: Map<&str> = Map::<&str>::from(vec![
+		("Hello world", "Hola mundo"),
+		("Hola mundo", "Hello world"),
+		("a", "b"),
+	]);
+
+	let learnt = learn(&map, None);
+
+	// * This output should be "Hola mundo"
+	let es: String = run("Hello world", &learnt, None, None, None, Some(0));
+
+	// * This output should be "Hello world"
+	let en: String = run("Hola mundo", &learnt, None, None, None, Some(0));
+
+	assert_eq!(es, "Hola mundo");
+	assert_eq!(en, "Hello world");
+}
+```
+
+Take into account that you can encourage or disencourage a key with the methods in the `Map` struct.
 
 ## Configuration
-One of the philosophies of Speak is that the UX is very customizable. That's why Speak has a lot of flexibility when using custom features!
+One of the philosophies of Speak is that the UX is very customizable. That's why Speak has a lot of flexibility when using custom features, there isn't any limit to the number of custom features you can use, and you can enable or disable them at any time, without compromising any other configuration.
 
-While a lot of custom values are available simply as arguments to the main functions (`learn` & `run`), there also some options that can be set to help the compiler.
-
-The current available features are:
-
-- `fancy_docs`: Enables the fancy documentation (Documentation that uses graphs and equations). This feature is **enabled** by default.
-
-- `debug`: Enables the debug mode. This prints various numbers and messages to the terminal while the program is running. This feature is **enabled** by default.
+To see the features you can use and their configuration, check the Speak documentation, [clicking this](https://docs.rs/speak/latest/speak/)
 
 See also: [Features Documentation](https://doc.rust-lang.org/cargo/reference/features.html)
 
 ## Why is Speak so fast?
 
 Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0 dependencies and just two files (the main library and the utils library.), Secondly, it's written in the (realisticly) most efficient and strict way possible. Also have in mind that Speak **is** designed to be fast in every loop, in every function wrapping there's a lot of thought, because **performance is very important for this project**, we want to be able to even have a **live chat** with the bot.
-
-## When will Speak be ready?
-
-I cannot know when Speak will be ready, but I can promise that it will be ready soon. I'm trying to make it the most perfect tool I can, that's why I'm taking a lot of time to make it.
-
-
-## Features
-
-### Working on:
-
-* ~~`learn` function~~
-* ~~`run` function~~
-
-### To do:
-
-* Multithreading
-* Change most `Vec`(s) to arrays (Without runtime inefficiencies)
-* Add `JS` version
-* Make configuration easier
 
 ## Contributions
 

@@ -1,5 +1,6 @@
-//! Speak crate made by Alex G. C. Copyright (c) 2022. See LICENSE for more
+//! Speak crate made by Alex G. C. See LICENSE for more
 //! information about the copyright.
+//! $ \text{Thanks!}\ $
 // If you want to see the utils scroll to the last line of the file.
 
 #![doc = document_features::document_features!()]

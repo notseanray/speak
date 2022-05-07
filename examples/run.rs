@@ -15,16 +15,12 @@ fn main() {
 	]);
 
 	let learnt = learn(&map, None);
-	println!("!{:?}", learnt.0);
-	
-	map.encourage(1, 1);
 
 	// * This output should be "Hola mundo"
 	let es: String = run("Hello world", &learnt, None, None, None, Some(0));
 
 	// * This output should be "Hello world"
 	let en: String = run("Hola mundo", &learnt, None, None, None, Some(0));
-
 
 
 	test_result!("ES", es, "Hola mundo.");
