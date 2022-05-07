@@ -1,6 +1,6 @@
 [package]
 name = "speak"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/blyxyas/speak/"
@@ -27,6 +27,12 @@ document-features = "0.2.1"
 # Dev dependencies
 [dev-dependencies]
 colored = "2.0.0"
+
+# Some optimizations for the release, if you want.
+[profile.release]
+codegen-units = 1
+lto = "fat"
+panic = "abort"
 
 [lib]
 name = "speak"
