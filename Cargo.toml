@@ -1,6 +1,6 @@
 [package]
 name = "speak"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/blyxyas/speak/"
@@ -70,6 +70,7 @@ randomness = ["dep:rand"]
 ## This feature is a very optional and easy to understand feature, it will panic if the program haves an error. With this feature disabled the program will return nothing meaningful, but it will not panic, with this feature enabled the program will panic if it has an error.
 
 ## <h2>What is an error?</h2>
+##
 ## An error is a situation that the utils library can't handle, like encouraging an out-of-bounds index.
 ## In the main functions (`run` and `learn`) there isn't posible errors, so, if you're going to manually check the index you're using (Not recommended), you can disable this feature.
 ## <h2>Dependencies</h2>

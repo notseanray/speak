@@ -16,7 +16,6 @@ macro_rules! debug_mode {
 }
 
 #[cfg(feature = "easy_panic")]
-#[macro_export]
 macro_rules! easy_panic {
 	() => {
 		panic!("(Easy panic) Error message should be included in 'debug' mode, else, you can activate RUST_BACKTRACE=1 to see the backtrace.");
@@ -24,7 +23,6 @@ macro_rules! easy_panic {
 }
 
 #[cfg(not(feature = "easy_panic"))]
-#[macro_export]
 macro_rules! easy_panic {
 	() => {};
 	($u: expr) => {
