@@ -8,7 +8,7 @@ mod utils;
 use crate::test_result_ as test_result;
 
 fn main() {
-	let map: Map<&str> = Map::<&str>::from(vec![
+	let mut map: Map<&str> = Map::<&str>::from(vec![
 		("Hello world", "Hola mundo"),
 		("Hola mundo", "Hello world"),
 		("a", "b"),
@@ -16,12 +16,16 @@ fn main() {
 
 	let learnt = learn(&map, None);
 	println!("!{:?}", learnt.0);
+	
+	map.encourage(1, 1);
 
 	// * This output should be "Hola mundo"
-	let es: String = run("Hello world", &learnt, None, None, None, None);
+	let es: String = run("Hello world", &learnt, None, None, None, Some(0));
 
 	// * This output should be "Hello world"
-	let en: String = run("Hola mundo", &learnt, None, None, None, None);
+	let en: String = run("Hola mundo", &learnt, None, None, None, Some(0));
+
+
 
 	test_result!("ES", es, "Hola mundo.");
 	test_result!("EN", en, "Hello world.");
