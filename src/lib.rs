@@ -1,6 +1,6 @@
 //! Speak crate made by Alex G. C. See LICENSE for more
 //! information about the copyright.
-//! $ \text{Thanks!}\ $
+//! $ E=mc^2 $
 // If you want to see the utils scroll to the last line of the file.
 
 #![doc = document_features::document_features!()]
