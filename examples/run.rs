@@ -8,7 +8,7 @@ mod utils;
 use crate::test_result_ as test_result;
 
 fn main() {
-	let mut map: Map<&str> = Map::<&str>::from(vec![
+	let map: Map<&str> = Map::<&str>::from(vec![
 		("Hello world", "Hola mundo"),
 		("Hola mundo", "Hello world"),
 		("a", "b"),
