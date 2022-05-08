@@ -61,6 +61,6 @@ You can contribute to this project with almost anything, it can be code, documen
 
 ## ⚖️ License & Credits
 
-Speak uses the [**GNU General Public License v2.0**](https://github.com/SpeakML/speak/blob/current/LICENSE/)
+Speak uses the [**Mozilla Public License, Version 2.0**](https://github.com/SpeakML/speak/blob/current/LICENSE/)
 
 Creator: [Alex G. C. aka Blyxyas](https://github.com/blyxyas)
