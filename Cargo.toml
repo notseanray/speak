@@ -3,7 +3,7 @@ name = "speak"
 version = "0.1.6"
 edition = "2021"
 readme = "README.md"
-repository = "https://github.com/blyxyas/speak/"
+repository = "https://github.com/SpeakML/Speak/"
 keywords = [
 	"speak",
 	"machine-learning",

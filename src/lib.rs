@@ -289,6 +289,10 @@ pub fn run<'a, T: Literal<String>>(
 	MAX_OUTPUT_LENGTH: Option<usize>,
 	RANGE: Option<usize>,
 ) -> String {
+	// * I know, this function is a mess, I cannot do nothing to help that, sorry,
+	// * this is what happens when you use 4 different variables, that you get 4^2
+	// * different things to check.
+
 	match (MEMORY, THRESHOLD, MAX_OUTPUT_LENGTH, RANGE) {
 		(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
 			rawinput.literal(),
