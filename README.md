@@ -14,7 +14,9 @@ Speak is very simple to use by design, that's the reason it has only a few publi
 
 This is a simple example of how to use Speak:
 ```rust
+use speak::{run, learn, Map};
 fn main() {
+	// First, we create a map, we can make it out of String(s) or &str(s)
 	let mut map: Map<&str> = Map::<&str>::from(vec![
 		("Hello world", "Hola mundo"),
 		("Hola mundo", "Hello world"),

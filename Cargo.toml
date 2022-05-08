@@ -46,6 +46,10 @@ doc = true
 edition = "2021"
 crate-type = ["lib"]
 
+[package.metadata.docs.rs]
+# Pass all features
+all-features = true
+
 [features]
 # debug is required (being that Speak is in development)
 default = ["debug", "fancy_docs", "randomness"]
