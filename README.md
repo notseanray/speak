@@ -58,6 +58,7 @@ You can contribute to this project with almost anything, it can be code, documen
 [![Stargazers repo roster for @SpeakML/speak](https://reporoster.com/stars/SpeakML/speak)](https://github.com/SpeakML/speak/stargazers)
 
 </h1>
+
 ## ⚖️ License & Credits
 
 Speak uses the [**GNU General Public License v2.0**](https://github.com/SpeakML/speak/blob/current/LICENSE/)
