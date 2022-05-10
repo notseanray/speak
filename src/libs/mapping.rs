@@ -1,5 +1,6 @@
 #[cfg(feature = "debug")]
 use colored::Colorize;
+use rand::seq::index;
 
 use crate::Literal;
 
@@ -32,13 +33,14 @@ macro_rules! easy_panic {
 	};
 }
 
-/// # Map<T>
-/// A map is a collection of key-value pairs, you can compare it to a hashmap or a dictionary, you can form a Map<T> with the `new()` function, or from a vector of tuples with the `from(...)` function.
-/// ## Example
+/// # Map
+/// A map is a collection of key-value pairs, you can compare it to a hashmap or
+/// a dictionary, you can form a Map with the `new()` function, or from a
+/// vector of tuples with the `from(...)` function. ## Example
 /// ```rust
 /// use mapping::Map;
 /// let mut map = Map::new();
-/// 
+///
 /// // Let's add some values.
 /// map.push("key", "value");
 /// map.push("key2", "value2");
@@ -46,15 +48,21 @@ macro_rules! easy_panic {
 ///
 /// Now, let's clear the map.
 /// ```
-/// 
-/// You can also make a Map<T> from a vector of tuples.
+///
+/// You can also make a Map from a vector of tuples.
 /// ```rust
 /// use mapping::Map;
 /// let mut map = Map::from(vec![("key", "value"), ("key2", "value2"), ("key3", "value3")]);
 /// ```
-pub struct Map<T> {
-	pub(crate) keys: Vec<T>,
-	pub(crate) values: Vec<T>,
+pub struct Map {
+	pub keys: Vec<DynType>,
+	pub values: Vec<DynType>,
+}
+
+enum DynType {
+	Literal,
+	LiteralRef,
+	Index
 }
 
 fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
@@ -62,40 +70,47 @@ fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 	vec.insert(to, tmp);
 }
 
-impl<'a, T> Map<T> where T: Literal<String> {
+impl<'a, T> Map
+where
+	T: Literal<String>,
+{
 	/// Creates a new map.
 	/// # Examples
 	/// ```rust
 	/// use mapping::Map;
 	/// let mut map = Map::new();
 	/// ```
-	pub fn new() -> Self {
+	fn new() -> Self {
 		Self {
 			keys: Vec::new(),
 			values: Vec::new(),
 		}
 	}
 
-	/// Adds a new key-value pair to the map.
+	/// Adds a new key-value pair to the map, its arguments can be a Literal, an Index or a &Literal.
 	/// # Examples
 	/// ```rust
 	/// use mapping::Map;
 	/// let mut map = Map::new();
 	/// map.insert("key", "value");
 	/// ```
-	pub fn insert(&mut self, key: T, value: T, index: usize) {
+	fn insert(&mut self, key: DynType, value: DynType, index: usize) {
 		self.keys.insert(index, key);
-		self.values.insert(index, value);
+		match value {
+			DynType::Literal => self.values.insert(index, key),
+			DynType::LiteralRef => self.values.insert(index, key),
+			DynType::Index => self.values.insert(index, &self.values[value]),
+		}
 	}
 
-	/// Pushes a new key-value pair to the end of the map, you can compare the `push` method with a `push` method in a `Vec`.
-	/// # Examples
+	/// Pushes a new key-value pair to the end of the map, you can compare the
+	/// `push` method with a `push` method in a `Vec`. # Examples
 	/// ```rust
 	/// use mapping::Map;
 	/// let mut map = Map::new();
 	/// map.push("key", "value");
 	/// ```
-	pub fn push(&mut self, key: T, value: T) {
+	fn push(&mut self, key: DynType, value: DynType) {
 		self.keys.push(key);
 		self.values.push(value);
 	}
@@ -113,30 +128,16 @@ impl<'a, T> Map<T> where T: Literal<String> {
 	/// // Now we clear the map.
 	/// map.clear();
 	/// ```
-	pub fn clear(&mut self) {
+	fn clear(&mut self) {
 		self.keys.clear();
 		self.values.clear();
 	}
 
-	/// Returns an Iterator<Item = (&T, &T)> to iterate over a map behaving like an iterator of tuples.
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// map.push("key", "value");
-	/// map.push("key2", "value2");
-	/// for (key, value) in map.iter() {
-	/// 	println!("{}", key);
-	/// 	println!("{}", value);
-	/// }
-	/// ```
-	pub fn iter(&self) -> impl Iterator<Item = (&T, &T)> {
-		self.keys.iter().zip(self.values.iter())
-	}
-
-
-	/// Encourages some keys more than others, so you can value better *expected output* and disencourage bad *expected output*. It takes an index of the key you want to encourage and how much you want to encourage it, ***take into account that the "how much?" number must not be greater than the index of the key you want to encourage!***
-	/// # Examples
+	/// Encourages some keys more than others, so you can value better *expected
+	/// output* and disencourage bad *expected output*. It takes an index of the
+	/// key you want to encourage and how much you want to encourage it, ***take
+	/// into account that the "how much?" number must not be greater than the
+	/// index of the key you want to encourage!*** # Examples
 	/// ```rust
 	/// use mapping::Map;
 	/// let mut map = Map::new();
@@ -146,7 +147,7 @@ impl<'a, T> Map<T> where T: Literal<String> {
 	/// map.push("key4", "value4");
 	/// map.encourage(2, 1);
 	/// ```
-	pub fn encourage(&mut self, idx: usize, how_much: usize) {
+	fn encourage(&mut self, idx: usize, how_much: usize) {
 		let klen = self.keys.len();
 		if idx >= klen {
 			debug_mode!("Index of key to encourage or index + how_much to encourage is out of bounds: {} + {}, length is {}", idx, how_much, klen);
@@ -161,9 +162,10 @@ impl<'a, T> Map<T> where T: Literal<String> {
 		move_index(&mut self.values, idx, idx - how_much);
 	}
 
-
-	/// Encourages a string, instead of an index, if the string doesn't exist in the map, it will panic!(), it takes a string and how much you want to encourage it, ***take into account that the "how much?" number must not be greater than the string you want to encourage!***
-	/// # Examples
+	/// Encourages a string, instead of an index, if the string doesn't exist in
+	/// the map, it will panic!(), it takes a string and how much you want to
+	/// encourage it, ***take into account that the "how much?" number must not
+	/// be greater than the string you want to encourage!*** # Examples
 	/// ```rust
 	/// use mapping::Map;
 	/// let mut map = Map::new();
@@ -171,7 +173,7 @@ impl<'a, T> Map<T> where T: Literal<String> {
 	/// map.push("key2", "value2");
 	/// map.push("key3", "value3");
 	/// map.encourage_by_str("key2", 1);
-	pub fn encourage_by_str(&mut self, str_: T, how_much: usize)
+	fn encourage_by_str(&mut self, str_: T, how_much: usize)
 	where
 		T: PartialEq<T>,
 	{
@@ -179,8 +181,12 @@ impl<'a, T> Map<T> where T: Literal<String> {
 		self.encourage(idx, how_much);
 	}
 
-	/// Disencourages some keys more than others, so you can value better *expected output* and disencourage bad *expected output*. It takes an index of the key you want to disencourage and how much you want to disencourage it, ***take into account that the "how much?" number must not be greater than the index of the key you want to disencourage!***
-	pub fn disencourage(&mut self, idx: usize, how_much: usize) {
+	/// Disencourages some keys more than others, so you can value better
+	/// *expected output* and disencourage bad *expected output*. It takes an
+	/// index of the key you want to disencourage and how much you want to
+	/// disencourage it, ***take into account that the "how much?" number must
+	/// not be greater than the index of the key you want to disencourage!***
+	fn disencourage(&mut self, idx: usize, how_much: usize) {
 		let klen = self.keys.len();
 		if idx >= self.keys.len() {
 			debug_mode!("Index of key to encourage or index + how_much to encourage is out of bounds: {} + {}, length is {}", idx, how_much, self.keys.len());
@@ -193,8 +199,11 @@ impl<'a, T> Map<T> where T: Literal<String> {
 		};
 	}
 
-	/// Disencourages a string, instead of an index, if the string doesn't exist in the map, it will panic!(), it takes a string and how much you want to disencourage it, ***take into account that the "how much?" number must not be greater than the string you want to disencourage!***
-	pub fn disencourage_by_str(&mut self, str_: T, how_much: usize)
+	/// Disencourages a string, instead of an index, if the string doesn't exist
+	/// in the map, it will panic!(), it takes a string and how much you want to
+	/// disencourage it, ***take into account that the "how much?" number must
+	/// not be greater than the string you want to disencourage!***
+	fn disencourage_by_str(&mut self, str_: T, how_much: usize)
 	where
 		T: PartialEq<T>,
 	{
@@ -203,7 +212,10 @@ impl<'a, T> Map<T> where T: Literal<String> {
 	}
 }
 
-impl<T> From<Vec<(T, T)>> for Map<T> where T: Literal<String> {
+impl<T> From<Vec<(T, T)>> for Map
+where
+	T: Literal<String>,
+{
 	/// Creates a new map from a vector of `(T, T)`
 	/// # Examples
 	/// ```rust
@@ -216,7 +228,24 @@ impl<T> From<Vec<(T, T)>> for Map<T> where T: Literal<String> {
 		for (key, value) in what {
 			map.keys.push(key);
 			map.values.push(value);
-		}
+		};
 		map
+	}
+}
+
+// Implement Iterator
+impl<T> Iterator for Map
+where
+	T: Literal<String>,
+{
+	type Item = (T, T);
+	fn next(&mut self) -> Option<Self::Item> {
+		match self.keys.pop() {
+			Some(key) => match self.values.pop() {
+				Some(value) => Some((key, value)),
+				None => None,
+			},
+			None => None,
+		}
 	}
 }

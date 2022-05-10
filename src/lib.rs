@@ -244,7 +244,7 @@ macro_rules! check_for_random {
 //
 
 pub fn learn<'a, T: Literal<String> + ToString>(
-	map: &'a Map<T>,
+	map: &'a Map,
 	memory: Option<usize>,
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
 	match memory {
@@ -254,7 +254,7 @@ pub fn learn<'a, T: Literal<String> + ToString>(
 }
 
 fn _train<'a, T: Literal<String> + ToString>(
-	map: &'a Map<T>,
+	map: &'a Map,
 	MEMORY: usize,
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
 	// Create a translated map
@@ -277,6 +277,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 		mega.push(ram.clone());
 		ram.clear();
 	}
+	println!("{}", map[2]);
 	debug_mode!("learn::mega -> {:#?}\n---------------------------\n", mega);
 	return (mega, translated_map.values, map.values.literal());
 }
