@@ -6,7 +6,7 @@ pub struct Map<T> {
 
 impl<T> Map<T> where T: Literal<String> {
 	#[inline]
-	fn new() -> Self {
+	pub fn new() -> Self {
 		Self {
 			keys: Vec::new(),
 			values: Vec::new(),
@@ -14,30 +14,30 @@ impl<T> Map<T> where T: Literal<String> {
 	}
 
 	#[inline]
-	fn push(&mut self, to_insert: (T, T)) {
+	pub fn push(&mut self, to_insert: (T, T)) {
 		self.keys.push(to_insert.0);
 		self.values.push(to_insert.1);
 	}
 
 	#[inline]
-	fn insert(&mut self, to_insert: (T, T), index: usize) {
+	pub fn insert(&mut self, to_insert: (T, T), index: usize) {
 		self.keys.insert(index, to_insert.0);
 		self.values.insert(index, to_insert.1);
 	}
 
 	#[inline]
-	fn clear(&mut self) {
+	pub fn clear(&mut self) {
 		self.keys.clear();
 		self.values.clear();
 	}
 
 	#[inline]
-	fn pop(&mut self) -> (Option<T>, Option<T>) {
+	pub fn pop(&mut self) -> (Option<T>, Option<T>) {
 		(self.keys.pop(), self.values.pop())
 	}
 
 	#[inline]
-	fn remove(&mut self, index: usize) -> (T, T) {
+	pub fn remove(&mut self, index: usize) -> (T, T) {
 		(self.keys.remove(index), self.values.remove(index))
 	}
 
@@ -51,11 +51,11 @@ impl<T> Map<T> where T: Literal<String> {
 	// These methods are used for more complex operations, like encouraging the map
 	// to analyze a certain key more often.
 
-	fn encourage(&self, index: usize) {
+	pub fn encourage(&self, index: usize) {
 		todo!()
 	}
 
-	fn discourage(&self, index: usize) {
+	pub fn discourage(&self, index: usize) {
 		todo!()
 	}
 }
@@ -202,5 +202,19 @@ impl<T> DynMap<T> where T: Dyn {
 
 	pub fn discourage(&self, index: usize) {
 		todo!()
+	}
+}
+
+// * Let's implement some other traits.
+
+impl<T> From<Vec<(T, T)>> for DynMap<T> where T: Dyn {
+	fn from(to_insert: Vec::<(T, T)>) -> Self {
+		let mut new: Self = Self::new();
+		for (k, v) in to_insert {
+			new.values.push(v);
+			new.keys.push(k);
+		}
+
+		new
 	}
 }

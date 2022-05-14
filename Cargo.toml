@@ -90,5 +90,7 @@ easy_panic = []
 ## <h2>Dependencies</h2>
 ## <ul><li><code>colored (2.0.0)</code></li></ul>
 debug = ["dep:colored"]
-dynamic = []
 traditional = []
+
+# Very recommended!
+dynamic = []
