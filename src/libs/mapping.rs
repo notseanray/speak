@@ -1,5 +1,5 @@
 use crate::Literal;
-pub struct Map<T: Literal<String>> {
+pub struct Map<T> {
 	pub keys: Vec<T>,
 	pub values: Vec<T>,
 }

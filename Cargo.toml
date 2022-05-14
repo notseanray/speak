@@ -91,3 +91,4 @@ easy_panic = []
 ## <ul><li><code>colored (2.0.0)</code></li></ul>
 debug = ["dep:colored"]
 dynamic = []
+traditional = []

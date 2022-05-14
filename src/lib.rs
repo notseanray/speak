@@ -244,7 +244,10 @@ macro_rules! check_for_random {
 //
 
 #[cfg(not(feature = "dynamic"))]
-pub fn learn<'a, T: Literal<String> + ToString>(
+#[cfg(feature = "traditional")]
+mod traditional {
+use super::*;
+	pub fn learn<'a, T: Literal<String> + ToString>(
 	map: &'a Map<T>,
 	memory: Option<usize>,
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
@@ -254,7 +257,7 @@ pub fn learn<'a, T: Literal<String> + ToString>(
 	}
 }
 
-#[cfg(not(feature = "dynamic"))]
+
 fn _train<'a, T: Literal<String> + ToString>(
 	map: &'a Map<T>,
 	MEMORY: usize,
@@ -284,7 +287,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 	return (mega, translated_map.values, map.values.literal());
 }
 
-#[cfg(not(feature = "dynamic"))]
+
 pub fn run<'a, T: Literal<String>>(
 	rawinput: T,
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
@@ -431,7 +434,7 @@ pub fn run<'a, T: Literal<String>>(
 
 // Please don't try to understand this, it's just pain, I know
 
-#[cfg(not(feature = "dynamic"))]
+
 fn _run<'a>(
 	rawinput: String,
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
@@ -523,8 +526,8 @@ fn _run<'a>(
 			*/
 			if BestMatch_unwrap.2
 				== &RMap[BestMatch_unwrap.1]
-					.split_whitespace()
-					.collect::<Vec<&str>>()
+				.split_whitespace()
+				.collect::<Vec<&str>>()
 					.into_chunks(MEMORY)
 					.base
 					.len() - 1
@@ -536,8 +539,22 @@ fn _run<'a>(
 	}
 	return result;
 }
+}
 
 // 🦀
+
+
+// Before declaring the Dynamic module, let's create a little function, so, if the user disables the `dynamic` feature, but not explicitly enables the `traditional` feature, the only function it was use is the `help` function.
+
+//
+// ────────────────────────────────────────────────────── I ──────────
+//   :::::: D Y N A M I C : :  :   :    :     :        :          :
+// ────────────────────────────────────────────────────────────────
+//
+
+#[cfg(feature = "dynamic")]
+#[cfg(not(feature = "traditional"))]
+mod dynamic {}
 
 #[path = "libs/chunks.rs"]
 mod chunks;
@@ -554,3 +571,5 @@ pub use mapping::*;
 // Now we can ignore that the import is not being used.
 #[cfg(feature = "randomness")]
 use rand::Rng;
+
+
