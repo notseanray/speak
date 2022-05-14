@@ -1,5 +1,6 @@
 // TODOS
-// - .specific_chunk(...): Returns an specific chunk instead of the whole list of chunks (Improve performance multiple times)
+// - .specific_chunk(...): Returns an specific chunk instead of the whole list
+//   of chunks (Improve performance multiple times)
 
 #[must_use]
 #[doc(hidden)]
@@ -19,10 +20,10 @@ impl<'a, T> Chunkable<'a, T> for Vec<T> {
 	fn into_chunks(&'a self, memory: usize) -> Chunks<T> {
 		if memory >= self.len() {
 			return Chunks {
-				base: vec![&self[..]]
-			}
+				base: vec![&self[..]],
+			};
 		}
-		
+
 		let mut chunks: Vec<&'a [T]> = Vec::new();
 		for i in (memory..self.len() + 1).step_by(memory) {
 			chunks.push(&self[i - memory..i]);

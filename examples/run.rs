@@ -1,4 +1,5 @@
-//! This little example translates a Spanish "Hola mundo" to English "Hello world" in the variable EN and viceversa in ES.
+//! This little example translates a Spanish "Hola mundo" to English "Hello
+//! world" in the variable EN and viceversa in ES.
 
 use colored::Colorize;
 use speak::{learn, run, Map};
@@ -21,7 +22,6 @@ fn main() {
 
 	// * This output should be "Hello world"
 	let en: String = run("Hola mundo", &learnt, None, None, None, Some(0));
-
 
 	test_result!("ES", es, "Hola mundo.");
 	test_result!("EN", en, "Hello world.");

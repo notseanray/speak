@@ -1,11 +1,16 @@
-use std::process::exit;
 use colored::Colorize;
+use std::process::exit;
 
 #[macro_export]
 macro_rules! test_result_ {
 	($name: expr, $x: ident, $supposed: expr) => {
 		if $x == $supposed {
-			println!("{} {} ; Result was: {}", $name.bold(), "OK".black().italic().on_bright_green(), $supposed.italic().on_bright_green());
+			println!(
+				"{} {} ; Result was: {}",
+				$name.bold(),
+				"OK".black().italic().on_bright_green(),
+				$supposed.italic().on_bright_green()
+			);
 		} else {
 			println!(
 				"{} {}{} \"{}\"{}{}",

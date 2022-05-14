@@ -17,7 +17,8 @@ impl Literal<String> for &str {
 	}
 }
 
-// This trait only accepts &str, but I have to use generics because of the main functions that uses generics.
+// This trait only accepts &str, but I have to use generics because of the main
+// functions that uses generics.
 
 impl<T> Literal<Vec<String>> for Vec<T>
 where

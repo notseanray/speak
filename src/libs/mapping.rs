@@ -51,14 +51,14 @@ where
 	// ────────────────────────────────────────────────────────────────────────────────
 	//
 
-	// These methods are used for more complex operations.
+	// These methods are used for more complex operations, like encouraging the map to analyze a certain key more often.
 
 	fn encourage(&self, index: usize) {
-		unimplemented!()
+		todo!()
 	}
 
 	fn discourage(&self, index: usize) {
-		unimplemented!()
+		todo!()
 	}
 }
 
@@ -91,6 +91,8 @@ impl<T> Iterator for Map<T> {
 // ──────────────────────────────────────────────────────────────────────────
 //
 
+// Dynamic maps are more complex than static maps
+
 pub struct DynMap<'item, T>
 where
 	T: Dyn,
@@ -99,8 +101,7 @@ where
 	pub values: Vec<T>,
 }
 
-pub trait Dyn: DynS + DynN {
-}
+pub trait Dyn: DynS + DynN {}
 
 // Dynamic for String
 pub trait DynS {
@@ -126,8 +127,6 @@ impl<Usize: IsUsize> DynN for Usize {
 	}
 }
 
-trait IsNumberOrString: IsString + IsUsize {}
-
 trait IsString {}
 
 impl IsString for String {}
@@ -138,3 +137,21 @@ impl IsString for &str {}
 
 trait IsUsize {}
 impl IsUsize for usize {}
+
+/*
+
++---------------------+      +-------------------+
+|H|E|L|L|O| |W|O|R|L|D+----->+H|O|L|A| |M|U|N|D|O| <----+ Explicit String
++---------------------+      ++------------------+
+							  ^
++-----------------+          ++-----------------+
+|F|O|O| |&| |B|A|R+--------->+0x4a595bdc55bf2627|  <----+ Address pointing to String
++-----------------+          +------------------+
+
++---------------------+      +-+
+|L|O|R|E|M| |I|P|S|U|M+----->+0|                   <----+ Index pointing to the first element
++---------------------+      +-+
+
+*/
+
+// This is how a dynamic map is used. While the normal map just accepts `String`(s), the dynamic map accepts all types that implement the `Dyn` trait. This means that the map can be used to store various types, even in the same map. And example of this is the previous map, that stores a string, an address pointing to that string and an index pointing to the first element, being, again, that string.
