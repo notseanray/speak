@@ -5,7 +5,10 @@ pub struct Map<T> {
 	pub values: Vec<T>,
 }
 
-impl<T> Map<T> where T: Literal<String> {
+impl<T> Map<T>
+where
+	T: Literal<String>,
+{
 	#[inline]
 	fn new() -> Self {
 		Self {
@@ -69,15 +72,69 @@ impl<T> Map<T> where T: Literal<String> {
 
 impl<T> Iterator for Map<T> {
 	type Item = (T, T);
-	
+
 	#[inline]
 	fn next(&mut self) -> Option<(T, T)> {
 		match self.keys.pop() {
 			Some(k) => match self.values.pop() {
 				Some(v) => Some((k, v)),
-				None => None
+				None => None,
 			},
-			None => None
+			None => None,
 		}
 	}
 }
+
+//
+// ──────────────────────────────────────────────────────────────── I ──────────
+//   :::::: D Y N A M I C   M A P S : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────
+//
+
+pub struct DynMap<'item, T>
+where
+	T: Dyn,
+{
+	pub keys: Vec<(&'item T, u8)>,
+	pub values: Vec<T>,
+}
+
+pub trait Dyn: DynS + DynN {
+}
+
+// Dynamic for String
+pub trait DynS {
+	fn _type() -> u8;
+}
+
+// Dynamic for Number
+pub trait DynN {
+	fn _type() -> u8;
+}
+
+impl<S: IsString> DynS for S {
+	#[inline]
+	fn _type() -> u8 {
+		0b00000000
+	}
+}
+
+impl<Usize: IsUsize> DynN for Usize {
+	#[inline]
+	fn _type() -> u8 {
+		0b11111111
+	}
+}
+
+trait IsNumberOrString: IsString + IsUsize {}
+
+trait IsString {}
+
+impl IsString for String {}
+impl IsString for &String {}
+
+impl IsString for str {}
+impl IsString for &str {}
+
+trait IsUsize {}
+impl IsUsize for usize {}
