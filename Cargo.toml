@@ -48,7 +48,7 @@ all-features = true
 
 [features]
 # debug is required (being that Speak is in development)
-default = ["debug", "fancy_docs", "randomness"]
+default = ["debug", "fancy_docs", "randomness", "dynamic"]
 
 ## <h1>Fancy Docs</h1>
 ## Fancy docs is the feature that adds some fancy documentation to the Speak crate.
@@ -90,3 +90,4 @@ easy_panic = []
 ## <h2>Dependencies</h2>
 ## <ul><li><code>colored (2.0.0)</code></li></ul>
 debug = ["dep:colored"]
+dynamic = []

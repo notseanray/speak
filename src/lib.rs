@@ -243,6 +243,7 @@ macro_rules! check_for_random {
 // ────────────────────────────────────────────────────────────
 //
 
+#[cfg(not(feature = "dynamic"))]
 pub fn learn<'a, T: Literal<String> + ToString>(
 	map: &'a Map<T>,
 	memory: Option<usize>,
@@ -253,6 +254,7 @@ pub fn learn<'a, T: Literal<String> + ToString>(
 	}
 }
 
+#[cfg(not(feature = "dynamic"))]
 fn _train<'a, T: Literal<String> + ToString>(
 	map: &'a Map<T>,
 	MEMORY: usize,
@@ -282,6 +284,7 @@ fn _train<'a, T: Literal<String> + ToString>(
 	return (mega, translated_map.values, map.values.literal());
 }
 
+#[cfg(not(feature = "dynamic"))]
 pub fn run<'a, T: Literal<String>>(
 	rawinput: T,
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
@@ -428,6 +431,7 @@ pub fn run<'a, T: Literal<String>>(
 
 // Please don't try to understand this, it's just pain, I know
 
+#[cfg(not(feature = "dynamic"))]
 fn _run<'a>(
 	rawinput: String,
 	learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),

@@ -24,7 +24,7 @@ Cargo.lock
 src/main.txt
 src/pseudocode
 
-examples/simple.rs
+examples
 
 # Ignoring env stuff
 node_modules

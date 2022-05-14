@@ -1,14 +1,10 @@
 use crate::Literal;
-
-pub struct Map<T> {
+pub struct Map<T: Literal<String>> {
 	pub keys: Vec<T>,
 	pub values: Vec<T>,
 }
 
-impl<T> Map<T>
-where
-	T: Literal<String>,
-{
+impl<T> Map<T> where T: Literal<String> {
 	#[inline]
 	fn new() -> Self {
 		Self {
@@ -46,12 +42,14 @@ where
 	}
 
 	//
-	// ────────────────────────────────────────────────────────────────────── I ──────────
-	//   :::::: C O M P L E X   M E T H O D S : :  :   :    :     :        :          :
+	// ────────────────────────────────────────────────────────────────────── I
+	// ──────────   :::::: C O M P L E X   M E T H O D S : :  :   :    :     :
+	// :          :
 	// ────────────────────────────────────────────────────────────────────────────────
 	//
 
-	// These methods are used for more complex operations, like encouraging the map to analyze a certain key more often.
+	// These methods are used for more complex operations, like encouraging the map
+	// to analyze a certain key more often.
 
 	fn encourage(&self, index: usize) {
 		todo!()
@@ -70,7 +68,7 @@ where
 // 	}
 // }
 
-impl<T> Iterator for Map<T> {
+impl<T> Iterator for Map<T> where T: Literal<String> {
 	type Item = (T, T);
 
 	#[inline]
@@ -93,59 +91,46 @@ impl<T> Iterator for Map<T> {
 
 // Dynamic maps are more complex than static maps
 
-pub struct DynMap<'item, T>
+pub struct DynMap<T>
 where
 	T: Dyn,
 {
-	pub keys: Vec<(&'item T, u8)>,
+	pub keys: Vec<T>,
 	pub values: Vec<T>,
 }
 
-pub trait Dyn: DynS + DynN {}
-
-// Dynamic for String
-pub trait DynS {
+pub trait Dyn {
+	// Being that integer 255 (0b11111110) for a Literal, 240 (0b11110000) is the
+	// code for a &Literal and 0 (0b0) is the code for an usize.
 	fn _type() -> u8;
 }
 
-// Dynamic for Number
-pub trait DynN {
-	fn _type() -> u8;
-}
-
-impl<S: IsString> DynS for S {
-	#[inline]
+impl Dyn for &str {
 	fn _type() -> u8 {
-		0b00000000
+		255 // 0b11111110
 	}
 }
 
-impl<Usize: IsUsize> DynN for Usize {
-	#[inline]
+impl Dyn for String {
 	fn _type() -> u8 {
-		0b11111111
+		240 // 0b11110000
 	}
 }
 
-trait IsString {}
-
-impl IsString for String {}
-impl IsString for &String {}
-
-impl IsString for str {}
-impl IsString for &str {}
-
-trait IsUsize {}
-impl IsUsize for usize {}
+impl Dyn for usize {
+	fn _type() -> u8 {
+		0 // 0b0
+	}
+}
 
 /*
 
 +---------------------+      +-------------------+
 |H|E|L|L|O| |W|O|R|L|D+----->+H|O|L|A| |M|U|N|D|O| <----+ Explicit String
 +---------------------+      ++------------------+
-							  ^
+							  ^ Points to:
 +-----------------+          ++-----------------+
-|F|O|O| |&| |B|A|R+--------->+0x4a595bdc55bf2627|  <----+ Address pointing to String
+|F|O|O| |&| |B|A|R+--------->+0x0a595bdc55bf2627|  <----+ Address pointing to String
 +-----------------+          +------------------+
 
 +---------------------+      +-+
@@ -154,4 +139,68 @@ impl IsUsize for usize {}
 
 */
 
-// This is how a dynamic map is used. While the normal map just accepts `String`(s), the dynamic map accepts all types that implement the `Dyn` trait. This means that the map can be used to store various types, even in the same map. And example of this is the previous map, that stores a string, an address pointing to that string and an index pointing to the first element, being, again, that string.
+// This is how a dynamic map is used. While the normal map just accepts
+// Strings the dynamic map accepts all types that implement the `Dyn`
+// trait. This means that the map can be used to store various types, even in
+// the same map, the map can store:
+//
+// - Strings
+// - References to Strings.
+// - Indexes to strings (numbers, being Usize)
+
+// Adding references to an usize is not necessary, because a reference is just a
+// number, so it would be the double of the size of a number.
+
+// * Ok, now we can start with the main implementations
+
+impl<T> DynMap<T> where T: Dyn {
+	#[inline]
+	pub fn new() -> Self {
+		Self {
+			keys: Vec::new(),
+			values: Vec::new(),
+		}
+	}
+
+	#[inline]
+	pub fn push(&mut self, to_insert: (T, T)) {
+		self.keys.push(to_insert.0);
+		self.values.push(to_insert.1);
+	}
+
+	#[inline]
+	pub fn insert(&mut self, to_insert: (T, T), index: usize) {
+		self.keys.insert(index, to_insert.0);
+		self.values.insert(index, to_insert.1);
+	}
+
+	#[inline]
+	pub fn clear(&mut self) {
+		self.keys.clear();
+		self.values.clear();
+	}
+
+	#[inline]
+	pub fn pop(&mut self) -> (Option<T>, Option<T>) {
+		(self.keys.pop(), self.values.pop())
+	}
+	
+	#[inline]
+	pub fn remove(&mut self, index: usize) -> (T, T) {
+		(self.keys.remove(index), self.values.remove(index))
+	}
+
+	//
+	// ────────────────────────────────────────────────────────────────────── I ──────────
+	//   :::::: C O M P L E X   M E T H O D S : :  :   :    :     :        :          :
+	// ────────────────────────────────────────────────────────────────────────────────
+	//
+
+	pub fn encourage(&self, index: usize) {
+		todo!()
+	}
+
+	pub fn discourage(&self, index: usize) {
+		todo!()
+	}
+}
