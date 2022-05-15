@@ -118,18 +118,21 @@ pub trait Dyn {
 }
 
 impl Dyn for &str {
+	#[inline]
 	fn _type() -> u8 {
 		255 // 0b11111110
 	}
 }
 
 impl Dyn for String {
+	#[inline]
 	fn _type() -> u8 {
 		240 // 0b11110000
 	}
 }
 
 impl Dyn for usize {
+	#[inline]
 	fn _type() -> u8 {
 		0 // 0b0
 	}

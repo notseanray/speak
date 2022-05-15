@@ -545,6 +545,27 @@ pub mod traditional {
 // ────────────────────────────────────────────────────────────────
 //
 
+pub fn learn<T>(
+	map: &DynMap<T>,
+	memory: Option<usize>,
+) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
+where
+	T: Dyn,
+{
+	match memory {
+		Some(mem) => _train(map, mem),
+		None => _train(map, DEFAULT_MEMORY),
+	}
+}
+
+fn _train<T>(map: &DynMap<T>, MEMORY: usize) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
+where
+	T: Dyn,
+{
+
+	return (Vec::new(), Vec::new(), Vec::new());
+}
+
 use rand::Rng;
 
 #[path = "libs/chunks.rs"]
