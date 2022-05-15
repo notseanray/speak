@@ -9,6 +9,7 @@ use std::fmt;
 
 #[cfg(feature = "easy_panic")]
 use colored::Colorize;
+use rand::prelude::IteratorRandom;
 
 #[cfg(feature = "easy_panic")]
 #[macro_use]
@@ -30,103 +31,6 @@ macro_rules! easy_panic {
 }
 
 //
-// ────────────────────────────────────────────────────────── I ──────────
-//   :::::: M A I N   M A P S : :  :   :    :     :        :          :
-// ────────────────────────────────────────────────────────────────────
-//
-
-#[derive(Debug)]
-pub struct Map<T> {
-	pub keys: Vec<T>,
-	pub values: Vec<T>,
-}
-
-impl<T> Map<T>
-where
-	T: Literal<String>,
-{
-	#[inline]
-	pub fn new() -> Self {
-		Self {
-			keys: Vec::new(),
-			values: Vec::new(),
-		}
-	}
-
-	#[inline]
-	pub fn push(&mut self, to_insert: (T, T)) {
-		self.keys.push(to_insert.0);
-		self.values.push(to_insert.1);
-	}
-
-	#[inline]
-	pub fn insert(&mut self, to_insert: (T, T), index: usize) {
-		self.keys.insert(index, to_insert.0);
-		self.values.insert(index, to_insert.1);
-	}
-
-	#[inline]
-	pub fn clear(&mut self) {
-		self.keys.clear();
-		self.values.clear();
-	}
-
-	#[inline]
-	pub fn pop(&mut self) -> (Option<T>, Option<T>) {
-		(self.keys.pop(), self.values.pop())
-	}
-
-	#[inline]
-	pub fn remove(&mut self, index: usize) -> (T, T) {
-		(self.keys.remove(index), self.values.remove(index))
-	}
-
-	//
-	// ────────────────────────────────────────────────────────────────────── I
-	// ──────────   :::::: C O M P L E X   M E T H O D S : :  :   :    :     :
-	// :          :
-	// ────────────────────────────────────────────────────────────────────────────────
-	//
-
-	// These methods are used for more complex operations, like encouraging the map
-	// to analyze a certain key more often.
-
-	pub fn encourage(&self, index: usize) {
-		todo!()
-	}
-
-	pub fn discourage(&self, index: usize) {
-		todo!()
-	}
-}
-
-// TODO i don't know how to constrain this `'a` lifetime
-// impl<T> Index<Range<usize>> for Map<T> {
-// 	type Output = (&'a [T], &'a [T]);
-// 	fn index(&self, index: Range<usize>) -> (&[T], &[T]) {
-// 		return (&self.keys[index], &self.values[index]);
-// 	}
-// }
-
-impl<T> Iterator for Map<T>
-where
-	T: Literal<String>,
-{
-	type Item = (T, T);
-
-	#[inline]
-	fn next(&mut self) -> Option<(T, T)> {
-		match self.keys.pop() {
-			Some(k) => match self.values.pop() {
-				Some(v) => Some((k, v)),
-				None => None,
-			},
-			None => None,
-		}
-	}
-}
-
-//
 // ──────────────────────────────────────────────────────────────── I ──────────
 //   :::::: D Y N A M I C   M A P S : :  :   :    :     :        :          :
 // ──────────────────────────────────────────────────────────────────────────
@@ -144,7 +48,7 @@ where
 
 pub trait Dyn {
 	// Being that integer 255 (0b11111110) for a Literal, 240 (0b11110000) is the
-	// code for a &Literal and 0 (0b0) is the code for an usize.
+ 	// code for a &Literal and 0 (0b0) is the code for an usize.
 	fn _type() -> u8;
 }
 
@@ -411,7 +315,8 @@ where
 // From:
 impl<T> From<Vec<(T, T)>> for DynMap<T>
 where
-	T: Dyn, Vec<T>: Copy
+	T: Dyn,
+	Vec<T>: Copy,
 {
 	fn from(to_insert: Vec<(T, T)>) -> Self {
 		let mut new: Self = Self::new();
@@ -420,5 +325,19 @@ where
 			new.keys.push(k);
 		}
 		return new;
+	}
+}
+
+// Iterator
+impl<T> Iterator for DynMap<T>
+where
+	T: Dyn,
+{
+	type Item = (T, T);
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.keys.len() == 0 {
+			return None;
+		}
+		Some((self.keys.remove(0), self.values.remove(0)))
 	}
 }

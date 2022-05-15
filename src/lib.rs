@@ -243,8 +243,7 @@ macro_rules! check_for_random {
 // ────────────────────────────────────────────────────────────
 //
 
-#[cfg(not(feature = "dynamic"))]
-#[cfg(feature = "traditional")]
+#[cfg(feature = "notvisible")]
 pub mod traditional {
 	use super::*;
 	pub fn learn<'a, T: Literal<String> + ToString>(
@@ -550,11 +549,7 @@ pub mod traditional {
 // ────────────────────────────────────────────────────────────────
 //
 
-#[cfg(feature = "dynamic")]
-#[cfg(not(feature = "traditional"))]
-pub mod dynamic {
-	use super::*;
-}
+ 
 
 #[path = "libs/chunks.rs"]
 mod chunks;
@@ -574,18 +569,3 @@ use rand::Rng;
 
 #[cfg(feature = "traditional")]
 use traditional::*;
-
-#[cfg(feature = "dynamic")]
-use dynamic::*;
-
-#[cfg(feature = "dynamic")]
-#[cfg(feature = "traditional")]
-pub fn help() {
-	panic!("You cannot use both the `dynamic` feature and the `tradional` feature at the same time, pick one. (`dynamic` is recommended, and the default)");
-}
-
-#[cfg(not(feature = "dynamic"))]
-#[cfg(not(feature = "traditional"))]
-pub fn help() {
-	panic!("You cannot use both the `dynamic` feature and the `tradional` feature at the same time, pick one. (`dynamic` is recommended, and the default)");
-}
