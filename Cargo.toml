@@ -83,7 +83,7 @@ randomness = ["dep:rand"]
 ## In the main functions (`run` and `learn`) there isn't posible errors, so, if you're going to manually check the index you're using (Not recommended), you can disable this feature.
 ## <h2>Dependencies</h2>
 ## No dependencies used.
-easy_panic = []
+easy_panic = ["dep:colored"]
 
 ## <h1>Debug</h1>
 ## Enables simple debug messages.
