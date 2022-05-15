@@ -38,6 +38,69 @@ macro_rules! easy_panic {
 
 // Dynamic maps are more complex than static maps
 
+/// # DynMap
+/// A Dynamic Map is a list of key-value pairs (Like a `HashMap` or a
+/// Dictionary), but it is not limited to that, it can be any type that has the
+/// `Dyn` trait implemented, even in the same map.
+///
+/// These types are:
+/// - `String`
+/// - `&str`
+/// - `usize`
+///
+/// So, it can contain a String, a reference to a String or an usize, being that
+/// usize the index of the value you want to get. Take this example about this
+/// dynamism:
+///
+/// ```text
+/// +---------------------+      +-------------------+
+/// |H|E|L|L|O| |W|O|R|L|D+----->+H|O|L|A| |M|U|N|D|O| <----+ Explicit String
+/// +--------+------------+      +-------------------+
+/// 							  ^ Points to:
+/// +--------+--------+          +------------------+
+/// |F|O|O| |&| |B|A|R+--------->+0x0a595bdc55bf2627|  <----+ Address pointing to String
+/// +-----------------+          +------------------+
+///
+/// +---------------------+      +-+
+/// |L|O|R|E|M| |I|P|S|U|M+----->+0|                   <----+ Index pointing to
+/// +---------------------+      +-+                          the first element
+/// ```
+///
+/// ## Ranking system
+/// The ranking system is the way that maps use to encourage or discourage
+/// certain strings (or indexes). The way it works is by only analyzing some
+/// indexes, indeed, it only analyzes the index if a random number is higher
+/// than the ranking of the index. (So it's very hard to analyze the index 1000
+/// but easy to analyze the index 10).
+///
+/// Also, you can modify the `RANGE` variable to guarantee a certain number of
+/// strings read, when using the main functions.
+///
+/// +---------+
+/// |         |
+/// | Entry 1 |
+/// |         | <----+ These ones are in range
+/// | Entry 2 |
+/// |         |
+/// +---------+
+///
+/// +---------+
+/// |         |
+/// | Entry 3 |
+/// |         |
+/// | Entry 4 |        All these are selected "randomly"
+/// |         | <----+ taking into account their index
+/// | Entry 5 |        number after n (Example: Index 3
+/// |         |        - n is Index 1).
+/// | Entry 6 |
+/// |         |
+/// +---------+
+///
+/// ## Example:
+/// ```rust
+/// use speak::DynMap;
+/// let mut map = DynMap::new();
+/// ```
 pub struct DynMap<T>
 where
 	T: Dyn,
@@ -46,9 +109,11 @@ where
 	pub values: Vec<T>,
 }
 
+/// # Dyn
+/// This trait is used to implement the DynMap.
 pub trait Dyn {
 	// Being that integer 255 (0b11111110) for a Literal, 240 (0b11110000) is the
- 	// code for a &Literal and 0 (0b0) is the code for an usize.
+	// code for a &Literal and 0 (0b0) is the code for an usize.
 	fn _type() -> u8;
 }
 

@@ -84,12 +84,9 @@ pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
 pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
 
-#[cfg(feature = "randomness")]
 #[cfg(feature = "fancy_docs")]
 #[cfg_attr(doc, aquamarine::aquamarine)]
 /// <h1>Randomness</h1>
-/// Randomness is an optional (but highly recommended) feature that will pass
-/// some randomness to the algorithm.
 ///
 /// ### What does this mean?
 /// There's two ways the algorithm works, the first way is **analyzing every
@@ -112,7 +109,6 @@ pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
 /// changing the index.
 pub const DEFAULT_RANGE: usize = 2;
 
-#[cfg(feature = "randomness")]
 #[cfg(not(feature = "fancy_docs"))]
 /// <h1>Randomness</h1>
 /// Randomness is an optional (but highly recommended) feature that will pass
@@ -549,7 +545,7 @@ pub mod traditional {
 // ────────────────────────────────────────────────────────────────
 //
 
- 
+use rand::Rng;
 
 #[path = "libs/chunks.rs"]
 mod chunks;
@@ -562,10 +558,3 @@ pub use literal::*;
 #[path = "libs/mapping.rs"]
 mod mapping;
 pub use mapping::*;
-
-// Now we can ignore that the import is not being used.
-#[cfg(feature = "randomness")]
-use rand::Rng;
-
-#[cfg(feature = "traditional")]
-use traditional::*;

@@ -1,6 +1,13 @@
 # Speak
 Speak is a **Chatbot based in machine-learning**, which can be used to **interact with the user**. The philosophy of the project is to **make the user feel like they are talking to a real person**, and the way Speak does that is by being very fast, that's it.
 
+## Installation
+
+Just put this in your `Cargo.toml`
+```toml
+speak = "0.1.6"
+```
+
 ## Features
 Speak is very simple to use by design, that's the reason it has only a few public objects and functions. The features you're going to use are:
 
