@@ -149,24 +149,47 @@ pub const DEFAULT_RANGE: usize = 3;
 // \end{array}
 // $$
 
-fn translate<T: Literal<String>>(vec: &Vec<T>) -> Vec<Vec<u32>> {
-	let mut result: Vec<Vec<u32>> = Vec::new();
-	let mut new_phrase: Vec<u32> = Vec::new();
-	let mut sum: u32 = 0;
-	for phrase in vec {
-		for word in phrase.literal().split_whitespace() {
-			for c in word.chars() {
-				sum += c as u32;
-			}
-			// I just did this, this implementation is 0.3 ms faster
-			new_phrase.push(((sum << 1) + 1) << 1 + 1);
-			sum = 0;
-		}
-		result.push(new_phrase.clone());
-		new_phrase.clear()
-	}
+#[inline]
+fn translate<'a, T: Dyn + Typing>(vec: &Vec<T>) -> Vec<Vec<u32>> {
+	let mut result: Vec<Vec<usize>> = Vec::new();
+	for element in vec {
+		result.push(match element._type() {
+			false => {
+				let mut ram: Vec<usize> = Vec::new();
+				for word in vec[element.usize()].str().split_whitespace() {
+					let mut sum: usize = 0;
+					for char in word.chars() {
+						sum += char as usize;
+					}
+					ram.push(sum);
+				}
+				ram.clone()
+			},
+			true => {
+				let mut ram: Vec<usize> = Vec::new();
+				for word in element.str().split_whitespace() {
+					let mut sum: usize = 0;
+					for char in word.chars() {
+						sum += char as usize;
+					}
+					ram.push(sum);
+				}
 
-	return result;
+				ram.clone()
+			}
+		})
+	}
+	return Vec::new();
+}
+
+fn translate_string(string: &str) -> Vec<u32> {
+	let mut vec = Vec::new();
+	for word in string.split_whitespace() {
+		for character in word.chars() {
+			vec.push(character as u32);
+		}
+	}
+	return vec;
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>,
@@ -550,7 +573,7 @@ pub fn learn<T>(
 	memory: Option<usize>,
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
 where
-	T: Dyn,
+	T: Dyn + Typing,
 {
 	match memory {
 		Some(mem) => _train(map, mem),
@@ -560,8 +583,15 @@ where
 
 fn _train<T>(map: &DynMap<T>, MEMORY: usize) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
 where
-	T: Dyn,
+	T: Dyn + Typing,
 {
+	// First ,we translate the map into two vectors:
+
+	// We need to translate the map to learn it, not only because of simplycity, but
+	// also because it's faster.
+
+	let TKeys = translate(&map.keys);
+	let VKeys = translate(&map.values);
 
 	return (Vec::new(), Vec::new(), Vec::new());
 }

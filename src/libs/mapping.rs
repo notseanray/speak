@@ -112,29 +112,45 @@ where
 /// # Dyn
 /// This trait is used to implement the DynMap.
 pub trait Dyn {
-	// Being that integer 255 (0b11111110) for a Literal, 240 (0b11110000) is the
-	// code for a &Literal and 0 (0b0) is the code for an usize.
-	fn _type() -> u8;
+	// Being that integer 255 (0b11111110) for a &str and 0 (0b0) is the code for an usize.
+
+	fn _type(&self) -> bool;
 }
 
 impl Dyn for &str {
 	#[inline]
-	fn _type() -> u8 {
-		255 // 0b11111110
-	}
-}
-
-impl Dyn for String {
-	#[inline]
-	fn _type() -> u8 {
-		240 // 0b11110000
+	fn _type(&self) -> bool {
+		true
 	}
 }
 
 impl Dyn for usize {
 	#[inline]
-	fn _type() -> u8 {
-		0 // 0b0
+	fn _type(&self) -> bool {
+		false
+	}
+}
+
+pub trait Typing {
+	fn usize(&self) -> usize;
+	fn str(&self) -> &str;
+}
+
+impl Typing for &str {
+	fn usize(&self) -> usize {
+		panic!("This is a string, not an usize.");
+	}
+	fn str(&self) -> &str {
+		self
+	}
+}
+
+impl Typing for usize {
+	fn usize(&self) -> usize {
+		*self
+	}
+	fn str(&self) -> &str {
+		panic!("This is an usize, not a string.");
 	}
 }
 
