@@ -599,6 +599,8 @@ where
 	return mega;
 }
 
+#[inline]
+#[must_use = "The run function is very expensive!"]
 pub fn run<T>(
 	input: &str,
 	map: DynMap<T>,
@@ -616,6 +618,7 @@ where
 		(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
 			input,
 			learnt,
+			map,
 			mem,
 			threshold,
 			output_length,
@@ -623,7 +626,7 @@ where
 		),
 		(Some(mem), Some(threshold), Some(output_length), None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			threshold,
 			output_length,
@@ -631,7 +634,7 @@ where
 		),
 		(Some(mem), Some(threshold), None, Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -639,7 +642,7 @@ where
 		),
 		(Some(mem), Some(threshold), None, None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -647,7 +650,7 @@ where
 		),
 		(Some(mem), None, Some(output_length), Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -655,7 +658,7 @@ where
 		),
 		(Some(mem), None, Some(output_length), None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -663,7 +666,7 @@ where
 		),
 		(Some(mem), None, None, Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -671,7 +674,7 @@ where
 		),
 		(Some(mem), None, None, None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			mem,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -679,7 +682,7 @@ where
 		),
 		(None, Some(threshold), Some(output_length), Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			threshold,
 			output_length,
@@ -687,7 +690,7 @@ where
 		),
 		(None, Some(threshold), Some(output_length), None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			threshold,
 			output_length,
@@ -695,7 +698,7 @@ where
 		),
 		(None, Some(threshold), None, Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -703,7 +706,7 @@ where
 		),
 		(None, Some(threshold), None, None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -711,7 +714,7 @@ where
 		),
 		(None, None, Some(output_length), Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -719,7 +722,7 @@ where
 		),
 		(None, None, Some(output_length), None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -727,7 +730,7 @@ where
 		),
 		(None, None, None, Some(range)) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -735,7 +738,7 @@ where
 		),
 		(None, None, None, None) => _run(
 			input,
-			learnt,
+			learnt, map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -743,15 +746,18 @@ where
 		),
 	}
 }
-fn _run<'a>(
+
+#[must_use = "The run function is very expensive!"]
+fn _run<'a, T>(
 	rawinput: &str,
 	learnt: &Vec<Vec<f32>>,
+	map: DynMap<T>,
 	MEMORY: usize,
 	THRESHOLD: f32,
 	MAX_OUTPUT_LENGTH: usize,
 	RANGE: usize,
-) -> String {
-	return String::new();
+) -> String where T: Dyn {
+	String::new()
 }
 
 use rand::Rng;
