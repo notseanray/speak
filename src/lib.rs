@@ -435,7 +435,7 @@ where
 	}
 }
 
-#[must_use = "The run function is very expensive!"]
+#[must_use = "The run function is expensive, you can't waste it like that!"]
 fn _run<'a, T>(
 	rawinput: &str,
 	learnt: &Vec<Vec<f32>>,
@@ -512,15 +512,6 @@ fn _run<'a, T>(
 
 				subphrases += 1;
 
-				/*
-				I cannot convert &RMap[BestMatch_unwrap.1]
-				.split_whitespace()
-				.collect::<Vec<&str>>()
-				.into_chunks(MEMORY)
-				.base
-
-				into a variable, I tried with a lots of things.
-				*/
 				if BestMatch_unwrap.2
 					== take_to_root(&RMap, BestMatch_unwrap.1)
 						.split_whitespace()
