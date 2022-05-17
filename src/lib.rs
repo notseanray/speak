@@ -164,7 +164,7 @@ fn translate<'a, T: Dyn>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 					ram.push(sum);
 				}
 				ram.clone()
-			},
+			}
 			true => {
 				let mut ram: Vec<usize> = Vec::new();
 				for word in element.str().split_whitespace() {
@@ -177,19 +177,9 @@ fn translate<'a, T: Dyn>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 
 				ram.clone()
 			}
-		})
+		});
 	}
 	return Vec::new();
-}
-
-fn translate_string(string: &str) -> Vec<u32> {
-	let mut vec = Vec::new();
-	for word in string.split_whitespace() {
-		for character in word.chars() {
-			vec.push(character as u32);
-		}
-	}
-	return vec;
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>,
@@ -568,10 +558,8 @@ pub mod traditional {
 // ────────────────────────────────────────────────────────────────
 //
 
-pub fn learn<T>(
-	map: &DynMap<T>,
-	memory: Option<usize>,
-) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
+#[inline]
+pub fn learn<T>(map: &DynMap<T>, memory: Option<usize>) -> Vec<Vec<f32>>
 where
 	T: Dyn,
 {
@@ -581,7 +569,7 @@ where
 	}
 }
 
-fn _train<T>(map: &DynMap<T>, MEMORY: usize) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
+fn _train<T>(map: &DynMap<T>, MEMORY: usize) -> Vec<Vec<f32>>
 where
 	T: Dyn,
 {
@@ -591,9 +579,179 @@ where
 	// also because it's faster.
 
 	let TKeys = translate(&map.keys);
-	let VKeys = translate(&map.values);
+	let TValues = translate(&map.values);
 
-	return (Vec::new(), Vec::new(), Vec::new());
+	let mut mega: Vec<Vec<f32>> = Vec::new();
+	let mut ram: Vec<f32> = Vec::new();
+
+	for (key, value) in TKeys.iter().zip(TValues) {
+		for keyChunk in key.into_chunks(MEMORY).base {
+			for valueChunk in value.into_chunks(MEMORY).base {
+				ram.push(
+					keyChunk.iter().sum::<u32>() as f32 / valueChunk.iter().sum::<u32>() as f32,
+				);
+			}
+		}
+		mega.push(ram.clone());
+		ram.clear();
+	}
+
+	return mega;
+}
+
+pub fn run<T>(
+	input: &str,
+	map: DynMap<T>,
+	learnt: &Vec<Vec<f32>>,
+	MEMORY: Option<usize>,
+	THRESHOLD: Option<f32>,
+	MAX_OUTPUT_LENGTH: Option<usize>,
+	RANGE: Option<usize>,
+) -> String
+where
+	T: Dyn,
+{
+
+	match (MEMORY, THRESHOLD, MAX_OUTPUT_LENGTH, RANGE) {
+		(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
+			input,
+			learnt,
+			mem,
+			threshold,
+			output_length,
+			range,
+		),
+		(Some(mem), Some(threshold), Some(output_length), None) => _run(
+			input,
+			learnt,
+			mem,
+			threshold,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(Some(mem), Some(threshold), None, Some(range)) => _run(
+			input,
+			learnt,
+			mem,
+			threshold,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			range,
+		),
+		(Some(mem), Some(threshold), None, None) => _run(
+			input,
+			learnt,
+			mem,
+			threshold,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+		(Some(mem), None, Some(output_length), Some(range)) => _run(
+			input,
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			output_length,
+			range,
+		),
+		(Some(mem), None, Some(output_length), None) => _run(
+			input,
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(Some(mem), None, None, Some(range)) => _run(
+			input,
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			range,
+		),
+		(Some(mem), None, None, None) => _run(
+			input,
+			learnt,
+			mem,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+		(None, Some(threshold), Some(output_length), Some(range)) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			output_length,
+			range,
+		),
+		(None, Some(threshold), Some(output_length), None) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(None, Some(threshold), None, Some(range)) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			range,
+		),
+		(None, Some(threshold), None, None) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			threshold,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+		(None, None, Some(output_length), Some(range)) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			output_length,
+			range,
+		),
+		(None, None, Some(output_length), None) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			output_length,
+			DEFAULT_RANGE,
+		),
+		(None, None, None, Some(range)) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			range,
+		),
+		(None, None, None, None) => _run(
+			input,
+			learnt,
+			DEFAULT_MEMORY,
+			DEFAULT_THRESHOLD,
+			DEFAULT_MAX_OUTPUT_LENGTH,
+			DEFAULT_RANGE,
+		),
+	}
+}
+fn _run<'a>(
+	rawinput: &str,
+	learnt: &Vec<Vec<f32>>,
+	MEMORY: usize,
+	THRESHOLD: f32,
+	MAX_OUTPUT_LENGTH: usize,
+	RANGE: usize,
+) -> String {
+	return String::new();
 }
 
 use rand::Rng;

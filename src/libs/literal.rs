@@ -1,31 +1,17 @@
-pub trait Literal<T> {
-	#[must_use]
-	fn literal(&self) -> T;
+use crate::Dyn;
+pub trait Literal {
+	fn literal(&self) -> Option<&str>;
 }
 
-impl Literal<String> for String {
-	#[must_use]
-	fn literal(&self) -> String {
-		self.to_owned()
+impl<T> Literal for T where T: Dyn {
+	fn literal(&self) -> Option<&str> {
+		match self.isstr() {
+			true => Some(self.str()),
+			false => None
+		}
 	}
 }
 
-impl Literal<String> for &str {
-	#[must_use]
-	fn literal(&self) -> String {
-		self.to_string()
-	}
-}
-
-// This trait only accepts &str, but I have to use generics because of the main
-// functions that uses generics.
-
-impl<T> Literal<Vec<String>> for Vec<T>
-where
-	T: ToString,
-{
-	#[must_use]
-	fn literal(&self) -> Vec<String> {
-		self.iter().map(|s| s.to_string()).collect()
-	}
+pub(crate) fn literal_vec<'a, T>(vec: &'a Vec<T>) -> Vec<Option<&'a str>> where T: Literal + 'a {
+	vec.into_iter().map(|x| x.literal()).collect()
 }
