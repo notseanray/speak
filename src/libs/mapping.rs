@@ -1,6 +1,3 @@
-use crate::Literal;
-use std::fmt;
-
 //
 // ──────────────────────────────────────────────────────── I ──────────
 //   :::::: F E A T U R E S : :  :   :    :     :        :          :
@@ -9,7 +6,6 @@ use std::fmt;
 
 #[cfg(feature = "easy_panic")]
 use colored::Colorize;
-use rand::prelude::IteratorRandom;
 
 #[cfg(feature = "easy_panic")]
 #[macro_use]
@@ -154,6 +150,14 @@ impl Typing for usize {
 #[doc(hidden)]
 pub trait IsStr {
 	fn isstr(&self) -> bool;
+}
+
+// This function sees if the index takes to an usize, in that case, it calls itself again
+pub(crate) fn take_to_root<'a, T: Dyn +'a>(vec: &'a Vec<T>, index: usize) -> &'a str {
+	match vec[index].isstr() {
+		false => take_to_root(vec, vec[index].usize()),
+		true => vec[index].str(),
+	}
 }
 
 /*

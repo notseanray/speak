@@ -216,7 +216,6 @@ macro_rules! debug_mode {
 	($command: expr, String) => {};
 }
 
-#[cfg(feature = "randomness")]
 macro_rules! check_for_random {
 	($i: expr, $range: expr) => {
 		if rand::thread_rng().gen_range(
@@ -234,323 +233,12 @@ macro_rules! check_for_random {
 	};
 }
 
-#[cfg(not(feature = "randomness"))]
-macro_rules! check_for_random {
-	($i: expr, $range: expr) => {};
-}
-
 //
 // ────────────────────────────────────────────────────────────────── I
 // ──────────   :::::: M A I N   F U N C T I O N S : :  :   :    :     :
 // :          :
 // ────────────────────────────────────────────────────────────────────────────
 //
-
-//
-// ────────────────────────────────────────────────── I ──────────
-//   :::::: L E A R N : :  :   :    :     :        :          :
-// ────────────────────────────────────────────────────────────
-//
-
-#[cfg(feature = "notvisible")]
-pub mod traditional {
-	use super::*;
-	pub fn learn<'a, T: Literal<String> + ToString>(
-		map: &'a Map<T>,
-		memory: Option<usize>,
-	) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
-		match memory {
-			Some(mem) => _train(map, mem),
-			None => _train(map, DEFAULT_MEMORY),
-		}
-	}
-
-	fn _train<'a, T: Literal<String> + ToString>(
-		map: &'a Map<T>,
-		MEMORY: usize,
-	) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>) {
-		// Create a translated map
-
-		let translated_map: Map<Vec<u32>> = Map::<Vec<u32>> {
-			keys: translate(&map.keys),
-			values: translate(&map.values),
-		};
-
-		let mut mega: Vec<Vec<f32>> = Vec::new();
-		let mut ram: Vec<f32> = Vec::new();
-		for (key, value) in translated_map.keys.iter().zip(translated_map.values.iter()) {
-			for keyChunk in key.into_chunks(MEMORY).base {
-				for valueChunk in value.into_chunks(MEMORY).base {
-					ram.push(
-						keyChunk.iter().sum::<u32>() as f32 / valueChunk.iter().sum::<u32>() as f32,
-					);
-				}
-			}
-			mega.push(ram.clone());
-			ram.clear();
-		}
-		// println!("{:#?}", map[2]);
-		debug_mode!("learn::mega -> {:#?}\n---------------------------\n", mega);
-		return (mega, translated_map.values, map.values.literal());
-	}
-
-	pub fn run<'a, T: Literal<String>>(
-		rawinput: T,
-		learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
-		MEMORY: Option<usize>,
-		THRESHOLD: Option<f32>,
-		MAX_OUTPUT_LENGTH: Option<usize>,
-		RANGE: Option<usize>,
-	) -> String {
-		// * I know, this function is a mess, I cannot do nothing to help that, sorry,
-		// * this is what happens when you use 4 different variables, that you get 4^2
-		// * different things to check.
-
-		match (MEMORY, THRESHOLD, MAX_OUTPUT_LENGTH, RANGE) {
-			(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				threshold,
-				output_length,
-				range,
-			),
-			(Some(mem), Some(threshold), Some(output_length), None) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				threshold,
-				output_length,
-				DEFAULT_RANGE,
-			),
-			(Some(mem), Some(threshold), None, Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				threshold,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				range,
-			),
-			(Some(mem), Some(threshold), None, None) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				threshold,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				DEFAULT_RANGE,
-			),
-			(Some(mem), None, Some(output_length), Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				DEFAULT_THRESHOLD,
-				output_length,
-				range,
-			),
-			(Some(mem), None, Some(output_length), None) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				DEFAULT_THRESHOLD,
-				output_length,
-				DEFAULT_RANGE,
-			),
-			(Some(mem), None, None, Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				DEFAULT_THRESHOLD,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				range,
-			),
-			(Some(mem), None, None, None) => _run(
-				rawinput.literal(),
-				learnt,
-				mem,
-				DEFAULT_THRESHOLD,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				DEFAULT_RANGE,
-			),
-			(None, Some(threshold), Some(output_length), Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				threshold,
-				output_length,
-				range,
-			),
-			(None, Some(threshold), Some(output_length), None) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				threshold,
-				output_length,
-				DEFAULT_RANGE,
-			),
-			(None, Some(threshold), None, Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				threshold,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				range,
-			),
-			(None, Some(threshold), None, None) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				threshold,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				DEFAULT_RANGE,
-			),
-			(None, None, Some(output_length), Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				DEFAULT_THRESHOLD,
-				output_length,
-				range,
-			),
-			(None, None, Some(output_length), None) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				DEFAULT_THRESHOLD,
-				output_length,
-				DEFAULT_RANGE,
-			),
-			(None, None, None, Some(range)) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				DEFAULT_THRESHOLD,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				range,
-			),
-			(None, None, None, None) => _run(
-				rawinput.literal(),
-				learnt,
-				DEFAULT_MEMORY,
-				DEFAULT_THRESHOLD,
-				DEFAULT_MAX_OUTPUT_LENGTH,
-				DEFAULT_RANGE,
-			),
-		}
-	}
-
-	// Please don't try to understand this, it's just pain, I know
-
-	fn _run<'a>(
-		rawinput: String,
-		learnt: &(Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>),
-		MEMORY: usize,
-		THRESHOLD: f32,
-		MAX_OUTPUT_LENGTH: usize,
-		RANGE: usize,
-	) -> String {
-		let mut input: Vec<u32> = Vec::new();
-		let mut sum: u32;
-
-		for word in rawinput.split_whitespace() {
-			sum = 0;
-			for c in word.chars() {
-				sum += c as u32;
-			}
-			input.push(((sum << 1) + 1) << 1 + 1);
-		}
-
-		let mut result: String = String::new();
-
-		// Raw Map
-		let RMap: &Vec<String> = &learnt.2;
-
-		// Translated Map
-		let TMap: &Vec<Vec<u32>> = &learnt.1;
-
-		// Mega Vec
-		let Mega: &Vec<Vec<f32>> = &learnt.0;
-
-		let mut subphrases: usize = 0;
-		let mut calculation: f32;
-		let mut BestMatch: Option<(f32, usize, usize)> = None;
-		let mut BestMatch_unwrap: (f32, usize, usize);
-		// For each word
-		for IChunk in input.into_chunks(MEMORY).base {
-			debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
-			for (i, value) in TMap.iter().enumerate() {
-				// Let's see if we are going to use this phrase
-				check_for_random!(i, RANGE);
-				debug_mode!("I = {}: V = {:?}", i, value);
-				for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
-					debug_mode!("{}: VC -> {:?}", j, VChunk);
-					for MVec in Mega {
-						debug_mode!("MV -> {:?}", MVec);
-						for MChunk in MVec.into_chunks(MEMORY).base {
-							calculation = calculation!(MChunk, IChunk, VChunk);
-							if calculation < THRESHOLD {
-								if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
-									BestMatch = Some((calculation, i, j));
-									debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
-									debug_mode!("@@@@@@@@@@@@@",);
-									debug_mode!(
-										"{} :: {:?}",
-										BestMatch.unwrap().0,
-										RMap[BestMatch.unwrap().1]
-									);
-								};
-							};
-						}
-					}
-				}
-			}
-
-			if BestMatch != None {
-				// Ok, i is the vector of the value and j is the vector of the chunk. So we have
-				// to recover the value from just two numbers.
-
-				BestMatch_unwrap = BestMatch.unwrap();
-				result.push_str(
-					&RMap[BestMatch_unwrap.1]
-						.split_whitespace()
-						.collect::<Vec<&str>>()
-						.into_chunks(MEMORY)
-						.base[BestMatch_unwrap.2]
-						.join(" "),
-				);
-
-				subphrases += 1;
-
-				/*
-				I cannot convert &RMap[BestMatch_unwrap.1]
-				.split_whitespace()
-				.collect::<Vec<&str>>()
-				.into_chunks(MEMORY)
-				.base
-
-				into a variable, I tried with a lots of things.
-				*/
-				if BestMatch_unwrap.2
-					== &RMap[BestMatch_unwrap.1]
-						.split_whitespace()
-						.collect::<Vec<&str>>()
-						.into_chunks(MEMORY)
-						.base
-						.len() - 1
-				{
-					if subphrases > MAX_OUTPUT_LENGTH {}
-					result.push('.');
-				}
-			};
-		}
-		return result;
-	}
-}
-
-// 🦀
-
-// Before declaring the Dynamic module, let's create a little function, so, if
-// the user disables the `dynamic` feature, but not explicitly enables the
-// `traditional` feature, the only function it was use is the `help` function.
 
 //
 // ────────────────────────────────────────────────────── I ──────────
@@ -757,7 +445,96 @@ fn _run<'a, T>(
 	MAX_OUTPUT_LENGTH: usize,
 	RANGE: usize,
 ) -> String where T: Dyn {
-	String::new()
+	let mut input: Vec<u32> = Vec::new();
+		let mut sum: u32;
+
+		for word in rawinput.split_whitespace() {
+			sum = 0;
+			for c in word.chars() {
+				sum += c as u32;
+			}
+			input.push(((sum << 1) + 1) << 1 + 1);
+		}
+
+		let mut result: String = String::new();
+		let Mega = learnt;
+		let TMap = translate(&map.values);
+		let RMap = map.values;
+
+
+		let mut subphrases: usize = 0;
+		let mut calculation: f32;
+		let mut BestMatch: Option<(f32, usize, usize)> = None;
+		let mut BestMatch_unwrap: (f32, usize, usize);
+		// For each word
+		for IChunk in input.into_chunks(MEMORY).base {
+			debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
+			for (i, value) in TMap.iter().enumerate() {
+				// Let's see if we are going to use this phrase
+				check_for_random!(i, RANGE);
+				debug_mode!("I = {}: V = {:?}", i, value);
+				for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
+					debug_mode!("{}: VC -> {:?}", j, VChunk);
+					for MVec in Mega {
+						debug_mode!("MV -> {:?}", MVec);
+						for MChunk in MVec.into_chunks(MEMORY).base {
+							calculation = calculation!(MChunk, IChunk, VChunk);
+							if calculation < THRESHOLD {
+								if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
+									BestMatch = Some((calculation, i, j));
+									debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
+									debug_mode!("@@@@@@@@@@@@@",);
+									debug_mode!(
+										"{} :: {:?}",
+										BestMatch.unwrap().0,
+										take_to_root(&RMap, BestMatch.unwrap().1)
+									);
+								};
+							};
+						}
+					}
+				}
+			}
+
+			if BestMatch != None {
+				// Ok, i is the vector of the value and j is the vector of the chunk. So we have
+				// to recover the value from just two numbers.
+
+				BestMatch_unwrap = BestMatch.unwrap();
+				result.push_str(
+						&take_to_root(&RMap, BestMatch_unwrap.1)
+						.split_whitespace()
+						.collect::<Vec<&str>>()
+						.into_chunks(MEMORY)
+						.base[BestMatch_unwrap.2]
+						.join(" "),
+				);
+
+				subphrases += 1;
+
+				/*
+				I cannot convert &RMap[BestMatch_unwrap.1]
+				.split_whitespace()
+				.collect::<Vec<&str>>()
+				.into_chunks(MEMORY)
+				.base
+
+				into a variable, I tried with a lots of things.
+				*/
+				if BestMatch_unwrap.2
+					== take_to_root(&RMap, BestMatch_unwrap.1)
+						.split_whitespace()
+						.collect::<Vec<&str>>()
+						.into_chunks(MEMORY)
+						.base
+						.len() - 1
+				{
+					if subphrases > MAX_OUTPUT_LENGTH {}
+					result.push('.');
+				}
+			};
+		}
+		return result;
 }
 
 use rand::Rng;

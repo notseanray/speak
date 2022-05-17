@@ -11,7 +11,3 @@ impl<T> Literal for T where T: Dyn {
 		}
 	}
 }
-
-pub(crate) fn literal_vec<'a, T>(vec: &'a Vec<T>) -> Vec<Option<&'a str>> where T: Literal + 'a {
-	vec.into_iter().map(|x| x.literal()).collect()
-}
