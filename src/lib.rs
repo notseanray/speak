@@ -150,10 +150,10 @@ pub const DEFAULT_RANGE: usize = 3;
 // $$
 
 #[inline]
-fn translate<'a, T: Dyn + Typing>(vec: &Vec<T>) -> Vec<Vec<u32>> {
+fn translate<'a, T: Dyn>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 	let mut result: Vec<Vec<usize>> = Vec::new();
 	for element in vec {
-		result.push(match element._type() {
+		result.push(match element.isstr() {
 			false => {
 				let mut ram: Vec<usize> = Vec::new();
 				for word in vec[element.usize()].str().split_whitespace() {
@@ -573,7 +573,7 @@ pub fn learn<T>(
 	memory: Option<usize>,
 ) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
 where
-	T: Dyn + Typing,
+	T: Dyn,
 {
 	match memory {
 		Some(mem) => _train(map, mem),
@@ -583,7 +583,7 @@ where
 
 fn _train<T>(map: &DynMap<T>, MEMORY: usize) -> (Vec<Vec<f32>>, Vec<Vec<u32>>, Vec<String>)
 where
-	T: Dyn + Typing,
+	T: Dyn,
 {
 	// First ,we translate the map into two vectors:
 
