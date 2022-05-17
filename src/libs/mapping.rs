@@ -1,74 +1,208 @@
-#[cfg(feature = "debug")]
-use colored::Colorize;
-
-use crate::Literal;
-
-#[cfg(feature = "debug")]
-macro_rules! debug_mode {
-	($command: expr, $($args: expr), *) => {
-		println!("{}", format!($command, $($args), *).bright_yellow());
-	};
-	($command: expr, String) => {};
-}
-
-#[cfg(not(feature = "debug"))]
-macro_rules! debug_mode {
-	($command: expr, $($args: expr), *) => {};
-	($command: expr, String) => {};
-}
+//
+// ──────────────────────────────────────────────────────── I ──────────
+//   :::::: F E A T U R E S : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────
+//
 
 #[cfg(feature = "easy_panic")]
+use colored::Colorize;
+
+#[cfg(feature = "easy_panic")]
+#[macro_use]
 macro_rules! easy_panic {
 	() => {
-		panic!("(Easy panic) Error message should be included in 'debug' mode, else, you can activate RUST_BACKTRACE=1 to see the backtrace.");
+		panic!("Easy Panic: The panic message should be in the debug information.");
+	};
+
+	($($arg:tt)*) => {
+		panic!("Easy Panic: ", $($arg)*);
 	};
 }
 
 #[cfg(not(feature = "easy_panic"))]
+#[macro_export]
 macro_rules! easy_panic {
 	() => {};
-	($u: expr) => {
-		return;
-	};
+	($($arg:tt)*) => {};
 }
 
-/// # Map<T>
-/// A map is a collection of key-value pairs, you can compare it to a hashmap or a dictionary, you can form a Map<T> with the `new()` function, or from a vector of tuples with the `from(...)` function.
-/// ## Example
-/// ```rust
-/// use mapping::Map;
-/// let mut map = Map::new();
-/// 
-/// // Let's add some values.
-/// map.push("key", "value");
-/// map.push("key2", "value2");
-/// map.push("key3", "value3");
+//
+// ──────────────────────────────────────────────────────────────── I ──────────
+//   :::::: D Y N A M I C   M A P S : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────────────────────
+//
+
+// Dynamic maps are more complex than static maps
+
+/// # DynMap
+/// A Dynamic Map is a list of key-value pairs (Like a `HashMap` or a
+/// Dictionary), but it is not limited to that, it can be any type that has the
+/// `Dyn` trait implemented, even in the same map.
 ///
-/// Now, let's clear the map.
+/// These types are:
+/// - `String`
+/// - `&str`
+/// - `usize`
+///
+/// So, it can contain a String, a reference to a String or an usize, being that
+/// usize the index of the value you want to get. Take this example about this
+/// dynamism:
+///
+/// ```text
+/// +---------------------+      +-------------------+
+/// |H|E|L|L|O| |W|O|R|L|D+----->+H|O|L|A| |M|U|N|D|O| <----+ Explicit String
+/// +--------+------------+      +-------------------+
+/// 							  ^ Points to:
+/// +--------+--------+          +------------------+
+/// |F|O|O| |&| |B|A|R+--------->+0x0a595bdc55bf2627|  <----+ Address pointing to String
+/// +-----------------+          +------------------+
+///
+/// +---------------------+      +-+
+/// |L|O|R|E|M| |I|P|S|U|M+----->+0|                   <----+ Index pointing to
+/// +---------------------+      +-+                          the first element
 /// ```
-/// 
-/// You can also make a Map<T> from a vector of tuples.
+///
+/// ## Ranking system
+/// The ranking system is the way that maps use to encourage or discourage
+/// certain strings (or indexes). The way it works is by only analyzing some
+/// indexes, indeed, it only analyzes the index if a random number is higher
+/// than the ranking of the index. (So it's very hard to analyze the index 1000
+/// but easy to analyze the index 10).
+///
+/// Also, you can modify the `RANGE` variable to guarantee a certain number of
+/// strings read, when using the main functions.
+///
+/// +---------+
+/// |         |
+/// | Entry 1 |
+/// |         | <----+ These ones are in range
+/// | Entry 2 |
+/// |         |
+/// +---------+
+///
+/// +---------+
+/// |         |
+/// | Entry 3 |
+/// |         |
+/// | Entry 4 |        All these are selected "randomly"
+/// |         | <----+ taking into account their index
+/// | Entry 5 |        number after n (Example: Index 3
+/// |         |        - n is Index 1).
+/// | Entry 6 |
+/// |         |
+/// +---------+
+///
+/// ## Example:
 /// ```rust
-/// use mapping::Map;
-/// let mut map = Map::from(vec![("key", "value"), ("key2", "value2"), ("key3", "value3")]);
+/// use speak::DynMap;
+/// let mut map = DynMap::new();
 /// ```
-pub struct Map<T> {
-	pub(crate) keys: Vec<T>,
-	pub(crate) values: Vec<T>,
+pub struct DynMap<T>
+where
+	T: Dyn,
+{
+	pub keys: Vec<T>,
+	pub values: Vec<T>,
 }
 
+/// # Dyn
+/// This trait is used to implement the DynMap.
+pub trait Dyn: IsStr + Typing {
+}
+
+impl IsStr for &str {
+	#[inline]
+	fn isstr(&self) -> bool {
+		true
+	}
+}
+
+impl IsStr for usize {
+	#[inline]
+	fn isstr(&self) -> bool {
+		false
+	}
+}
+
+pub trait Typing {
+	fn usize(&self) -> usize;
+	fn str(&self) -> &str;
+}
+
+impl Typing for &str {
+	fn usize(&self) -> usize {
+		panic!("This is a string, not an usize.");
+	}
+	fn str(&self) -> &str {
+		self
+	}
+}
+
+impl Typing for usize {
+	fn usize(&self) -> usize {
+		*self
+	}
+	fn str(&self) -> &str {
+		panic!("This is an usize, not a string.");
+	}
+}
+
+#[doc(hidden)]
+pub trait IsStr {
+	fn isstr(&self) -> bool;
+}
+
+// This function sees if the index takes to an usize, in that case, it calls itself again
+pub(crate) fn take_to_root<'a, T: Dyn +'a>(vec: &'a Vec<T>, index: usize) -> &'a str {
+	match vec[index].isstr() {
+		false => take_to_root(vec, vec[index].usize()),
+		true => vec[index].str(),
+	}
+}
+
+/*
+
++---------------------+      +-------------------+
+|H|E|L|L|O| |W|O|R|L|D+----->+H|O|L|A| |M|U|N|D|O| <----+ Explicit String
++---------------------+      ++------------------+
+							  ^ Points to:
++-----------------+          ++-----------------+
+|F|O|O| |&| |B|A|R+--------->+0x0a595bdc55bf2627|  <----+ Address pointing to String
++-----------------+          +------------------+
+
++---------------------+      +-+
+|L|O|R|E|M| |I|P|S|U|M+----->+0|                   <----+ Index pointing to the first element
++---------------------+      +-+
+
+*/
+
+// This is how a dynamic map is used. While the normal map just accepts
+// Strings the dynamic map accepts all types that implement the `Dyn`
+// trait. This means that the map can be used to store various types, even in
+// the same map, the map can store:
+//
+// - Strings
+// - References to Strings.
+// - Indexes to strings (numbers, being Usize)
+
+// Adding references to an usize is not necessary, because a reference is just a
+// number, so it would be the double of the size of a number.
+
+// * Ok, now we can start with the main implementations
+
+// I cannot implement this.
+#[inline]
 fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 	let tmp = vec.remove(idx);
 	vec.insert(to, tmp);
 }
 
-impl<'a, T> Map<T> where T: Literal<String> {
-	/// Creates a new map.
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// ```
+impl<T> DynMap<T>
+where
+	T: Dyn,
+	Vec<T>: Copy,
+{
+	#[inline]
 	pub fn new() -> Self {
 		Self {
 			keys: Vec::new(),
@@ -76,147 +210,224 @@ impl<'a, T> Map<T> where T: Literal<String> {
 		}
 	}
 
-	/// Adds a new key-value pair to the map.
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// map.insert("key", "value");
-	/// ```
-	pub fn insert(&mut self, key: T, value: T, index: usize) {
-		self.keys.insert(index, key);
-		self.values.insert(index, value);
+	#[inline]
+	pub fn push(&mut self, to_insert: (T, T)) {
+		self.keys.push(to_insert.0);
+		self.values.push(to_insert.1);
 	}
 
-	/// Pushes a new key-value pair to the end of the map, you can compare the `push` method with a `push` method in a `Vec`.
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// map.push("key", "value");
-	/// ```
-	pub fn push(&mut self, key: T, value: T) {
-		self.keys.push(key);
-		self.values.push(value);
+	#[inline]
+	pub fn insert(&mut self, to_insert: (T, T), index: usize) {
+		self.keys.insert(index, to_insert.0);
+		self.values.insert(index, to_insert.1);
 	}
 
-	/// Clears the map completely.
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	///
-	/// // We add some key-value pairs.
-	/// map.push("key", "value");
-	/// map.push("key2", "value2");
-	///
-	/// // Now we clear the map.
-	/// map.clear();
-	/// ```
+	#[inline]
 	pub fn clear(&mut self) {
 		self.keys.clear();
 		self.values.clear();
 	}
 
-	/// Returns an Iterator<Item = (&T, &T)> to iterate over a map behaving like an iterator of tuples.
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// map.push("key", "value");
-	/// map.push("key2", "value2");
-	/// for (key, value) in map.iter() {
-	/// 	println!("{}", key);
-	/// 	println!("{}", value);
-	/// }
-	/// ```
-	pub fn iter(&self) -> impl Iterator<Item = (&T, &T)> {
-		self.keys.iter().zip(self.values.iter())
+	#[inline]
+	pub fn pop(&mut self) -> (Option<T>, Option<T>) {
+		(self.keys.pop(), self.values.pop())
 	}
 
-
-	/// Encourages some keys more than others, so you can value better *expected output* and disencourage bad *expected output*. It takes an index of the key you want to encourage and how much you want to encourage it, ***take into account that the "how much?" number must not be greater than the index of the key you want to encourage!***
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// map.push("key", "value");
-	/// map.push("key2", "value2");
-	/// map.push("key3", "value3");
-	/// map.push("key4", "value4");
-	/// map.encourage(2, 1);
-	/// ```
-	pub fn encourage(&mut self, idx: usize, how_much: usize) {
-		let klen = self.keys.len();
-		if idx >= klen {
-			debug_mode!("Index of key to encourage or index + how_much to encourage is out of bounds: {} + {}, length is {}", idx, how_much, klen);
-			easy_panic!(());
-		};
-		// If it underflows, it will be 0
-		if idx - how_much >= klen {
-			debug_mode!("(Key will be moved to the first rank, the program will continue) Index to search - how_much is out of bounds: {} - {}, length is {}", idx, how_much, klen);
-			move_index(self.keys.as_mut(), idx, 0);
-		};
-		move_index(&mut self.keys, idx, idx - how_much);
-		move_index(&mut self.values, idx, idx - how_much);
+	#[inline]
+	pub fn remove(&mut self, index: usize) -> (T, T) {
+		(self.keys.remove(index), self.values.remove(index))
 	}
 
+	#[inline]
+	pub fn move_tuple(&mut self, index: usize, to: usize) {
+		move_index(&mut self.keys, index, to);
+		move_index(&mut self.values, index, to);
+	}
 
-	/// Encourages a string, instead of an index, if the string doesn't exist in the map, it will panic!(), it takes a string and how much you want to encourage it, ***take into account that the "how much?" number must not be greater than the string you want to encourage!***
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let mut map = Map::new();
-	/// map.push("key", "value");
-	/// map.push("key2", "value2");
-	/// map.push("key3", "value3");
-	/// map.encourage_by_str("key2", 1);
-	pub fn encourage_by_str(&mut self, str_: T, how_much: usize)
+	#[inline]
+	pub fn search_key(&self, key: &T) -> Option<usize>
 	where
-		T: PartialEq<T>,
+		T: PartialEq,
 	{
-		let idx = self.keys.iter().position(|x| *x == str_).unwrap();
-		self.encourage(idx, how_much);
+		self.keys.iter().position(|k| k == key)
 	}
 
-	/// Disencourages some keys more than others, so you can value better *expected output* and disencourage bad *expected output*. It takes an index of the key you want to disencourage and how much you want to disencourage it, ***take into account that the "how much?" number must not be greater than the index of the key you want to disencourage!***
-	pub fn disencourage(&mut self, idx: usize, how_much: usize) {
-		let klen = self.keys.len();
-		if idx >= self.keys.len() {
-			debug_mode!("Index of key to encourage or index + how_much to encourage is out of bounds: {} + {}, length is {}", idx, how_much, self.keys.len());
-			easy_panic!(());
-		};
-
-		if idx + how_much >= klen {
-			debug_mode!("(Key will be moved to the last rank, the program will continue) Index to search + how_much is out of bounds: {} + {}, length is {}", idx, how_much, klen);
-			move_index(self.keys.as_mut(), idx, klen - 1);
-		};
-	}
-
-	/// Disencourages a string, instead of an index, if the string doesn't exist in the map, it will panic!(), it takes a string and how much you want to disencourage it, ***take into account that the "how much?" number must not be greater than the string you want to disencourage!***
-	pub fn disencourage_by_str(&mut self, str_: T, how_much: usize)
+	#[inline]
+	pub fn search_value(&self, value: &T) -> Option<usize>
 	where
-		T: PartialEq<T>,
+		T: PartialEq,
 	{
-		let idx = self.keys.iter().position(|x| *x == str_).unwrap();
-		self.disencourage(idx, how_much);
+		self.values.iter().position(|v| v == value)
+	}
+
+	// Searches for a tuple, being formed by a key-value pair.
+	#[inline]
+	pub fn search_tuple(&self, tuple: (&T, &T)) -> Option<usize>
+	where
+		T: PartialEq,
+	{
+		match self.search_key(tuple.0) {
+			Some(_) => match self.search_value(tuple.1) {
+				Some(idx) => Some(idx),
+				None => None,
+			},
+			None => None,
+		}
+	}
+
+	#[inline]
+	pub fn len(&self) -> usize {
+		self.keys.len()
+	}
+
+	#[inline]
+	pub fn is_empty(&self) -> bool {
+		self.keys.len() == 0
+	}
+
+	//
+	// ────────────────────────────────────────────────────────────────────── I
+	// ──────────   :::::: C O M P L E X   M E T H O D S : :  :   :    :     :
+	// :          :
+	// ────────────────────────────────────────────────────────────────────────────────
+	//
+
+	// Maybe you're wondering "¿How these work?", well, I'm going to explain them:
+	//
+	// Imagine you have a list of 200 strings, and you have to read until the end,
+	// You could read every single one, but that would take a lot of time. So,
+	// thinking about it you come to the conclusion that you can read the most
+	// important ones first, and then you can toss a coin to see if you should read
+	// the next one. That takes the (Time to read * Amount guaranteed to read) +
+	// (Total amount of strings - Amount read) / 2 (If the coin toss is completely
+	// random).
+
+	// Ok, that's very good, now you can read less stings than you thought, but,
+	// what if you can continue? Let's, instead, roll a dice, a magic dice, and for
+	// each time you roll the dice, you add a new side to the dice. So, if you roll
+	// the dice 2 times, the roll has 2 sides, if you roll the dice 3 times, the
+	// roll has 3 sides, and so on.
+
+	// The dice starts with the amount of guaranteed reads, what happens when you
+	// roll the dice? If the roll is less than the amount of guaranteed reads, you
+	// read the next string, otherwise, pass to the next roll. So that the roll no.
+	// 34 is more probable than the roll no. 35, and so on.
+
+	// This is a distribution, that gives us the power to `rank` all the entries,
+	// encouraging some 'good' entries with the probability of being analyzed, and
+	// disencouraging the 'bad' ones with the probability of not being analyzed.
+
+	/*
+
+	+---------+
+	|         |
+	| Entry 1 |
+	|         | <----+ This ones are in range
+	| Entry 2 |
+	|         |
+	+---------+
+
+	+---------+
+	|         |
+	| Entry 3 |
+	|         |
+	| Entry 4 |        All these are selected "randomly"
+	|         | <----+ taking into account their index
+	| Entry 5 |        number after n (Example: Index 3
+	|         |        - n is Index 1).
+	| Entry 6 |
+	|         |
+	+---------+
+
+	*/
+
+	// In this case, encouraging is just the ranking system taking into account, so,
+	// we can encourage a key by ranking it higher.
+	pub fn encourage(&mut self, index: usize, how_much: usize) {
+		if index < how_much || index >= self.keys.len() {
+			easy_panic!("Index out of bounds, make sure that 'how much' is less than the index from which you want to encourage: {} - {} is less than 0 (It underflows) AND make sure that the index is less than the length of the map.", index, how_much);
+		} else {
+			self.move_tuple(index, index - how_much);
+		}
+	}
+
+	#[inline]
+	pub fn encourage_unchecked(&mut self, index: usize, how_much: usize) {
+		self.move_tuple(index, index - how_much);
+	}
+
+	#[inline]
+	pub fn encourage_by_str(&mut self, string: T, how_much: usize)
+	where
+		T: PartialEq,
+	{
+		let idx = self
+			.search_key(&string)
+			.unwrap_or_else(|| panic!("String not found"));
+
+		self.encourage(idx, idx - how_much);
+	}
+
+	pub fn discourage(&mut self, index: usize, how_much: usize) {
+		if index >= self.keys.len() || index + how_much >= self.keys.len() {
+			easy_panic!("Index out of bounds, make sure that index ({}) + how much you want to disencourage ({}) is less than the total length of the map ({})", index, how_much, self.keys.len());
+		};
+		self.move_tuple(index, index + how_much);
+	}
+
+	#[inline]
+	pub fn discourage_unchecked(&mut self, index: usize, how_much: usize) {
+		self.move_tuple(index, index + how_much);
+	}
+
+	#[inline]
+	pub fn discourage_by_str(&mut self, string: T, how_much: usize)
+	where
+		T: PartialEq,
+	{
+		let idx = self
+			.search_key(&string)
+			.unwrap_or_else(|| panic!("String not found"));
+
+		self.discourage(idx, how_much);
+	}
+
+	// fn into_tuples(self) -> Vec<(T, T)> {
+	// 	self.keys
+	// 		.into_iter()
+	// 		.zip(self.values.into_iter())
+	// 		.collect::<Vec<(T, T)>>()
+	// }
+}
+
+// ─── OTHER IMPLEMENTATIONS ──────────────────────────────────────────────────
+
+// From:
+impl<T> From<Vec<(T, T)>> for DynMap<T>
+where
+	T: Dyn,
+	Vec<T>: Copy,
+{
+	fn from(to_insert: Vec<(T, T)>) -> Self {
+		let mut new: Self = Self::new();
+		for (k, v) in to_insert {
+			new.values.push(v);
+			new.keys.push(k);
+		}
+		return new;
 	}
 }
 
-impl<T> From<Vec<(T, T)>> for Map<T> where T: Literal<String> {
-	/// Creates a new map from a vector of `(T, T)`
-	/// # Examples
-	/// ```rust
-	/// use mapping::Map;
-	/// let vec = vec![("key", "value")];
-	/// let map = Map::from(vec);
-	/// ```
-	fn from(what: Vec<(T, T)>) -> Self {
-		let mut map = Self::new();
-		for (key, value) in what {
-			map.keys.push(key);
-			map.values.push(value);
+// Iterator
+impl<T> Iterator for DynMap<T>
+where
+	T: Dyn,
+{
+	type Item = (T, T);
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.keys.len() == 0 {
+			return None;
 		}
-		map
+		Some((self.keys.remove(0), self.values.remove(0)))
 	}
 }
