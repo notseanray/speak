@@ -97,22 +97,25 @@ macro_rules! easy_panic {
 /// use speak::DynMap;
 /// let mut map = DynMap::new();
 /// ```
-pub struct DynMap<'a>
-{
-	pub keys: Vec<&'a DE>,
-	pub values: Vec<&'a DE>,
+
+#[derive(Debug)]
+pub struct DynMap<'a> {
+	pub keys: Vec<&'a str>,
+	pub values: Vec<&'a str>,
 }
 
 #[doc(hidden)]
+#[derive(Debug)]
 pub enum DE {
 	String,
-	Number
+	Number,
 }
 
-trait Dyn {
+pub trait Dyn {
 	fn isstr(&self) -> bool;
 	fn str(&self) -> &str;
 	fn usize(&self) -> usize;
+	fn usize_plus<T>(&self, vec: &Vec<T>) -> &str;
 }
 
 impl Dyn for DE {
@@ -120,23 +123,58 @@ impl Dyn for DE {
 	fn isstr(&self) -> bool {
 		match self {
 			DE::String => true,
-			DE::Number => false
+			DE::Number => false,
 		}
 	}
 
 	#[inline]
 	fn str(&self) -> &str {
-		match self {
-			DE::String => self,
-			DE::Number => panic!("This is not a string!")
-		}
+		self.confirm_string()
 	}
 
 	#[inline]
 	fn usize(&self) -> usize {
+		self.confirm_usize()
+	}
+
+	#[inline]
+	fn usize_plus<T>(&self, vec: &Vec<T>) -> &str {
+		self.confirm_usize_plus(vec)
+	}
+}
+
+pub(crate) trait ToUsize {
+	fn confirm_usize(&self) -> usize;
+	fn confirm_usize_plus<T>(&self, vec: &Vec<T>) -> &str;
+}
+impl ToUsize for DE {
+	#[inline]
+	fn confirm_usize(&self) -> usize {
 		match self {
 			DE::String => panic!("This is not a number!"),
-			DE::Number => self
+			DE::Number => self.usize(),
+		}
+	}
+
+	#[inline]
+	fn confirm_usize_plus<T>(&self, vec: &Vec<T>) -> &str {
+		match self {
+			DE::String => panic!("This is not a number!"),
+			DE::Number => self.str(),
+		}
+	}
+}
+
+pub trait ToString {
+	fn confirm_string(&self) -> &str;
+}
+
+impl ToString for DE {
+	#[inline]
+	fn confirm_string(&self) -> &str {
+		match self {
+			DE::String => self.str(),
+			DE::Number => panic!("This is not a string!"),
 		}
 	}
 }
@@ -187,8 +225,42 @@ fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 	vec.insert(to, tmp);
 }
 
-impl<'a> DynMap<'a>
-{
+macro_rules! is_str {
+	($($e: expr),*) => {
+		$(
+			match $e {
+				DE::String => true,
+				DE::Number => false
+			}
+		)*
+	};
+}
+
+macro_rules! define {
+	($e: expr, $vec: expr) => {
+		if $e.isstr() {
+			$e.str()
+		} else {
+			$e.usize_plus(&$vec)
+		}
+	};
+}
+
+/// This function is used to move an index to a new index.
+#[macro_export]
+macro_rules! map {
+	($(($e1: expr, $e2: expr)),*) => {
+		{
+			let mut temp = speak::DynMap::new();
+			$(
+				temp.push((speak::define!($e1), speak::define!($e2)));
+			)*
+			temp
+		}
+	};
+}
+
+impl<'a> DynMap<'a> {
 	#[inline]
 	pub fn new() -> Self {
 		Self {
@@ -198,24 +270,15 @@ impl<'a> DynMap<'a>
 	}
 
 	#[inline]
-	pub fn from(vec: Vec<(&DE, &DE)>) -> Self {
-		let mut map = Self::new();
-		for (key, value) in vec {
-			map.push((key, value));
-		}
-		map
-	}
-
-	#[inline]
 	pub fn push(&mut self, to_insert: (&'a DE, &'a DE)) {
-		self.keys.push(to_insert.0);
-		self.values.push(to_insert.1);
+		self.keys.push(define!(to_insert.0, self));
+		self.values.push(define!(to_insert.1, self));
 	}
 
 	#[inline]
 	pub fn insert(&mut self, to_insert: (&'a DE, &'a DE), index: usize) {
-		self.keys.insert(index, to_insert.0);
-		self.values.insert(index, to_insert.1);
+		self.keys.insert(index, define!(to_insert.0, self));
+		self.values.insert(index, define!(to_insert.1, self));
 	}
 
 	#[inline]
@@ -231,7 +294,10 @@ impl<'a> DynMap<'a>
 
 	#[inline]
 	pub fn remove(&mut self, index: usize) -> (&'a DE, &'a DE) {
-		(self.keys.remove(index), self.values.remove(index))
+		(
+			define!(self.keys).remove(index),
+			define!(self.values).remove(index),
+		)
 	}
 
 	#[inline]
@@ -241,21 +307,20 @@ impl<'a> DynMap<'a>
 	}
 
 	#[inline]
-	pub fn search_key(&self, key: &str) -> Option<usize>
-	{
-		self.keys.iter().position(|&k| k.str() == key)
+	pub fn search_key(&self, key: &str) -> Option<usize> {
+		self.keys.iter().position(|&k| k == key)
 	}
 
 	#[inline]
-	pub fn search_value(&self, value: &str) -> Option<usize>
-	{
-		self.values.iter().position(|&v| v == &value)
+	pub fn search_value(&self, value: &str) -> Option<usize> {
+		self.values
+			.iter()
+			.position(|&v| v.confirm_string() == value)
 	}
 
 	// Searches for a tuple, being formed by a key-value pair.
 	#[inline]
-	pub fn search_tuple(&self, tuple: (&str, &str)) -> Option<usize>
-	{
+	pub fn search_tuple(&self, tuple: (&str, &str)) -> Option<usize> {
 		match self.search_key(tuple.0) {
 			Some(_) => match self.search_value(tuple.1) {
 				Some(idx) => Some(idx),
@@ -347,8 +412,7 @@ impl<'a> DynMap<'a>
 	}
 
 	#[inline]
-	pub fn encourage_by_str(&mut self, string: &str, how_much: usize)
-	{
+	pub fn encourage_by_str(&mut self, string: &str, how_much: usize) {
 		let idx = self
 			.search_key(&string)
 			.unwrap_or_else(|| panic!("String not found"));
@@ -369,8 +433,7 @@ impl<'a> DynMap<'a>
 	}
 
 	#[inline]
-	pub fn discourage_by_str(&mut self, string: &str, how_much: usize)
-	{
+	pub fn discourage_by_str(&mut self, string: &str, how_much: usize) {
 		let idx = self
 			.search_key(&string)
 			.unwrap_or_else(|| panic!("String not found"));
@@ -388,23 +451,9 @@ impl<'a> DynMap<'a>
 
 // ─── OTHER IMPLEMENTATIONS ──────────────────────────────────────────────────
 
-// From:
-impl From<Vec<(&DE, &DE)>> for DynMap<'a>
-{
-	fn from(to_insert: Vec<(&DE, &DE)>) -> Self {
-		let mut new: Self = Self::new();
-		for (k, v) in to_insert {
-			new.values.push(v);
-			new.keys.push(&k);
-		}
-		return new;
-	}
-}
-
 // Iterator
-impl Iterator for DynMap<'a>
-{
-	type Item = (DE, DE);
+impl<'a> Iterator for DynMap<'a> {
+	type Item = (&'a DE, &'a DE);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.keys.len() == 0 {
 			return None;

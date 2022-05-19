@@ -2,7 +2,6 @@
 //! information about the copyright.
 // If you want to see the utils scroll to the last line of the file.
 
-#![feature(ptr_metadata)]
 #![doc = document_features::document_features!()]
 #![allow(non_snake_case)]
 
@@ -151,7 +150,7 @@ pub const DEFAULT_RANGE: usize = 3;
 // $$
 
 #[inline]
-fn translate(vec: &Vec<crate::mapping::DE>) -> Vec<Vec<u32>> {
+fn translate(vec: &Vec<&crate::mapping::DE>) -> Vec<Vec<u32>> {
 	let mut result: Vec<Vec<usize>> = Vec::new();
 	for element in vec {
 		result.push(match element.isstr() {
@@ -248,14 +247,14 @@ macro_rules! check_for_random {
 //
 
 #[inline]
-pub fn learn(map: &DynMap, memory: Option<usize>) -> Vec<Vec<f32>> {
+pub fn learn<T>(map: &DynMap, memory: Option<usize>) -> Vec<Vec<f32>> {
 	match memory {
 		Some(mem) => _train(map, mem),
 		None => _train(map, DEFAULT_MEMORY),
 	}
 }
 
-fn _train<T>(map: &DynMap, MEMORY: usize) -> Vec<Vec<f32>> {
+fn _train(map: &DynMap, MEMORY: usize) -> Vec<Vec<f32>> {
 	// First ,we translate the map into two vectors:
 
 	// We need to translate the map to learn it, not only because of simplycity, but
