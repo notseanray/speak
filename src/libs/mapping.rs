@@ -97,63 +97,53 @@ macro_rules! easy_panic {
 /// use speak::DynMap;
 /// let mut map = DynMap::new();
 /// ```
-pub struct DynMap<T>
-where
-	T: Dyn,
+pub struct DynMap<'a>
 {
-	pub keys: Vec<T>,
-	pub values: Vec<T>,
-}
-
-/// # Dyn
-/// This trait is used to implement the DynMap.
-pub trait Dyn: IsStr + Typing {
-}
-
-impl IsStr for &str {
-	#[inline]
-	fn isstr(&self) -> bool {
-		true
-	}
-}
-
-impl IsStr for usize {
-	#[inline]
-	fn isstr(&self) -> bool {
-		false
-	}
-}
-
-pub trait Typing {
-	fn usize(&self) -> usize;
-	fn str(&self) -> &str;
-}
-
-impl Typing for &str {
-	fn usize(&self) -> usize {
-		panic!("This is a string, not an usize.");
-	}
-	fn str(&self) -> &str {
-		self
-	}
-}
-
-impl Typing for usize {
-	fn usize(&self) -> usize {
-		*self
-	}
-	fn str(&self) -> &str {
-		panic!("This is an usize, not a string.");
-	}
+	pub keys: Vec<&'a DE>,
+	pub values: Vec<&'a DE>,
 }
 
 #[doc(hidden)]
-pub trait IsStr {
-	fn isstr(&self) -> bool;
+pub enum DE {
+	String,
+	Number
 }
 
-// This function sees if the index takes to an usize, in that case, it calls itself again
-pub(crate) fn take_to_root<'a, T: Dyn +'a>(vec: &'a Vec<T>, index: usize) -> &'a str {
+trait Dyn {
+	fn isstr(&self) -> bool;
+	fn str(&self) -> &str;
+	fn usize(&self) -> usize;
+}
+
+impl Dyn for DE {
+	#[inline]
+	fn isstr(&self) -> bool {
+		match self {
+			DE::String => true,
+			DE::Number => false
+		}
+	}
+
+	#[inline]
+	fn str(&self) -> &str {
+		match self {
+			DE::String => self,
+			DE::Number => panic!("This is not a string!")
+		}
+	}
+
+	#[inline]
+	fn usize(&self) -> usize {
+		match self {
+			DE::String => panic!("This is not a number!"),
+			DE::Number => self
+		}
+	}
+}
+
+// This function sees if the index takes to an usize, in that case, it calls
+// itself again
+pub(crate) fn take_to_root<'a>(vec: &'a Vec<&'a DE>, index: usize) -> &'a str {
 	match vec[index].isstr() {
 		false => take_to_root(vec, vec[index].usize()),
 		true => vec[index].str(),
@@ -197,10 +187,7 @@ fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 	vec.insert(to, tmp);
 }
 
-impl<T> DynMap<T>
-where
-	T: Dyn,
-	Vec<T>: Copy,
+impl<'a> DynMap<'a>
 {
 	#[inline]
 	pub fn new() -> Self {
@@ -211,13 +198,22 @@ where
 	}
 
 	#[inline]
-	pub fn push(&mut self, to_insert: (T, T)) {
+	pub fn from(vec: Vec<(&DE, &DE)>) -> Self {
+		let mut map = Self::new();
+		for (key, value) in vec {
+			map.push((key, value));
+		}
+		map
+	}
+
+	#[inline]
+	pub fn push(&mut self, to_insert: (&'a DE, &'a DE)) {
 		self.keys.push(to_insert.0);
 		self.values.push(to_insert.1);
 	}
 
 	#[inline]
-	pub fn insert(&mut self, to_insert: (T, T), index: usize) {
+	pub fn insert(&mut self, to_insert: (&'a DE, &'a DE), index: usize) {
 		self.keys.insert(index, to_insert.0);
 		self.values.insert(index, to_insert.1);
 	}
@@ -229,12 +225,12 @@ where
 	}
 
 	#[inline]
-	pub fn pop(&mut self) -> (Option<T>, Option<T>) {
+	pub fn pop(&mut self) -> (Option<&'a DE>, Option<&'a DE>) {
 		(self.keys.pop(), self.values.pop())
 	}
 
 	#[inline]
-	pub fn remove(&mut self, index: usize) -> (T, T) {
+	pub fn remove(&mut self, index: usize) -> (&'a DE, &'a DE) {
 		(self.keys.remove(index), self.values.remove(index))
 	}
 
@@ -245,26 +241,20 @@ where
 	}
 
 	#[inline]
-	pub fn search_key(&self, key: &T) -> Option<usize>
-	where
-		T: PartialEq,
+	pub fn search_key(&self, key: &str) -> Option<usize>
 	{
-		self.keys.iter().position(|k| k == key)
+		self.keys.iter().position(|&k| k.str() == key)
 	}
 
 	#[inline]
-	pub fn search_value(&self, value: &T) -> Option<usize>
-	where
-		T: PartialEq,
+	pub fn search_value(&self, value: &str) -> Option<usize>
 	{
-		self.values.iter().position(|v| v == value)
+		self.values.iter().position(|&v| v == &value)
 	}
 
 	// Searches for a tuple, being formed by a key-value pair.
 	#[inline]
-	pub fn search_tuple(&self, tuple: (&T, &T)) -> Option<usize>
-	where
-		T: PartialEq,
+	pub fn search_tuple(&self, tuple: (&str, &str)) -> Option<usize>
 	{
 		match self.search_key(tuple.0) {
 			Some(_) => match self.search_value(tuple.1) {
@@ -357,9 +347,7 @@ where
 	}
 
 	#[inline]
-	pub fn encourage_by_str(&mut self, string: T, how_much: usize)
-	where
-		T: PartialEq,
+	pub fn encourage_by_str(&mut self, string: &str, how_much: usize)
 	{
 		let idx = self
 			.search_key(&string)
@@ -381,9 +369,7 @@ where
 	}
 
 	#[inline]
-	pub fn discourage_by_str(&mut self, string: T, how_much: usize)
-	where
-		T: PartialEq,
+	pub fn discourage_by_str(&mut self, string: &str, how_much: usize)
 	{
 		let idx = self
 			.search_key(&string)
@@ -403,27 +389,22 @@ where
 // ─── OTHER IMPLEMENTATIONS ──────────────────────────────────────────────────
 
 // From:
-impl<T> From<Vec<(T, T)>> for DynMap<T>
-where
-	T: Dyn,
-	Vec<T>: Copy,
+impl From<Vec<(&DE, &DE)>> for DynMap<'a>
 {
-	fn from(to_insert: Vec<(T, T)>) -> Self {
+	fn from(to_insert: Vec<(&DE, &DE)>) -> Self {
 		let mut new: Self = Self::new();
 		for (k, v) in to_insert {
 			new.values.push(v);
-			new.keys.push(k);
+			new.keys.push(&k);
 		}
 		return new;
 	}
 }
 
 // Iterator
-impl<T> Iterator for DynMap<T>
-where
-	T: Dyn,
+impl Iterator for DynMap<'a>
 {
-	type Item = (T, T);
+	type Item = (DE, DE);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.keys.len() == 0 {
 			return None;
