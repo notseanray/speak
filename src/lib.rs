@@ -150,36 +150,22 @@ pub const DEFAULT_RANGE: usize = 3;
 // $$
 
 #[inline]
-fn translate(vec: &Vec<&crate::mapping::DE>) -> Vec<Vec<u32>> {
+fn translate(vec: &Vec<&str>) -> Vec<Vec<usize>> {
 	let mut result: Vec<Vec<usize>> = Vec::new();
-	for element in vec {
-		result.push(match element.isstr() {
-			false => {
-				let mut ram: Vec<usize> = Vec::new();
-				for word in vec[element.usize()].str().split_whitespace() {
-					let mut sum: usize = 0;
-					for char in word.chars() {
-						sum += char as usize;
-					}
-					ram.push(sum);
-				}
-				ram.clone()
-			}
-			true => {
-				let mut ram: Vec<usize> = Vec::new();
-				for word in element.str().split_whitespace() {
-					let mut sum: usize = 0;
-					for char in word.chars() {
-						sum += char as usize;
-					}
-					ram.push(sum);
-				}
+	let mut wordvec: Vec<usize> = Vec::new();
 
-				ram.clone()
+	let mut sum: usize = 0;
+
+	for &phrase in vec {
+		for word in phrase.split_whitespace() {
+			for c in word.chars() {
+				sum += c as usize;
 			}
-		});
+			wordvec.push(((sum << 1) + 1) << 1 + 1);
+		}
+		result.push(wordvec.clone());
 	}
-	return Vec::new();
+	return result;
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>,
@@ -190,7 +176,7 @@ fn translate(vec: &Vec<&crate::mapping::DE>) -> Vec<Vec<u32>> {
 macro_rules! calculation {
 	($MChunk: expr, $IChunk: expr, $VChunk: expr) => {
 		($MChunk.iter().sum::<f32>()
-			- ($IChunk.iter().sum::<u32>() as f32 / $VChunk.iter().sum::<u32>() as f32))
+			- ($IChunk.iter().sum::<usize>() as f32 / $VChunk.iter().sum::<usize>() as f32))
 			.abs()
 	};
 }
@@ -270,7 +256,7 @@ fn _train(map: &DynMap, MEMORY: usize) -> Vec<Vec<f32>> {
 		for keyChunk in key.into_chunks(MEMORY).base {
 			for valueChunk in value.into_chunks(MEMORY).base {
 				ram.push(
-					keyChunk.iter().sum::<u32>() as f32 / valueChunk.iter().sum::<u32>() as f32,
+					keyChunk.iter().sum::<usize>() as f32 / valueChunk.iter().sum::<usize>() as f32,
 				);
 			}
 		}
@@ -444,13 +430,13 @@ fn _run<'a>(
 	MAX_OUTPUT_LENGTH: usize,
 	RANGE: usize,
 ) -> String {
-	let mut input: Vec<u32> = Vec::new();
-	let mut sum: u32;
+	let mut input: Vec<usize> = Vec::new();
+	let mut sum: usize;
 
 	for word in rawinput.split_whitespace() {
 		sum = 0;
 		for c in word.chars() {
-			sum += c as u32;
+			sum += c as usize;
 		}
 		input.push(((sum << 1) + 1) << 1 + 1);
 	}
@@ -485,7 +471,7 @@ fn _run<'a>(
 								debug_mode!(
 									"{} :: {:?}",
 									BestMatch.unwrap().0,
-									take_to_root(&RMap, BestMatch.unwrap().1)
+									&RMap[BestMatch.unwrap().1]
 								);
 							};
 						};
@@ -500,7 +486,7 @@ fn _run<'a>(
 
 			BestMatch_unwrap = BestMatch.unwrap();
 			result.push_str(
-				&take_to_root(&RMap, BestMatch_unwrap.1)
+				&RMap[BestMatch_unwrap.1]
 					.split_whitespace()
 					.collect::<Vec<&str>>()
 					.into_chunks(MEMORY)
@@ -511,7 +497,7 @@ fn _run<'a>(
 			subphrases += 1;
 
 			if BestMatch_unwrap.2
-				== take_to_root(&RMap, BestMatch_unwrap.1)
+				== &RMap[BestMatch_unwrap.1]
 					.split_whitespace()
 					.collect::<Vec<&str>>()
 					.into_chunks(MEMORY)
