@@ -112,22 +112,21 @@ pub enum DE {
 }
 
 pub trait Dyn {
-	fn to_enum(&self) -> DE;
+	fn to_enum(&self) -> &DE;
 	fn to_str(&self) -> &str;
 	fn to_usize(&self) -> usize;
 }
 
 impl Dyn for DE {
-	
 	#[inline]
-	fn to_enum(&self) -> DE {
-		*self
+	fn to_enum(&self) -> &DE {
+		self
 	}
-	
+
 	#[inline]
 	fn to_str(&self) -> &str {
 		match *self {
-			DE::String => self,
+			DE::String => self.to_str(),
 			DE::Number => panic!("This is not a String, this is a number."),
 		}
 	}
@@ -136,15 +135,15 @@ impl Dyn for DE {
 	fn to_usize(&self) -> usize {
 		match *self {
 			DE::String => panic!("This is a String, not a Number."),
-			DE::Number => self,
+			DE::Number => self.to_usize(),
 		}
 	}
 }
 
 impl Dyn for &str {
 	#[inline]
-	fn to_enum(&self) -> DE {
-		DE::String
+	fn to_enum(&self) -> &DE {
+		&DE::String
 	}
 
 	#[inline]
@@ -160,8 +159,8 @@ impl Dyn for &str {
 
 impl Dyn for usize {
 	#[inline]
-	fn to_enum(&self) -> DE {
-		DE::Number
+	fn to_enum(&self) -> &DE {
+		&DE::Number
 	}
 
 	#[inline]
@@ -171,7 +170,7 @@ impl Dyn for usize {
 
 	#[inline]
 	fn to_usize(&self) -> usize {
-		self
+		*self
 	}
 }
 
@@ -212,37 +211,61 @@ fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 	vec.insert(to, tmp);
 }
 
-macro_rules! is_str {
-	($($e: expr),*) => {
-		$(
-			match $e {
-				DE::String => true,
-				DE::Number => false
-			}
-		)*
+#[doc(hidden)]
+macro_rules! define {
+	($e: expr, $vec: expr) => {
+		match $e {
+			DE::String => $e.to_str(),
+			DE::Number => $vec[$e.to_usize()]
+		}
 	};
 }
 
 #[macro_export]
 #[doc(hidden)]
-macro_rules! define {
-	($e: expr, $vec: expr) => {
-		if $e.isstr() {
-			$e.confirm_string()
-		} else {
-			$e.usize_plus(&$vec)
+macro_rules! is_string_m {
+	($e: expr) => {
+		match $e {
+			&str => true,
+			_ => false,
 		}
 	};
 }
 
-/// This function is used to move an index to a new index.
+pub trait IsString {
+	fn is_string(&self) -> bool;
+}
+
+impl IsString for &str {
+	fn is_string(&self) -> bool {
+		true
+	}
+}
+
+impl IsString for usize {
+	fn is_string(&self) -> bool {
+		false
+	}
+}
+
+// If you're wondering why use can use map![...] instead of map!(), all macros
+// can do it, but we only do it with some because it's idiomatic.
 #[macro_export]
 macro_rules! map {
 	($(($e1: expr, $e2: expr)),*) => {
 		{
 			let mut temp = speak::DynMap::new();
 			$(
-				temp.push((speak::define!($e1, temp), speak::define!($e2, temp)));
+				temp.keys.push(
+					match is_string_m!(&$e1) {
+						true => $e1.to_str(),
+						false => temp.keys[$e1.to_usize()]
+					});
+
+					temp.values.push(match is_string_m!(&$e1) {
+						true => $e2.to_str(),
+						false => temp.values[$e1.to_usize()]
+					});
 			)*
 			temp
 		}
@@ -283,10 +306,7 @@ impl<'a> DynMap<'a> {
 
 	#[inline]
 	pub fn remove(&mut self, index: usize) -> (&'a str, &'a str) {
-		(
-			self.keys.remove(index),
-			self.values.remove(index),
-		)
+		(self.keys.remove(index), self.values.remove(index))
 	}
 
 	#[inline]
@@ -302,9 +322,7 @@ impl<'a> DynMap<'a> {
 
 	#[inline]
 	pub fn search_value(&self, value: &str) -> Option<usize> {
-		self.values
-			.iter()
-			.position(|&v| v == value)
+		self.values.iter().position(|&v| v == value)
 	}
 
 	// Searches for a tuple, being formed by a key-value pair.
