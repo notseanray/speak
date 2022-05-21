@@ -154,6 +154,7 @@ impl Dyn for &str {
 	#[inline]
 	fn to_usize(&self) -> usize {
 		panic!("This is a String, not a Number.");
+		// 0
 	}
 }
 
@@ -166,6 +167,7 @@ impl Dyn for usize {
 	#[inline]
 	fn to_str(&self) -> &str {
 		panic!("This is a Number, not a String.");
+		// "x"
 	}
 
 	#[inline]
@@ -257,14 +259,14 @@ macro_rules! map {
 			let mut temp = speak::DynMap::new();
 			$(
 				temp.keys.push(
-					match is_string_m!(&$e1) {
+					match &$e1.is_string() {
 						true => $e1.to_str(),
 						false => temp.keys[$e1.to_usize()]
 					});
 
-					temp.values.push(match is_string_m!(&$e1) {
+					temp.values.push(match &$e2.is_string() {
 						true => $e2.to_str(),
-						false => temp.values[$e1.to_usize()]
+						false => temp.values[$e2.to_usize()]
 					});
 			)*
 			temp
