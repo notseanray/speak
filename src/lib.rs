@@ -233,7 +233,7 @@ macro_rules! check_for_random {
 //
 
 #[inline]
-pub fn learn<T>(map: &DynMap, memory: Option<usize>) -> Vec<Vec<f32>> {
+pub fn learn(map: &DynMap, memory: Option<usize>) -> Vec<Vec<f32>> {
 	match memory {
 		Some(mem) => _train(map, mem),
 		None => _train(map, DEFAULT_MEMORY),
@@ -271,7 +271,7 @@ fn _train(map: &DynMap, MEMORY: usize) -> Vec<Vec<f32>> {
 #[must_use = "The run function is very expensive!"]
 pub fn run(
 	input: &str,
-	map: DynMap,
+	map: &DynMap,
 	learnt: &Vec<Vec<f32>>,
 	MEMORY: Option<usize>,
 	THRESHOLD: Option<f32>,
@@ -424,7 +424,7 @@ pub fn run(
 fn _run<'a>(
 	rawinput: &str,
 	learnt: &Vec<Vec<f32>>,
-	map: DynMap,
+	map: &DynMap,
 	MEMORY: usize,
 	THRESHOLD: f32,
 	MAX_OUTPUT_LENGTH: usize,
@@ -444,7 +444,7 @@ fn _run<'a>(
 	let mut result: String = String::new();
 	let Mega = learnt;
 	let TMap = translate(&map.values);
-	let RMap = map.values;
+	let RMap = &map.values;
 
 	let mut subphrases: usize = 0;
 	let mut calculation: f32;
@@ -525,3 +525,7 @@ pub use literal::*;
 #[path = "libs/mapping.rs"]
 mod mapping;
 pub use mapping::*;
+
+#[path = "libs/serialization.rs"]
+mod seri;
+pub use seri::*;
