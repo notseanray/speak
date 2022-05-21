@@ -1,4 +1,4 @@
-use speak;
+use speak::*;
 fn main() {
 	let map		=	speak::map![("hi", "hello"), ("bye", 0usize)];
 	let learnt	=	speak::learn(&map, None);
