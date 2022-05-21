@@ -4,13 +4,7 @@ version = "0.1.7"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/SpeakML/Speak/"
-keywords = [
-	"speak",
-	"machine-learning",
-	"nlp",
-	"minimal",
-	"fast",
-]
+keywords = ["speak", "machine-learning", "nlp", "minimal", "fast"]
 license = "MPL-2.0"
 description = "A minimal, fast, machine-learning based chatbot"
 publish = true
@@ -22,6 +16,7 @@ document-features = "0.2.1"
 
 serde = { version = "1.0.137", features = ["derive"] }
 
+regex = { version = "1.5.6", optional = true }
 aquamarine = { version = "0.1.1", optional = true }
 colored = { version = "2.0.0", optional = true }
 
@@ -51,7 +46,7 @@ all-features = true
 
 [features]
 # debug is required (being that Speak is in development)
-default = ["debug", "fancy_docs"]
+default = ["debug", "fancy_docs", "analyzer"]
 
 ## <h1>Fancy Docs</h1>
 ## Fancy docs is the feature that adds some fancy documentation to the Speak crate.
@@ -77,3 +72,8 @@ easy_panic = ["dep:colored"]
 ## <h2>Dependencies</h2>
 ## <ul><li><code>colored (2.0.0)</code></li></ul>
 debug = ["dep:colored"]
+
+## <h1>Analyzer</h1>
+## This feature is used to enable the `analyzer` module. (Not imported as **\***.) This module is used to analyze both the current data (Using Regex and with the option to use filters, to prevent nonsense data, spam... etc.) And the data that the user inputs.
+
+analyzer = ["dep:regex"]
