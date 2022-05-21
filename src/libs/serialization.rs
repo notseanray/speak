@@ -1,3 +1,6 @@
+// TODO: Implement JSON serialization
+// TODO: Implement RMP serialization (More efficient than JSON)
+
 //
 // ────────────────────────────────────────────────────────── I ──────────
 //   :::::: S E R I A L I Z E : :  :   :    :     :        :          :
