@@ -4,12 +4,9 @@
 // ────────────────────────────────────────────────────────────────────
 //
 
-use serde::{
-	ser::{Serialize, SerializeStruct, Serializer},
-	Deserialize,
-};
-
 use crate::DynMap;
+
+use serde::{Serialize, Serializer, Deserialize, Deserializer, de::MapAccess, de::Visitor, de::Error, ser::SerializeStruct};
 
 impl<'a> Serialize for DynMap<'a> {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -31,8 +28,6 @@ impl<'a> Serialize for DynMap<'a> {
 //   :::::: D E S E R I A L I Z E : :  :   :    :     :        :          :
 // ────────────────────────────────────────────────────────────────────────
 //
-
-use serde::de::{self, Deserializer, MapAccess, Visitor};
 
 impl<'de> Deserialize<'de> for DynMap<'de> {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -65,22 +60,22 @@ impl<'de> Deserialize<'de> for DynMap<'de> {
 					match key {
 						Field::Keys => {
 							if keys.is_some() {
-								return Err(de::Error::duplicate_field("keys"));
+								return Err(Error::duplicate_field("keys"));
 							}
 							keys = Some(map.next_value()?);
 						}
 						Field::Values => {
 							if values.is_some() {
-								return Err(de::Error::duplicate_field("values"));
+								return Err(Error::duplicate_field("values"));
 							}
 							values = Some(map.next_value()?);
 						}
 					}
 				}
 
-				let keys = keys.ok_or_else(|| de::Error::missing_field("keys"))?;
+				let keys = keys.ok_or_else(|| Error::missing_field("keys"))?;
 
-				let values = values.ok_or_else(|| de::Error::missing_field("values"))?;
+				let values = values.ok_or_else(|| Error::missing_field("values"))?;
 
 				Ok(DynMap { keys, values })
 			}
