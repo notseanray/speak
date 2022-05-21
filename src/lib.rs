@@ -653,3 +653,6 @@ pub use mapping::*;
 #[path = "libs/serialization.rs"]
 mod seri;
 pub use seri::*;
+
+#[path = "libs/analyzer.rs"]
+pub mod analyzer;
