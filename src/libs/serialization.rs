@@ -9,8 +9,6 @@ use serde::{
 	Deserialize,
 };
 
-use rmp_serde::{Serializer as RmpSerializer, Deserializer as RmpDeserializer};
-
 use crate::DynMap;
 
 impl<'a> Serialize for DynMap<'a> {
@@ -93,3 +91,12 @@ impl<'de> Deserialize<'de> for DynMap<'de> {
 		deserializer.deserialize_struct("DynMap", FIELDS, DynMapVisitor)
 	}
 }
+
+//
+// ──────────────────────────────────────────────── I ──────────
+//   :::::: J S O N : :  :   :    :     :        :          :
+// ──────────────────────────────────────────────────────────
+//
+
+// TODO: Implement JSON serialization
+// TODO: Implement RMP serialization (More efficient than JSON)
