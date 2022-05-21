@@ -97,66 +97,82 @@ macro_rules! easy_panic {
 /// use speak::DynMap;
 /// let mut map = DynMap::new();
 /// ```
-pub struct DynMap<T>
-where
-	T: Dyn,
-{
-	pub keys: Vec<T>,
-	pub values: Vec<T>,
-}
 
-/// # Dyn
-/// This trait is used to implement the DynMap.
-pub trait Dyn: IsStr + Typing {
-}
-
-impl IsStr for &str {
-	#[inline]
-	fn isstr(&self) -> bool {
-		true
-	}
-}
-
-impl IsStr for usize {
-	#[inline]
-	fn isstr(&self) -> bool {
-		false
-	}
-}
-
-pub trait Typing {
-	fn usize(&self) -> usize;
-	fn str(&self) -> &str;
-}
-
-impl Typing for &str {
-	fn usize(&self) -> usize {
-		panic!("This is a string, not an usize.");
-	}
-	fn str(&self) -> &str {
-		self
-	}
-}
-
-impl Typing for usize {
-	fn usize(&self) -> usize {
-		*self
-	}
-	fn str(&self) -> &str {
-		panic!("This is an usize, not a string.");
-	}
+#[derive(Debug)]
+pub struct DynMap<'a> {
+	pub keys: Vec<&'a str>,
+	pub values: Vec<&'a str>,
 }
 
 #[doc(hidden)]
-pub trait IsStr {
-	fn isstr(&self) -> bool;
+#[derive(Debug)]
+pub enum DE {
+	String,
+	Number,
 }
 
-// This function sees if the index takes to an usize, in that case, it calls itself again
-pub(crate) fn take_to_root<'a, T: Dyn +'a>(vec: &'a Vec<T>, index: usize) -> &'a str {
-	match vec[index].isstr() {
-		false => take_to_root(vec, vec[index].usize()),
-		true => vec[index].str(),
+pub trait Dyn {
+	fn to_enum(&self) -> &DE;
+	fn to_str(&self) -> &str;
+	fn to_usize(&self) -> usize;
+}
+
+impl Dyn for DE {
+	#[inline]
+	fn to_enum(&self) -> &DE {
+		self
+	}
+
+	#[inline]
+	fn to_str(&self) -> &str {
+		match *self {
+			DE::String => self.to_str(),
+			DE::Number => panic!("This is not a String, this is a number."),
+		}
+	}
+
+	#[inline]
+	fn to_usize(&self) -> usize {
+		match *self {
+			DE::String => panic!("This is a String, not a Number."),
+			DE::Number => self.to_usize(),
+		}
+	}
+}
+
+impl Dyn for &str {
+	#[inline]
+	fn to_enum(&self) -> &DE {
+		&DE::String
+	}
+
+	#[inline]
+	fn to_str(&self) -> &str {
+		self
+	}
+
+	#[inline]
+	fn to_usize(&self) -> usize {
+		panic!("This is a String, not a Number.");
+		// 0
+	}
+}
+
+impl Dyn for usize {
+	#[inline]
+	fn to_enum(&self) -> &DE {
+		&DE::Number
+	}
+
+	#[inline]
+	fn to_str(&self) -> &str {
+		panic!("This is a Number, not a String.");
+		// "x"
+	}
+
+	#[inline]
+	fn to_usize(&self) -> usize {
+		*self
 	}
 }
 
@@ -197,11 +213,68 @@ fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 	vec.insert(to, tmp);
 }
 
-impl<T> DynMap<T>
-where
-	T: Dyn,
-	Vec<T>: Copy,
-{
+#[doc(hidden)]
+macro_rules! define {
+	($e: expr, $vec: expr) => {
+		match $e {
+			DE::String => $e.to_str(),
+			DE::Number => $vec[$e.to_usize()]
+		}
+	};
+}
+
+#[macro_export]
+#[doc(hidden)]
+macro_rules! is_string_m {
+	($e: expr) => {
+		match $e {
+			&str => true,
+			_ => false,
+		}
+	};
+}
+
+pub trait IsString {
+	fn is_string(&self) -> bool;
+}
+
+impl IsString for &str {
+	fn is_string(&self) -> bool {
+		true
+	}
+}
+
+impl IsString for usize {
+	fn is_string(&self) -> bool {
+		false
+	}
+}
+
+// If you're wondering why use can use map![...] instead of map!(), all macros
+// can do it, but we only do it with some because it's idiomatic.
+#[macro_export]
+macro_rules! map {
+	($(($e1: expr, $e2: expr)),*) => {
+		{
+			let mut temp = speak::DynMap::new();
+			$(
+				temp.keys.push(
+					match &$e1.is_string() {
+						true => $e1.to_str(),
+						false => temp.keys[$e1.to_usize()]
+					});
+
+					temp.values.push(match &$e2.is_string() {
+						true => $e2.to_str(),
+						false => temp.values[$e2.to_usize()]
+					});
+			)*
+			temp
+		}
+	};
+}
+
+impl<'a> DynMap<'a> {
 	#[inline]
 	pub fn new() -> Self {
 		Self {
@@ -211,15 +284,15 @@ where
 	}
 
 	#[inline]
-	pub fn push(&mut self, to_insert: (T, T)) {
-		self.keys.push(to_insert.0);
-		self.values.push(to_insert.1);
+	pub fn push(&mut self, to_insert: (&'a DE, &'a DE)) {
+		self.keys.push(define!(to_insert.0, self.keys));
+		self.values.push(define!(to_insert.1, self.values));
 	}
 
 	#[inline]
-	pub fn insert(&mut self, to_insert: (T, T), index: usize) {
-		self.keys.insert(index, to_insert.0);
-		self.values.insert(index, to_insert.1);
+	pub fn insert(&mut self, to_insert: (&'a DE, &'a DE), index: usize) {
+		self.keys.insert(index, define!(to_insert.0, self.keys));
+		self.values.insert(index, define!(to_insert.1, self.values));
 	}
 
 	#[inline]
@@ -229,12 +302,12 @@ where
 	}
 
 	#[inline]
-	pub fn pop(&mut self) -> (Option<T>, Option<T>) {
+	pub fn pop(&mut self) -> (Option<&'a str>, Option<&'a str>) {
 		(self.keys.pop(), self.values.pop())
 	}
 
 	#[inline]
-	pub fn remove(&mut self, index: usize) -> (T, T) {
+	pub fn remove(&mut self, index: usize) -> (&'a str, &'a str) {
 		(self.keys.remove(index), self.values.remove(index))
 	}
 
@@ -245,27 +318,18 @@ where
 	}
 
 	#[inline]
-	pub fn search_key(&self, key: &T) -> Option<usize>
-	where
-		T: PartialEq,
-	{
-		self.keys.iter().position(|k| k == key)
+	pub fn search_key(&self, key: &str) -> Option<usize> {
+		self.keys.iter().position(|&k| k == key)
 	}
 
 	#[inline]
-	pub fn search_value(&self, value: &T) -> Option<usize>
-	where
-		T: PartialEq,
-	{
-		self.values.iter().position(|v| v == value)
+	pub fn search_value(&self, value: &str) -> Option<usize> {
+		self.values.iter().position(|&v| v == value)
 	}
 
 	// Searches for a tuple, being formed by a key-value pair.
 	#[inline]
-	pub fn search_tuple(&self, tuple: (&T, &T)) -> Option<usize>
-	where
-		T: PartialEq,
-	{
+	pub fn search_tuple(&self, tuple: (&str, &str)) -> Option<usize> {
 		match self.search_key(tuple.0) {
 			Some(_) => match self.search_value(tuple.1) {
 				Some(idx) => Some(idx),
@@ -357,10 +421,7 @@ where
 	}
 
 	#[inline]
-	pub fn encourage_by_str(&mut self, string: T, how_much: usize)
-	where
-		T: PartialEq,
-	{
+	pub fn encourage_by_str(&mut self, string: &str, how_much: usize) {
 		let idx = self
 			.search_key(&string)
 			.unwrap_or_else(|| panic!("String not found"));
@@ -381,10 +442,7 @@ where
 	}
 
 	#[inline]
-	pub fn discourage_by_str(&mut self, string: T, how_much: usize)
-	where
-		T: PartialEq,
-	{
+	pub fn discourage_by_str(&mut self, string: &str, how_much: usize) {
 		let idx = self
 			.search_key(&string)
 			.unwrap_or_else(|| panic!("String not found"));
@@ -402,28 +460,9 @@ where
 
 // ─── OTHER IMPLEMENTATIONS ──────────────────────────────────────────────────
 
-// From:
-impl<T> From<Vec<(T, T)>> for DynMap<T>
-where
-	T: Dyn,
-	Vec<T>: Copy,
-{
-	fn from(to_insert: Vec<(T, T)>) -> Self {
-		let mut new: Self = Self::new();
-		for (k, v) in to_insert {
-			new.values.push(v);
-			new.keys.push(k);
-		}
-		return new;
-	}
-}
-
 // Iterator
-impl<T> Iterator for DynMap<T>
-where
-	T: Dyn,
-{
-	type Item = (T, T);
+impl<'a> Iterator for DynMap<'a> {
+	type Item = (&'a str, &'a str);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.keys.len() == 0 {
 			return None;

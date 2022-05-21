@@ -150,36 +150,22 @@ pub const DEFAULT_RANGE: usize = 3;
 // $$
 
 #[inline]
-fn translate<'a, T: Dyn>(vec: &Vec<T>) -> Vec<Vec<u32>> {
+fn translate(vec: &Vec<&str>) -> Vec<Vec<usize>> {
 	let mut result: Vec<Vec<usize>> = Vec::new();
-	for element in vec {
-		result.push(match element.isstr() {
-			false => {
-				let mut ram: Vec<usize> = Vec::new();
-				for word in vec[element.usize()].str().split_whitespace() {
-					let mut sum: usize = 0;
-					for char in word.chars() {
-						sum += char as usize;
-					}
-					ram.push(sum);
-				}
-				ram.clone()
-			}
-			true => {
-				let mut ram: Vec<usize> = Vec::new();
-				for word in element.str().split_whitespace() {
-					let mut sum: usize = 0;
-					for char in word.chars() {
-						sum += char as usize;
-					}
-					ram.push(sum);
-				}
+	let mut wordvec: Vec<usize> = Vec::new();
 
-				ram.clone()
+	let mut sum: usize = 0;
+
+	for &phrase in vec {
+		for word in phrase.split_whitespace() {
+			for c in word.chars() {
+				sum += c as usize;
 			}
-		});
+			wordvec.push(((sum << 1) + 1) << 1 + 1);
+		}
+		result.push(wordvec.clone());
 	}
-	return Vec::new();
+	return result;
 }
 
 // fn merge_hashmaps<T: std::hash::Hash + std::cmp::Eq>(map1: HashMap<T, T>,
@@ -190,7 +176,7 @@ fn translate<'a, T: Dyn>(vec: &Vec<T>) -> Vec<Vec<u32>> {
 macro_rules! calculation {
 	($MChunk: expr, $IChunk: expr, $VChunk: expr) => {
 		($MChunk.iter().sum::<f32>()
-			- ($IChunk.iter().sum::<u32>() as f32 / $VChunk.iter().sum::<u32>() as f32))
+			- ($IChunk.iter().sum::<usize>() as f32 / $VChunk.iter().sum::<usize>() as f32))
 			.abs()
 	};
 }
@@ -247,20 +233,14 @@ macro_rules! check_for_random {
 //
 
 #[inline]
-pub fn learn<T>(map: &DynMap<T>, memory: Option<usize>) -> Vec<Vec<f32>>
-where
-	T: Dyn,
-{
+pub fn learn<T>(map: &DynMap, memory: Option<usize>) -> Vec<Vec<f32>> {
 	match memory {
 		Some(mem) => _train(map, mem),
 		None => _train(map, DEFAULT_MEMORY),
 	}
 }
 
-fn _train<T>(map: &DynMap<T>, MEMORY: usize) -> Vec<Vec<f32>>
-where
-	T: Dyn,
-{
+fn _train(map: &DynMap, MEMORY: usize) -> Vec<Vec<f32>> {
 	// First ,we translate the map into two vectors:
 
 	// We need to translate the map to learn it, not only because of simplycity, but
@@ -276,7 +256,7 @@ where
 		for keyChunk in key.into_chunks(MEMORY).base {
 			for valueChunk in value.into_chunks(MEMORY).base {
 				ram.push(
-					keyChunk.iter().sum::<u32>() as f32 / valueChunk.iter().sum::<u32>() as f32,
+					keyChunk.iter().sum::<usize>() as f32 / valueChunk.iter().sum::<usize>() as f32,
 				);
 			}
 		}
@@ -289,32 +269,23 @@ where
 
 #[inline]
 #[must_use = "The run function is very expensive!"]
-pub fn run<T>(
+pub fn run(
 	input: &str,
-	map: DynMap<T>,
+	map: DynMap,
 	learnt: &Vec<Vec<f32>>,
 	MEMORY: Option<usize>,
 	THRESHOLD: Option<f32>,
 	MAX_OUTPUT_LENGTH: Option<usize>,
 	RANGE: Option<usize>,
-) -> String
-where
-	T: Dyn,
-{
-
+) -> String {
 	match (MEMORY, THRESHOLD, MAX_OUTPUT_LENGTH, RANGE) {
-		(Some(mem), Some(threshold), Some(output_length), Some(range)) => _run(
+		(Some(mem), Some(threshold), Some(output_length), Some(range)) => {
+			_run(input, learnt, map, mem, threshold, output_length, range)
+		}
+		(Some(mem), Some(threshold), Some(output_length), None) => _run(
 			input,
 			learnt,
 			map,
-			mem,
-			threshold,
-			output_length,
-			range,
-		),
-		(Some(mem), Some(threshold), Some(output_length), None) => _run(
-			input,
-			learnt, map,
 			mem,
 			threshold,
 			output_length,
@@ -322,7 +293,8 @@ where
 		),
 		(Some(mem), Some(threshold), None, Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			mem,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -330,7 +302,8 @@ where
 		),
 		(Some(mem), Some(threshold), None, None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			mem,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -338,7 +311,8 @@ where
 		),
 		(Some(mem), None, Some(output_length), Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			mem,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -346,7 +320,8 @@ where
 		),
 		(Some(mem), None, Some(output_length), None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			mem,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -354,7 +329,8 @@ where
 		),
 		(Some(mem), None, None, Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			mem,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -362,7 +338,8 @@ where
 		),
 		(Some(mem), None, None, None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			mem,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -370,7 +347,8 @@ where
 		),
 		(None, Some(threshold), Some(output_length), Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			threshold,
 			output_length,
@@ -378,7 +356,8 @@ where
 		),
 		(None, Some(threshold), Some(output_length), None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			threshold,
 			output_length,
@@ -386,7 +365,8 @@ where
 		),
 		(None, Some(threshold), None, Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -394,7 +374,8 @@ where
 		),
 		(None, Some(threshold), None, None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			threshold,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -402,7 +383,8 @@ where
 		),
 		(None, None, Some(output_length), Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -410,7 +392,8 @@ where
 		),
 		(None, None, Some(output_length), None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			output_length,
@@ -418,7 +401,8 @@ where
 		),
 		(None, None, None, Some(range)) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -426,7 +410,8 @@ where
 		),
 		(None, None, None, None) => _run(
 			input,
-			learnt, map,
+			learnt,
+			map,
 			DEFAULT_MEMORY,
 			DEFAULT_THRESHOLD,
 			DEFAULT_MAX_OUTPUT_LENGTH,
@@ -436,96 +421,95 @@ where
 }
 
 #[must_use = "The run function is expensive, you can't waste it like that!"]
-fn _run<'a, T>(
+fn _run<'a>(
 	rawinput: &str,
 	learnt: &Vec<Vec<f32>>,
-	map: DynMap<T>,
+	map: DynMap,
 	MEMORY: usize,
 	THRESHOLD: f32,
 	MAX_OUTPUT_LENGTH: usize,
 	RANGE: usize,
-) -> String where T: Dyn {
-	let mut input: Vec<u32> = Vec::new();
-		let mut sum: u32;
+) -> String {
+	let mut input: Vec<usize> = Vec::new();
+	let mut sum: usize;
 
-		for word in rawinput.split_whitespace() {
-			sum = 0;
-			for c in word.chars() {
-				sum += c as u32;
-			}
-			input.push(((sum << 1) + 1) << 1 + 1);
+	for word in rawinput.split_whitespace() {
+		sum = 0;
+		for c in word.chars() {
+			sum += c as usize;
 		}
+		input.push(((sum << 1) + 1) << 1 + 1);
+	}
 
-		let mut result: String = String::new();
-		let Mega = learnt;
-		let TMap = translate(&map.values);
-		let RMap = map.values;
+	let mut result: String = String::new();
+	let Mega = learnt;
+	let TMap = translate(&map.values);
+	let RMap = map.values;
 
-
-		let mut subphrases: usize = 0;
-		let mut calculation: f32;
-		let mut BestMatch: Option<(f32, usize, usize)> = None;
-		let mut BestMatch_unwrap: (f32, usize, usize);
-		// For each word
-		for IChunk in input.into_chunks(MEMORY).base {
-			debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
-			for (i, value) in TMap.iter().enumerate() {
-				// Let's see if we are going to use this phrase
-				check_for_random!(i, RANGE);
-				debug_mode!("I = {}: V = {:?}", i, value);
-				for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
-					debug_mode!("{}: VC -> {:?}", j, VChunk);
-					for MVec in Mega {
-						debug_mode!("MV -> {:?}", MVec);
-						for MChunk in MVec.into_chunks(MEMORY).base {
-							calculation = calculation!(MChunk, IChunk, VChunk);
-							if calculation < THRESHOLD {
-								if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
-									BestMatch = Some((calculation, i, j));
-									debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
-									debug_mode!("@@@@@@@@@@@@@",);
-									debug_mode!(
-										"{} :: {:?}",
-										BestMatch.unwrap().0,
-										take_to_root(&RMap, BestMatch.unwrap().1)
-									);
-								};
+	let mut subphrases: usize = 0;
+	let mut calculation: f32;
+	let mut BestMatch: Option<(f32, usize, usize)> = None;
+	let mut BestMatch_unwrap: (f32, usize, usize);
+	// For each word
+	for IChunk in input.into_chunks(MEMORY).base {
+		debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
+		for (i, value) in TMap.iter().enumerate() {
+			// Let's see if we are going to use this phrase
+			check_for_random!(i, RANGE);
+			debug_mode!("I = {}: V = {:?}", i, value);
+			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
+				debug_mode!("{}: VC -> {:?}", j, VChunk);
+				for MVec in Mega {
+					debug_mode!("MV -> {:?}", MVec);
+					for MChunk in MVec.into_chunks(MEMORY).base {
+						calculation = calculation!(MChunk, IChunk, VChunk);
+						if calculation < THRESHOLD {
+							if (BestMatch == None) || (calculation < BestMatch.unwrap().0) {
+								BestMatch = Some((calculation, i, j));
+								debug_mode!("BestMatch Elected!: {:?}", BestMatch.unwrap());
+								debug_mode!("@@@@@@@@@@@@@",);
+								debug_mode!(
+									"{} :: {:?}",
+									BestMatch.unwrap().0,
+									&RMap[BestMatch.unwrap().1]
+								);
 							};
-						}
+						};
 					}
 				}
 			}
-
-			if BestMatch != None {
-				// Ok, i is the vector of the value and j is the vector of the chunk. So we have
-				// to recover the value from just two numbers.
-
-				BestMatch_unwrap = BestMatch.unwrap();
-				result.push_str(
-						&take_to_root(&RMap, BestMatch_unwrap.1)
-						.split_whitespace()
-						.collect::<Vec<&str>>()
-						.into_chunks(MEMORY)
-						.base[BestMatch_unwrap.2]
-						.join(" "),
-				);
-
-				subphrases += 1;
-
-				if BestMatch_unwrap.2
-					== take_to_root(&RMap, BestMatch_unwrap.1)
-						.split_whitespace()
-						.collect::<Vec<&str>>()
-						.into_chunks(MEMORY)
-						.base
-						.len() - 1
-				{
-					if subphrases > MAX_OUTPUT_LENGTH {}
-					result.push('.');
-				}
-			};
 		}
-		return result;
+
+		if BestMatch != None {
+			// Ok, i is the vector of the value and j is the vector of the chunk. So we have
+			// to recover the value from just two numbers.
+
+			BestMatch_unwrap = BestMatch.unwrap();
+			result.push_str(
+				&RMap[BestMatch_unwrap.1]
+					.split_whitespace()
+					.collect::<Vec<&str>>()
+					.into_chunks(MEMORY)
+					.base[BestMatch_unwrap.2]
+					.join(" "),
+			);
+
+			subphrases += 1;
+
+			if BestMatch_unwrap.2
+				== &RMap[BestMatch_unwrap.1]
+					.split_whitespace()
+					.collect::<Vec<&str>>()
+					.into_chunks(MEMORY)
+					.base
+					.len() - 1
+			{
+				if subphrases > MAX_OUTPUT_LENGTH {}
+				result.push('.');
+			}
+		};
+	}
+	return result;
 }
 
 use rand::Rng;

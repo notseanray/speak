@@ -5,7 +5,7 @@ Speak is a **Chatbot based in machine-learning**, which can be used to **interac
 
 Just put this in your `Cargo.toml`
 ```toml
-speak = "0.1.6"
+speak = "0.1.7"
 ```
 
 ## Features
@@ -16,34 +16,6 @@ Speak is very simple to use by design, that's the reason it has only a few publi
 - `run(...)`
 
 **That's it**, you can use Speak with just two functions! These two functions are just normal functions, and you can use them in any way you want. If you want to know more, check your favorite IDE documentation tool. (All docs are integrated in the crate.)
-
-## Getting started
-
-This is a simple example of how to use Speak:
-```rust
-use speak::{run, learn, Map};
-fn main() {
-	// First, we create a map, we can make it out of String(s) or &str(s)
-	let mut map: Map<&str> = Map::<&str>::from(vec![
-		("Hello world", "Hola mundo"),
-		("Hola mundo", "Hello world"),
-		("a", "b"),
-	]);
-
-	let learnt = learn(&map, None);
-
-	// * This output should be "Hola mundo"
-	let es: String = run("Hello world", &learnt, None, None, None, Some(0));
-
-	// * This output should be "Hello world"
-	let en: String = run("Hola mundo", &learnt, None, None, None, Some(0));
-
-	assert_eq!(es, "Hola mundo");
-	assert_eq!(en, "Hello world");
-}
-```
-
-Take into account that you can encourage or disencourage a key with the methods in the `Map` struct.
 
 ## Configuration
 One of the philosophies of Speak is that the UX is very customizable. That's why Speak has a lot of flexibility when using custom features, there isn't any limit to the number of custom features you can use, and you can enable or disable them at any time, without compromising any other configuration.
