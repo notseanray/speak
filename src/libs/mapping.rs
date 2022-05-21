@@ -234,6 +234,7 @@ macro_rules! is_string_m {
 	};
 }
 
+#[doc(hidden)]
 pub trait IsString {
 	fn is_string(&self) -> bool;
 }

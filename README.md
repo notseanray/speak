@@ -11,7 +11,7 @@ speak = "0.1.7"
 ## Features
 Speak is very simple to use by design, that's the reason it has only a few public objects and functions. The features you're going to use are:
 
-- `Map<T>` (Struct)
+- `DynMap` (Struct)
 - `learn(...)`
 - `run(...)`
 
