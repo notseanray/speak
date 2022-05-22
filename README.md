@@ -32,6 +32,8 @@ Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0
 
 You can contribute to this project with almost anything, it can be code, documentation, bug reports, feature requests... etc. You can do it opening an [issue](https://github.com/SpeakML/speak/issues/new) or a [pull request](https://github.com/SpeakML/speak/pulls/new), or you can contact me on social media.
 
+Currently there isn't any contributor guide *yet*, I'll make one soon.
+
 **Thanks for contributing!**
 
 <h1 align=center>
