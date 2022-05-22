@@ -6,8 +6,8 @@ pub trait Literal {
 impl<T> Literal for T where T: Dyn {
 	fn literal(&self) -> Option<&str> {
 		match self.to_enum() {
-			DE::String => Some(self.to_str()),
-			DE::Number => None
+			DE::String(_) => Some(self.to_str()),
+			DE::Number(_) => None
 		}
 	}
 }

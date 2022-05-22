@@ -105,45 +105,45 @@ pub struct DynMap<'a> {
 }
 
 #[doc(hidden)]
-#[derive(Debug)]
-pub enum DE {
-	String,
-	Number,
+#[derive(Debug, Copy, Clone)]
+pub enum DE<'s> {
+	String(&'s str),
+	Number(usize),
 }
 
 pub trait Dyn {
-	fn to_enum(&self) -> &DE;
+	fn to_enum(&self) -> DE;
 	fn to_str(&self) -> &str;
 	fn to_usize(&self) -> usize;
 }
 
-impl Dyn for DE {
+impl<'a> Dyn for DE<'a> {
 	#[inline]
-	fn to_enum(&self) -> &DE {
-		self
+	fn to_enum(&self) -> DE {
+		*self
 	}
 
 	#[inline]
 	fn to_str(&self) -> &str {
 		match *self {
-			DE::String => self.to_str(),
-			DE::Number => panic!("This is not a String, this is a number."),
+			DE::String(_) => self.to_str(),
+			DE::Number(_) => panic!("This is not a String, this is a number."),
 		}
 	}
 
 	#[inline]
 	fn to_usize(&self) -> usize {
 		match *self {
-			DE::String => panic!("This is a String, not a Number."),
-			DE::Number => self.to_usize(),
+			DE::String(_) => panic!("This is a String, not a Number."),
+			DE::Number(_) => self.to_usize(),
 		}
 	}
 }
 
 impl Dyn for &str {
 	#[inline]
-	fn to_enum(&self) -> &DE {
-		&DE::String
+	fn to_enum(&self) -> DE {
+		DE::String(self)
 	}
 
 	#[inline]
@@ -160,8 +160,8 @@ impl Dyn for &str {
 
 impl Dyn for usize {
 	#[inline]
-	fn to_enum(&self) -> &DE {
-		&DE::Number
+	fn to_enum(&self) -> DE {
+		DE::Number(*self)
 	}
 
 	#[inline]
@@ -217,8 +217,8 @@ fn move_index<T>(vec: &mut Vec<T>, idx: usize, to: usize) {
 macro_rules! define {
 	($e: expr, $vec: expr) => {
 		match $e {
-			DE::String => $e.to_str(),
-			DE::Number => $vec[$e.to_usize()]
+			DE::String(_) => $e.to_str(),
+			DE::Number(_) => $vec[$e.to_usize()]
 		}
 	};
 }
@@ -254,6 +254,29 @@ impl IsString for usize {
 // If you're wondering why use can use map![...] instead of map!(), all macros
 // can do it, but we only do it with some because it's idiomatic.
 #[macro_export]
+/// <h1>map![...]</h1>
+///
+/// This macro is used to create a dynamic map. The recommended usage is by
+/// using it with square brackets, it takes an undefined number of tuples of the
+/// form `(key, value)`. It has a **special syntax!** You can also input a
+/// number! For example `(key, 3)` To get the third index of the map. (You can
+/// also use it with keys, or even with both.)
+///
+/// ## Example
+/// ```rust
+/// use speak::DynMap;
+/// let map = map![
+///     ("Hi, how are you?", "I'm good, thanks!"),
+///     ("So... How is your pet?", "Elizabeth the III is fine"),
+///     ("What's your favourite animal?", "I love cats!")
+///     ("Do you like cats?", 2) // Here, while the key is different,
+///                                 the value is pointing to the second index,
+///                                 the "I love cats!" phrase.
+/// //    ...
+/// ];
+/// ```
+/// You can see the definition of the macro in the <docs.rs> page or building it
+/// with `rustdoc`.
 macro_rules! map {
 	($(($e1: expr, $e2: expr)),*) => {
 		{
@@ -277,6 +300,20 @@ macro_rules! map {
 
 impl<'a> DynMap<'a> {
 	#[inline]
+	/// <h1>new()</h1>
+	///
+	/// <p>
+	///
+	/// This inline function creates a new empty dynamic map, If you want to
+	/// create a map with values, you can use the `map!` macro.
+	///
+	/// </p>
+	///
+	/// ## Example
+	/// ```rust
+	/// use speak::DynMap;
+	/// let map = DynMap::new();
+	/// ```
 	pub fn new() -> Self {
 		Self {
 			keys: Vec::new(),
@@ -285,51 +322,138 @@ impl<'a> DynMap<'a> {
 	}
 
 	#[inline]
-	pub fn push(&mut self, to_insert: (&'a DE, &'a DE)) {
+	/// <h1>push(...)</h1>
+	///
+	/// The `push` function is used to push a tuple to the end of the map. It
+	/// takes a `&str` type. You can use `push_dyn` to push a dynamic type
+	/// (Admiting numbers and references to strings).
+	///
+	/// You can use the `map![...]` macro to create a map from a list of tuples.
+	///
+	/// ## Example
+	/// ```rust
+	/// use speak::DynMap;
+	/// let mut map = DynMap::new();
+	/// map.push(("Hello World", "Hola mundo!"));
+	/// ```
+	pub fn push(&mut self, to_insert: (&'a str, &'a str)) {
+		self.keys.push(to_insert.0);
+		self.values.push(to_insert.1);
+	}
+
+	#[inline]
+	/// <h1>push_dyn(...)</h1>
+	///
+	/// The `push_dyn` function is used to push a tuple to the end of the map.
+	/// It takes a dynamic type. You can use `push` to push a `&str` type.
+	///
+	/// ## Example
+	/// ```rust
+	/// use speak::DynMap;
+	/// let mut map = DynMap::new();
+	/// map.push_dyn((&DE::String("Hello World"), &DE::String("Hola mundo!"))); // You can also use a number, instead of a string (referencing an index of the same map.)
+	/// ```
+	pub fn push_dyn(&mut self, to_insert: (&'a DE, &'a DE)) {
 		self.keys.push(define!(to_insert.0, self.keys));
 		self.values.push(define!(to_insert.1, self.values));
 	}
 
 	#[inline]
-	pub fn insert(&mut self, to_insert: (&'a DE, &'a DE), index: usize) {
+	/// <h1>insert_dyn(...)</h1>
+	///
+	/// The `insert_dyn` function is used to insert a tuple to the map at a
+	/// given index. It takes a dynamic type. You can use `insert` to insert a
+	/// `&str` type. Take into account that this function is as effient as the
+	/// built-in `insert` function.
+	///
+	/// ## Example
+	/// ```rust
+	/// use speak::DynMap;
+	///
+	/// fn main() {
+	///
+	/// 	let mut map = DynMap::new();
+	/// 	map.insert_dyn((&DE::String("Hello World"), &DE::String("Hola mundo!")), 0); // You can also use a number, instead of a string (referencing an index of the same map.)
+	/// }
+	pub fn insert_dyn(&mut self, to_insert: (&'a DE, &'a DE), index: usize) {
 		self.keys.insert(index, define!(to_insert.0, self.keys));
 		self.values.insert(index, define!(to_insert.1, self.values));
 	}
 
 	#[inline]
+	/// <h1>insert(...)</h1>
+	///
+	/// The `insert` function is used to insert a tuple to the map at a
+	/// given index. It takes a `&str` type. You can use `insert_dyn` to
+	/// insert a dynamic type (Admiting numbers and references to strings). Take
+	/// into account that this function is as effient as the built-in `insert`
+	/// function.
+	///
+	/// ## Example
+	/// ```rust
+	/// use speak::DynMap;
+	///
+	/// fn main() {
+	/// 	let mut map = DynMap::new();
+	/// 	map.insert(("Hello World", "Hola mundo!"), 0);
+	/// }
+	///```
+	pub fn insert(&mut self, to_insert: (&'a str, &'a str), index: usize) {
+		self.keys.insert(index, to_insert.0);
+		self.values.insert(index, to_insert.1);
+	}
+
+	#[inline]
+	/// <h1>clear()</h1>
+	/// 
+	/// This function is used to clear the map. It clears both the keys and the values.
 	pub fn clear(&mut self) {
 		self.keys.clear();
 		self.values.clear();
 	}
 
 	#[inline]
+	/// <h1>pop()</h1>
+	/// It removes and returns the last element of the map.
+	/// It returns a tuple of the removed element. (If it exists)
 	pub fn pop(&mut self) -> (Option<&'a str>, Option<&'a str>) {
 		(self.keys.pop(), self.values.pop())
 	}
 
 	#[inline]
+	/// <h1>remove()</h1>
+	/// It removes and returns the element at the given index.
+	/// It returns a tuple of the removed element. (If it exists)
 	pub fn remove(&mut self, index: usize) -> (&'a str, &'a str) {
 		(self.keys.remove(index), self.values.remove(index))
 	}
 
 	#[inline]
+	/// <h1>move_tuple(...)</h1>
+	/// It moves the element at the given index to the index of the second parameter.
 	pub fn move_tuple(&mut self, index: usize, to: usize) {
 		move_index(&mut self.keys, index, to);
 		move_index(&mut self.values, index, to);
 	}
 
 	#[inline]
+	/// <h1>search_key(...)</h1>
+	/// Searchs for the given key in the map. It has a O(n) complexity at max.
 	pub fn search_key(&self, key: &str) -> Option<usize> {
 		self.keys.iter().position(|&k| k == key)
 	}
 
 	#[inline]
+	/// <h1>search_value(...)</h1>
+	/// Searchs for the given value in the map. It has a O(n) complexity at max.
 	pub fn search_value(&self, value: &str) -> Option<usize> {
 		self.values.iter().position(|&v| v == value)
 	}
 
 	// Searches for a tuple, being formed by a key-value pair.
 	#[inline]
+	/// <h1>search_tuple(...)</h1>
+	/// Searchs for the given tuple in the map, it takes a tuple of the form (key, value).
 	pub fn search_tuple(&self, tuple: (&str, &str)) -> Option<usize> {
 		match self.search_key(tuple.0) {
 			Some(_) => match self.search_value(tuple.1) {
@@ -341,11 +465,15 @@ impl<'a> DynMap<'a> {
 	}
 
 	#[inline]
+	/// <h1>len()</h1>
+	/// Returns the number of elements in the map.
 	pub fn len(&self) -> usize {
 		self.keys.len()
 	}
 
 	#[inline]
+	/// <h1>is_empty()</h1>
+	/// Returns true if the map is empty.
 	pub fn is_empty(&self) -> bool {
 		self.keys.len() == 0
 	}
