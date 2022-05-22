@@ -46,7 +46,7 @@ all-features = true
 
 [features]
 # debug is required (being that Speak is in development)
-default = ["debug", "fancy_docs", "analyzer"]
+default = ["debug", "fancy_docs"]
 
 ## <h1>Fancy Docs</h1>
 ## Fancy docs is the feature that adds some fancy documentation to the Speak crate.
