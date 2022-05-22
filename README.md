@@ -5,7 +5,7 @@ Speak is a **Chatbot based in machine-learning**, which can be used to **interac
 
 Just put this in your `Cargo.toml`
 ```toml
-speak = "0.1.7"
+speak = "0.1.8"
 ```
 
 ## Features
