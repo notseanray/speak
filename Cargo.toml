@@ -1,6 +1,6 @@
 [package]
 name = "speak"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/SpeakML/Speak/"
@@ -46,7 +46,7 @@ all-features = true
 
 [features]
 # debug is required (being that Speak is in development)
-default = ["debug", "fancy_docs", "analyzer"]
+default = ["debug", "fancy_docs"]
 
 ## <h1>Fancy Docs</h1>
 ## Fancy docs is the feature that adds some fancy documentation to the Speak crate.
@@ -73,7 +73,6 @@ easy_panic = ["dep:colored"]
 ## <ul><li><code>colored (2.0.0)</code></li></ul>
 debug = ["dep:colored"]
 
-## <h1>Analyzer</h1>
-## This feature is used to enable the `analyzer` module. (Not imported as **\***.) This module is used to analyze both the current data (Using Regex and with the option to use filters, to prevent nonsense data, spam... etc.) And the data that the user inputs.
-
-analyzer = ["dep:regex"]
+# ## <h1>Analyzer</h1>
+# ## This feature is used to enable the `analyzer` module. (Not imported as **\***.) This module is used to analyze both the current data (Using Regex and with the option to use filters, to prevent nonsense data, spam... etc.) And the data that the user inputs.
+# analyzer = ["dep:regex"]

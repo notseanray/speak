@@ -5,7 +5,7 @@ Speak is a **Chatbot based in machine-learning**, which can be used to **interac
 
 Just put this in your `Cargo.toml`
 ```toml
-speak = "0.1.7"
+speak = "0.1.8"
 ```
 
 ## Features
@@ -31,6 +31,8 @@ Firstly, Speak is written in Rust, with just a few hundred lines of code, with 0
 ## Contributions
 
 You can contribute to this project with almost anything, it can be code, documentation, bug reports, feature requests... etc. You can do it opening an [issue](https://github.com/SpeakML/speak/issues/new) or a [pull request](https://github.com/SpeakML/speak/pulls/new), or you can contact me on social media.
+
+Currently there isn't any contributor guide *yet*, I'll make one soon.
 
 **Thanks for contributing!**
 
