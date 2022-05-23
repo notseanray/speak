@@ -540,6 +540,10 @@ impl<'a> DynMap<'a> {
 
 	// In this case, encouraging is just the ranking system taking into account, so,
 	// we can encourage a key by ranking it higher.
+
+	/// <h1>encourage(...)</h1>
+	/// It encourages the given key, by ranking it higher. (See also [ranking system])
+	// TODO: Add the ranking system
 	pub fn encourage(&mut self, index: usize, how_much: usize) {
 		if index < how_much || index >= self.keys.len() {
 			easy_panic!("Index out of bounds, make sure that 'how much' is less than the index from which you want to encourage: {} - {} is less than 0 (It underflows) AND make sure that the index is less than the length of the map.", index, how_much);

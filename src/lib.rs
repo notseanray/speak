@@ -1,11 +1,10 @@
 //! Speak crate made by Alex G. C. See LICENSE for more
 //! information about the copyright.
-// If you want to see the utils scroll to the last line of the file.
 
 #![doc = document_features::document_features!()]
-#![allow(non_snake_case)]
 
 // #![warn(missing_docs)]
+#![allow(non_snake_case)]
 
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
@@ -14,136 +13,14 @@
 // ────────────────────────────────────────────────────────────────────────────────────────────────
 //
 
-#[cfg(feature = "fancy_docs")]
-#[cfg_attr(doc, aquamarine::aquamarine)]
-///## Memory
-///
-///Every phrase is made up from words. We make a phrase from adding sequences
-/// of words together. Well, the `MEMORY` parameter is used to define how many
-/// words we take into account into analyzing a phrase.
-///
-///The functions that takes this parameter take into account that maybe the
-/// length of the phrase divided by the number of words in the phrase is not an
-/// integer. So this functions will take into account until the last words, and
-/// then scan the words between the length of the phrase minus the memory and
-/// the length of the word.
-///
-///```mermaid
-/// graph TD
-/// 	A("Hi,")
-/// 	B("my")
-/// 	C{{"name"}}
-/// 	D("is")
-/// 	E("Alex")
-///
-/// 	F["Not found!"]
-///
-/// 	style F stroke-dasharray: 5 5
-///
-/// 	X["Iteration 1"]
-/// 	Y["Iteration 2"]
-/// 	Z["Bugged iteration 2"]
-///
-/// 	X-->A;
-/// 	X-->B;
-/// 	X-->C;
-///
-/// 	Y-->C;
-/// 	Y-->D;
-/// 	Y-->E;
-///
-/// 	Z-->D;
-/// 	Z-->E;
-/// 	Z-->F;
-/// ```
-///
-///###### Honestly, I just wanted to show you how it works, and this graph.
 pub const DEFAULT_MEMORY: usize = 2;
-
-#[cfg(not(feature = "fancy_docs"))]
-///## Memory
-///
-///Every phrase is made up from words. We make a phrase from adding sequences
-/// of words together. Well, the `MEMORY` parameter is used to define how many
-/// words we take into account into analyzing a phrase.
-///
-///The functions that takes this parameter take into account that maybe the
-/// length of the phrase divided by the number of words in the phrase is not an
-/// integer. So this functions will take into account until the last words, and
-/// then scan the words between the length of the phrase minus the memory and
-/// the length of the word.
-pub const DEFAULT_MEMORY: usize = 2;
-
-///## Threshold
-///As you know, we divide two values to find their relations. Well, that
-/// relation is then checked against the threshold, if it doesn't passes the
-/// threshold, the word is not elected. This is the operation to determine if a
-/// word is elected. As you can see, if the threshold is too low (less than 0.1
-/// is not recommended), the word "spaghetti" and the word "spagetti" will not
-/// be relationated. But if the threshold is too high (more than 0.3 is not
-/// recommended), a lot of words, even if they are very different, will be
-/// relationated and the final result will not have sense.
+// pub const DEFAULT_MEMORY: usize = 2;
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
-
-/// <h1>Max Output Length</h1>
-/// 
-/// The outputs that the [`run` function][run] aren't a single phrase, this variable is used to limit the length of the output (in subphrases). Personally, I recommend you be indirectly proportional to the length of the [memory][mem] (For example, if you have a high [memory][mem], use a short Max Output Length)
-///
-/// [run]: fn.run.html
-/// [mem]: constant.DEFAULT_MEMORY.html
-/// 
 pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
-
-#[cfg(feature = "fancy_docs")]
-#[cfg_attr(doc, aquamarine::aquamarine)]
-/// <h1>Randomness</h1>
-///
-/// ### What does this mean?
-/// There's two ways the algorithm works, the first way is **analyzing every
-/// single entry**, this method is slow, and doesn't have the ability to
-/// *encourage* or *disencourage* some entry.
-///
-/// The second method is **analyzing every single entry until a break point,
-/// then aplying a distribution**, this method is more fast, when the break
-/// point is reached, the algorithm will start to ignore some cases. The
-/// distribution used is very simple just: <h3 align="center"><img src="https://render.githubusercontent.com/render/math?math=\bbox[%230d1117]{\color{%23fff}{%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09i%20%5Cleq%20%5Ctext%7Brange%7D%20%26%20%5Cdotsc%09%5C%5C%09i%20%3E%20%5Ctext%7Brange%7D%20%26%20R%5Cin%5C%7B0%2C...%2C%5C%23V%5C%7D%5C%20%5Cbigg%5C%7B%5Cbegin%7Barray%7D%7Bll%7D%09%09R%20%3C%20i%20%26%20%5Cdotsc%09%09%5C%5C%09%09R%20%5Cgeq%20i%20%26%20%5Ctext%7Bpass%7D%09%5Cend%7Barray%7D%5Cend%7Barray%7D}}" /></h3>
-///
-/// The distribution is very simple, and just random enough to serve our
-/// purpose. ### Why use a distribution?
-/// Activating the randomness will change the way that the `run` algorithm
-/// works, adding a new system, the *ranking system*. The ranking system will
-/// take into account just the first `RANGE` entries, and then will use the
-/// distribution, so the last entry is very unlikely to be analyzed, but the
-/// first one after the range is almost guaranteed to be analyzed. We use this
-/// because now we can *rank* the entries, encouraging or disencouraging them by
-/// changing the index.
 pub const DEFAULT_RANGE: usize = 2;
 
 #[cfg(not(feature = "fancy_docs"))]
-/// <h1>Randomness</h1>
-/// Randomness is an optional (but highly recommended) feature that will pass
-/// some randomness to the algorithm.
-///
-/// ### What does this mean?
-/// There's two ways the algorithm works, the first way is **analyzing every
-/// single entry**, this method is slow, and doesn't have the ability to
-/// *encourage* or *disencourage* some entry.
-///
-/// The second method is **analyzing every single entry until a break point,
-/// then aplying a distribution**, this method is more fast, when the break
-/// point is reached, the algorithm will start to ignore some cases. The
-/// distribution used is very simple.
-///
-/// The distribution is very simple, and just random enough to serve our
-/// purpose. ### Why use a distribution?
-/// Activating the randomness will change the way that the `run` algorithm
-/// works, adding a new system, the *ranking system*. The ranking system will
-/// take into account just the first `RANGE` entries, and then will use the
-/// distribution, so the last entry is very unlikely to be analyzed, but the
-/// first one after the range is almost guaranteed to be analyzed. We use this
-/// because now we can *rank* the entries, encouraging or disencouraging them by
-/// changing the index.
-pub const DEFAULT_RANGE: usize = 3;
+pub const DEFAULT_RANGE: usize = 2;
 
 // ↑
 // $$
@@ -403,6 +280,8 @@ fn _train(map: &DynMap, MEMORY: usize) -> Vec<Vec<f32>> {
 /// *think* will be bad pairs (For example nonsensical input coming from users.)
 /// 
 /// **You can always learn more about these variables going to their default-value documentation.**
+/// 
+/// [mem]: constant.DEFAULT_MEMORY.html
 pub fn run(
 	input: &str,
 	map: &DynMap,
