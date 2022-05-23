@@ -5,6 +5,8 @@
 #![doc = document_features::document_features!()]
 #![allow(non_snake_case)]
 
+// #![warn(missing_docs)]
+
 //
 // ────────────────────────────────────────────────────────────────────────────────────── I ──────────
 //   :::::: C O N F I G U R A T I O N   A N D   U T I L S : :  :   :    :     :
@@ -82,6 +84,14 @@ pub const DEFAULT_MEMORY: usize = 2;
 /// recommended), a lot of words, even if they are very different, will be
 /// relationated and the final result will not have sense.
 pub const DEFAULT_THRESHOLD: f32 = 0.1;
+
+/// <h1>Max Output Length</h1>
+/// 
+/// The outputs that the [`run` function][run] aren't a single phrase, this variable is used to limit the length of the output (in subphrases). Personally, I recommend you be indirectly proportional to the length of the [memory][mem] (For example, if you have a high [memory][mem], use a short Max Output Length)
+///
+/// [run]: fn.run.html
+/// [mem]: constant.DEFAULT_MEMORY.html
+/// 
 pub const DEFAULT_MAX_OUTPUT_LENGTH: usize = 2;
 
 #[cfg(feature = "fancy_docs")]
@@ -641,10 +651,6 @@ use rand::Rng;
 #[path = "libs/chunks.rs"]
 mod chunks;
 pub use chunks::*;
-
-#[path = "libs/literal.rs"]
-mod literal;
-pub use literal::*;
 
 #[path = "libs/mapping.rs"]
 mod mapping;

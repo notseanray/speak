@@ -21,6 +21,7 @@ macro_rules! easy_panic {
 
 #[cfg(not(feature = "easy_panic"))]
 #[macro_export]
+#[doc(hidden)]
 macro_rules! easy_panic {
 	() => {};
 	($($arg:tt)*) => {};
@@ -100,7 +101,9 @@ macro_rules! easy_panic {
 
 #[derive(Debug)]
 pub struct DynMap<'a> {
+	/// The list of keys (Because `DynMap`(s) are formed of key-value pairs)
 	pub keys: Vec<&'a str>,
+	/// The list of values (Because `DynMap`(s) are formed of key-value pairs)
 	pub values: Vec<&'a str>,
 }
 
@@ -111,6 +114,7 @@ pub enum DE<'s> {
 	Number(usize),
 }
 
+#[doc(hidden)]
 pub trait Dyn {
 	fn to_enum(&self) -> DE;
 	fn to_str(&self) -> &str;
