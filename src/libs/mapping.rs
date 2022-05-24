@@ -15,7 +15,7 @@ macro_rules! easy_panic {
 	};
 
 	($($arg:tt)*) => {
-		panic!("Easy Panic: ", $($arg)*);
+		panic!("Easy Panic: {}", $($arg)*);
 	};
 }
 
