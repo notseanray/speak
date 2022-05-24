@@ -28,5 +28,6 @@ src/pseudocode
 node_modules
 venv
 
+docs/eq.md
 
 *.log

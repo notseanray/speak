@@ -1,0 +1,33 @@
+#!/bin/bash
+# This script is run to check if you inputed a valid commit message
+#
+# The commit message guidelines are very simple:
+#
+# The first thing in your commit message should be the section that you changed, for stylistic reasons, it must be '[`Section name`]', you can use the following as a guide:
+#
+# - [`docs`] : For documentation.
+# - [`algo`] : For algorithm.
+# - [`git`] : For changing git configuration.
+# - [`lots`] or [`misc`] : For changing several things. If you change one thing significantly more than others, use that section instead of this.
+# - [`test`] : For testing.
+# - [`fix`] or [`bugfix`] : For fixing bugs.
+# - [`feature`] : For adding new features.
+# - [`<Version here.>`] : For changing the version number.
+# - [`Cargo`] : For Cargo changes.
+# - [`README`] : For changes to the README.
+
+# If you need something that isn't here, please open an issue on the GitHub repo.
+
+COMMIT_MSG_FILE=$1
+
+# First, we check that the commit message is not empty.
+
+if [ -z "$COMMIT_MSG_FILE" ]; then
+	echo "No commit message file was provided"
+	exit 1
+fi
+
+if [ "${COMMIT_MSG_FILE:0:1}" != "[" ]; then
+	echo -e "The ✨ magic stylistic guidelines ✨ require that the first thing to be in your commit message is the section that you changed. \nFor example, if you're changing the documentation, use: \n\n [\`docs\`] <Your commit message>"
+	exit 1
+fi

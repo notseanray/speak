@@ -16,7 +16,6 @@ document-features = "0.2.1"
 
 serde = { version = "1.0.137", features = ["derive"] }
 
-regex = { version = "1.5.6", optional = true }
 aquamarine = { version = "0.1.1", optional = true }
 colored = { version = "2.0.0", optional = true }
 
@@ -62,9 +61,12 @@ fancy_docs = ["dep:aquamarine"]
 ## <h2>What is an error?</h2>
 ##
 ## An error is a situation that the utils library can't handle, like encouraging an out-of-bounds index.
-## In the main functions (`run` and `learn`) there isn't posible errors, so, if you're going to manually check the index you're using (Not recommended), you can disable this feature.
+## In the main functions ([`run`][run] and [`learn`][learn]) there isn't posible errors, so, if you're going to manually check the index you're using (Not recommended), you can disable this feature.
 ## <h2>Dependencies</h2>
 ## No dependencies used.
+##
+## [run]: fn.run.html
+## [learn]: fn.learn.html
 easy_panic = ["dep:colored"]
 
 ## <h1>Debug</h1>

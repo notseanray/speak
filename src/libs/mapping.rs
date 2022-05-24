@@ -15,12 +15,13 @@ macro_rules! easy_panic {
 	};
 
 	($($arg:tt)*) => {
-		panic!("Easy Panic: ", $($arg)*);
+		panic!("Easy Panic: {}", $($arg)*);
 	};
 }
 
 #[cfg(not(feature = "easy_panic"))]
 #[macro_export]
+#[doc(hidden)]
 macro_rules! easy_panic {
 	() => {};
 	($($arg:tt)*) => {};
@@ -100,7 +101,9 @@ macro_rules! easy_panic {
 
 #[derive(Debug)]
 pub struct DynMap<'a> {
+	/// The list of keys (Because `DynMap`(s) are formed of key-value pairs)
 	pub keys: Vec<&'a str>,
+	/// The list of values (Because `DynMap`(s) are formed of key-value pairs)
 	pub values: Vec<&'a str>,
 }
 
@@ -111,6 +114,7 @@ pub enum DE<'s> {
 	Number(usize),
 }
 
+#[doc(hidden)]
 pub trait Dyn {
 	fn to_enum(&self) -> DE;
 	fn to_str(&self) -> &str;
@@ -536,6 +540,10 @@ impl<'a> DynMap<'a> {
 
 	// In this case, encouraging is just the ranking system taking into account, so,
 	// we can encourage a key by ranking it higher.
+
+	/// <h1>encourage(...)</h1>
+	/// It encourages the given key, by ranking it higher. (See also [ranking system])
+	// TODO: Add the ranking system
 	pub fn encourage(&mut self, index: usize, how_much: usize) {
 		if index < how_much || index >= self.keys.len() {
 			easy_panic!("Index out of bounds, make sure that 'how much' is less than the index from which you want to encourage: {} - {} is less than 0 (It underflows) AND make sure that the index is less than the length of the map.", index, how_much);
