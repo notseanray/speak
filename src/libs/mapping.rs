@@ -13,10 +13,6 @@ macro_rules! easy_panic {
 	() => {
 		panic!("Easy Panic: The panic message should be in the debug information.");
 	};
-
-	($($arg:tt)*) => {
-		panic!("Easy Panic: {}", $($arg)*);
-	};
 }
 
 #[cfg(not(feature = "easy_panic"))]
@@ -24,7 +20,25 @@ macro_rules! easy_panic {
 #[doc(hidden)]
 macro_rules! easy_panic {
 	() => {};
-	($($arg:tt)*) => {};
+}
+
+#[cfg(feature = "debug")]
+use colored::Colorize;
+
+#[cfg(feature = "debug")]
+macro_rules! debug_mode {
+	($command: expr, $($args: expr), *) => {
+		println!("{} {}", "debug".bold().red(), format!($command, $($args), *).bright_yellow());
+	};
+	($command: expr) => {
+		println!("{}", format!($command).bright_yellow());
+	};
+}
+
+#[cfg(not(feature = "debug"))]
+macro_rules! debug_mode {
+	($command: expr, $($args: expr), *) => {};
+	($command: expr, String) => {};
 }
 
 //
@@ -546,7 +560,8 @@ impl<'a> DynMap<'a> {
 	// TODO: Add the ranking system
 	pub fn encourage(&mut self, index: usize, how_much: usize) {
 		if index < how_much || index >= self.keys.len() {
-			easy_panic!("Index out of bounds, make sure that 'how much' is less than the index from which you want to encourage: {} - {} is less than 0 (It underflows) AND make sure that the index is less than the length of the map.", index, how_much);
+			debug_mode!("Index out of bounds, make sure that 'how much' is less than the index from which you want to encourage: {} - {} is less than 0 (It underflows) AND make sure that the index is less than the length of the map.", index, how_much);
+			easy_panic!();
 		} else {
 			self.move_tuple(index, index - how_much);
 		}
@@ -568,7 +583,8 @@ impl<'a> DynMap<'a> {
 
 	pub fn discourage(&mut self, index: usize, how_much: usize) {
 		if index >= self.keys.len() || index + how_much >= self.keys.len() {
-			easy_panic!("Index out of bounds, make sure that index ({}) + how much you want to disencourage ({}) is less than the total length of the map ({})", index, how_much, self.keys.len());
+			debug_mode!("Index out of bounds, make sure that index ({}) + how much you want to disencourage ({}) is less than the total length of the map ({})", index, how_much, self.keys.len());
+			easy_panic!();
 		};
 		self.move_tuple(index, index + how_much);
 	}
