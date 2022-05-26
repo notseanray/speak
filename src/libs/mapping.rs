@@ -4,6 +4,17 @@
 // ──────────────────────────────────────────────────────────────────
 //
 
+// I have to do this in order to avoid double-importing bugs.
+
+#[cfg(not(feature = "debug"))]
+#[cfg(feature = "easy_panic")]
+use colored::Colorize;
+
+#[cfg(feature = "debug")]
+#[cfg(not(feature = "easy_panic"))]
+use colored::Colorize;
+
+#[cfg(feature = "debug")]
 #[cfg(feature = "easy_panic")]
 use colored::Colorize;
 
@@ -21,9 +32,6 @@ macro_rules! easy_panic {
 macro_rules! easy_panic {
 	() => {};
 }
-
-#[cfg(feature = "debug")]
-use colored::Colorize;
 
 #[cfg(feature = "debug")]
 macro_rules! debug_mode {
