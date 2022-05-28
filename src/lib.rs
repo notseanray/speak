@@ -91,17 +91,31 @@ macro_rules! debug_mode {
 
 macro_rules! check_for_random {
 	($i: expr, $range: expr) => {
-		if rand::thread_rng().gen_range(
-			0..({
-				if $i >= $range {
-					$range
-				} else {
-					$i + 1
-				}
-			} + 1),
-		) < $range
-		{
+		// if rand::thread_rng().gen_range(
+		// 	0..({
+		// 		if $i >= $range {
+		// 			$range
+		// 		} else {
+		// 			$i + 1
+		// 		}
+		// 	} + 1),
+		// ) < $range
+		// {
+		// 	println!("Passed {}", $i);
+		// } 
+
+		if $i < $range {
 			println!("Passed {}", $i);
+			true
+		} else {
+			
+					if rand::thread_rng().gen_range(
+						0..$i
+					) < $range {
+						true
+					} else {
+						false
+					}
 		}
 	};
 }
@@ -467,8 +481,11 @@ fn _run<'a>(
 	for IChunk in input.into_chunks(MEMORY).base {
 		debug_mode!("\n##################\n\nIC -> {:?}", IChunk);
 		for (i, value) in TMap.iter().enumerate() {
-			// Let's see if we are going to use this phrase
-			check_for_random!(i, RANGE);
+			// Let's see if we are going to analyze this phrase
+			if check_for_random!(i, RANGE) {
+				break
+			};
+
 			debug_mode!("I = {}: V = {:?}", i, value);
 			for (j, VChunk) in value.into_chunks(MEMORY).base.iter().enumerate() {
 				debug_mode!("{}: VC -> {:?}", j, VChunk);

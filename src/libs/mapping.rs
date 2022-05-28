@@ -94,7 +94,7 @@ macro_rules! debug_mode {
 ///
 /// Also, you can modify the `RANGE` variable to guarantee a certain number of
 /// strings read, when using the main functions.
-///
+///```text
 /// +---------+
 /// |         |
 /// | Entry 1 |
@@ -114,7 +114,7 @@ macro_rules! debug_mode {
 /// | Entry 6 |
 /// |         |
 /// +---------+
-///
+///```
 /// ## Example:
 /// ```rust
 /// use speak::DynMap;
