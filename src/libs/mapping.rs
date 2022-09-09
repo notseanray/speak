@@ -431,7 +431,7 @@ impl<'a> DynMap<'a> {
 
 	#[inline]
 	/// <h1>clear()</h1>
-	/// 
+	///
 	/// This function is used to clear the map. It clears both the keys and the values.
 	pub fn clear(&mut self) {
 		self.keys.clear();
@@ -482,10 +482,7 @@ impl<'a> DynMap<'a> {
 	/// Searchs for the given tuple in the map, it takes a tuple of the form (key, value).
 	pub fn search_tuple(&self, tuple: (&str, &str)) -> Option<usize> {
 		match self.search_key(tuple.0) {
-			Some(_) => match self.search_value(tuple.1) {
-				Some(idx) => Some(idx),
-				None => None,
-			},
+			Some(_) => self.search_value(tuple.1),
 			None => None,
 		}
 	}
@@ -583,7 +580,7 @@ impl<'a> DynMap<'a> {
 	#[inline]
 	pub fn encourage_by_str(&mut self, string: &str, how_much: usize) {
 		let idx = self
-			.search_key(&string)
+			.search_key(string)
 			.unwrap_or_else(|| panic!("String not found"));
 
 		self.encourage(idx, idx - how_much);
@@ -605,7 +602,7 @@ impl<'a> DynMap<'a> {
 	#[inline]
 	pub fn discourage_by_str(&mut self, string: &str, how_much: usize) {
 		let idx = self
-			.search_key(&string)
+			.search_key(string)
 			.unwrap_or_else(|| panic!("String not found"));
 
 		self.discourage(idx, how_much);
@@ -625,7 +622,7 @@ impl<'a> DynMap<'a> {
 impl<'a> Iterator for DynMap<'a> {
 	type Item = (&'a str, &'a str);
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.keys.len() == 0 {
+		if self.keys.is_empty() {
 			return None;
 		}
 		Some((self.keys.remove(0), self.values.remove(0)))

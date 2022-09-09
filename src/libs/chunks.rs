@@ -33,7 +33,7 @@ impl<'a, T> Chunkable<'a, T> for Vec<T> {
 			chunks.push(&self[self.len() - memory..]);
 		};
 
-		return Chunks::<T> { base: chunks };
+		Chunks::<T> { base: chunks }
 	}
 
 	// fn specific_chunk(&'a self, memory: usize, index: usize) -> &'a [T] {
